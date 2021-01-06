@@ -29,7 +29,7 @@
         "googleMobileAdsAppId": "ca-app-pub-3013833975597353~9684490974"
       }
     },
-    "githubUrl": "https://github.com/briansayles/tvis",
+    "githubUrl": "https://github.com/briansayles/tvis-auth0",
     "platforms": [
       "android",
       "ios"

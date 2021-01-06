@@ -1,37 +1,19 @@
-# Auth0 Example
+# TourneyVision Client APp
 
-<p>
-  <!-- iOS -->
-  <img alt="Supports Expo iOS" longdesc="Supports Expo iOS" src="https://img.shields.io/badge/iOS-4630EB.svg?style=flat-square&logo=APPLE&labelColor=999999&logoColor=fff" />
-  <!-- Android -->
-  <img alt="Supports Expo Android" longdesc="Supports Expo Android" src="https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff" />
-  <!-- Web -->
-  <img alt="Supports Expo Web" longdesc="Supports Expo Web" src="https://img.shields.io/badge/web-4630EB.svg?style=flat-square&logo=GOOGLE-CHROME&labelColor=4285F4&logoColor=fff" />
-</p>
+## Technologies/Services Used
 
-## 🚀 How to use
+- Auth0 for authentication
+- Hasura cloud for GraphQL API engine
+- Heroku for database hosting
+- Postgresql for database
+- Expo for react-native client development
+- Apollo for GraphQL client
 
-- Install with `yarn` or `npm install`.
-- Create your own app on [Auth0](https://auth0.com).
-- Add the `AuthSession` auth URL to `Allowed Callback URLs` on Auth0.
-- Open `App.js` and replace `auth0ClientId` and `auth0Domain` with your app settings.
-- Run [`expo start`](https://docs.expo.io/versions/latest/workflow/expo-cli/), try it out.
+## Authentication and Authorization
 
-#### AuthSession callback URL
-
-The AuthSession helps you with browser authentication, without the need of an additional server or website. To use this with Auth0 authentication flows, we need to tell Auth0 that the callback URLs are allowed.
-
-Each Expo user has it's own URL for different projects, the basic structure of this URL is `https://auth.expo.io/@your-username/your-expo-app-slug`. If you are signed in as `awesome-ppl`, and your app is called `meme-explorer`, your URL looks like `https://auth.expo.io/@awesome-ppl/meme-explorer`.
-
-> [Read more about AuthSession here](https://docs.expo.io/versions/latest/sdk/auth-session/)
-
-#### Auth0 app settings
-
-Both the `auth0ClientId` and `auth0Domain` needs to match your Auth0 app settings.
-
-![Application Settings](https://i.imgur.com/Io9I4qg.jpg)
-
-## 📝 Notes
-
-- [Expo AuthSession docs](https://docs.expo.io/versions/latest/sdk/auth-session/)
-- [Auth0 React/SPA quickstart guide](https://auth0.com/docs/quickstart/spa/react)
+<p>Auth0 is used to provide authentication services. Hasura cloud is used for authorization/permissions, which are role-based.
+Auth0 returns an id_token in JWT format that is signed. The Apollo client link is set up in the app to forward the JWT in the
+Authorization header in requests sent to Hasura. Hasura validates that the JWT is legitimate by ensuring that it is signed
+properly, which it is able to do because it has a copy of the signing secret stored away as an environment variable. The JWT
+includes the user's ID and allowed roles, which are used by Hasura to ensure that the user has the proper permissions to
+perform whatever actions it's requesting.
