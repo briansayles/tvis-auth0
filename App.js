@@ -1,19 +1,14 @@
 import * as React from 'react';
-import { SafeAreaView, View, Text, Button, Platform, Alert, FlatList, LogBox } from 'react-native';
+import { SafeAreaView, View, Text, Button, Platform, Alert, FlatList } from 'react-native';
+import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as AuthSession from 'expo-auth-session';
 import jwtDecode from 'jwt-decode';
-import { ApolloClient, ApolloProvider, createHttpLink, ApolloLink, HttpLink, from, split, execute, useQuery, useApolloClient, gql} from '@apollo/client'
-import { InMemoryCache } from '@apollo/client/cache';
-import { Query, Mutation, Subscription } from '@apollo/client/react/components';
-import { getMainDefinition } from '@apollo/client/utilities'
-import { WebSocketLink } from "@apollo/client/link/ws";
-import { SubscriptionClient } from "subscriptions-transport-ws";
-import { GraphQLConfig, Auth0Config} from './config'
-import { styles } from './styles'
+import { ApolloProvider } from '@apollo/client'
+import { Auth0Config} from './config'
 import { Ionicons } from '@expo/vector-icons'
 
 import { HomeScreen } from './screens/HomeScreen'
@@ -31,7 +26,15 @@ const Tab = createBottomTabNavigator()
 
 export default function App({ navigation }) {
   React.useEffect(() => {
-    LogBox.ignoreAllLogs(true)   
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DUCK_OTHERS,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+      playThroughEarpieceAndroid: true,
+      staysActiveInBackground: true,
+    })
   }, [])
   const [state, dispatch] = React.useReducer(
     (prevState, action) => {
@@ -142,16 +145,15 @@ export default function App({ navigation }) {
             screenOptions={({ route }) => ({
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName;
-
                 if (route.name === 'Home') {
                   iconName = 'ios-home'
-                } else if (route.name === 'Settings') {
+                } else if (route.name === 'Profile') {
                   iconName = 'ios-settings'
                 } else if (route.name === 'Tournaments') {
                   iconName = 'ios-list'
+                } else if (route.name ==='SignIn') {
+                  iconName = 'log-in-outline'
                 }
-  
-                // You can return any component that you like here!
                 return <Ionicons name={iconName} size={size} color={color} />
               },
             })}
@@ -168,7 +170,7 @@ export default function App({ navigation }) {
               <>
                 <Tab.Screen name="Home" component={HomeScreen} />
                 <Tab.Screen name="Tournaments" component={TournamentsStack} />
-                <Tab.Screen name="Settings" component={SettingsScreen} />
+                <Tab.Screen name="Profile" component={SettingsScreen} />
                 </>
             )}
           </Tab.Navigator> 
@@ -182,6 +184,17 @@ function TournamentsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Tournaments" component={TournamentsScreen} />
+      {/* <Stack.Screen name="Timer" component={}/>
+      <Stack.Screen name="Tournament Dashboard" component={}/>
+      <Stack.Screen name="TimerOptionsScreen" component={}/>
+      <Stack.Screen name="SegmentListScreen" component={}/>
+      <Stack.Screen name="SegmentEditScreen" component={}/>
+      <Stack.Screen name="ChipListScreen" component={}/>
+      <Stack.Screen name="ChipEditScreen" component={}/>
+      <Stack.Screen name="CostListScreen" component={}/>
+      <Stack.Screen name="CostEditScreen" component={}/>
+      <Stack.Screen name="BuyListScreen" component={}/>
+      <Stack.Screen name="BuyEditScreen" component={}/> */}
     </Stack.Navigator>
   );
 }
