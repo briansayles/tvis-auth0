@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SafeAreaView, View, Text, Button, Platform, Alert, FlatList } from 'react-native';
+import { Platform, Alert, } from 'react-native';
 import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
 import { NavigationContainer } from '@react-navigation/native';
@@ -16,6 +16,7 @@ import { SettingsScreen} from './screens/SettingsScreen'
 import { TournamentsScreen } from './screens/TournamentsScreen'
 import { SignInScreen } from './screens/SignInScreen'
 import { makeApolloClient } from './apolloClient'
+import { TournamentDashboardScreen } from './screens/TournamentDashboardScreen'
 
 const authorizationEndpoint = Auth0Config.authorizeURI
 const useProxy = Platform.select({ web: false, default: true });
@@ -73,15 +74,18 @@ export default function App({ navigation }) {
 
       try {
         userToken = await SecureStore.getItem('userToken');
+        // After restoring token, we may need to validate it in production apps
+        const decoded = jwtDecode(userToken);
+        const { exp } = decoded;
+        const expiry = new Date(exp*1000)
+        if (expiry < Date.now()) {
+          dispatch({type: 'SIGN_OUT'})
+        } else {
+          dispatch({ type: 'RESTORE_TOKEN', token: userToken });
+        }
       } catch (e) {
         // Restoring token failed
       }
-
-      // After restoring token, we may need to validate it in production apps
-
-      // This will switch to the App screen or Auth screen and this loading
-      // screen will be unmounted and thrown away.
-      dispatch({ type: 'RESTORE_TOKEN', token: userToken });
     };
 
     bootstrapAsync();
@@ -151,7 +155,7 @@ export default function App({ navigation }) {
                   iconName = 'ios-settings'
                 } else if (route.name === 'Tournaments') {
                   iconName = 'ios-list'
-                } else if (route.name ==='SignIn') {
+                } else if (route.name ==='Sign In') {
                   iconName = 'log-in-outline'
                 }
                 return <Ionicons name={iconName} size={size} color={color} />
@@ -164,7 +168,7 @@ export default function App({ navigation }) {
           >
             {state.userToken == null ? (
               <>
-                <Tab.Screen name="SignIn" component={SignInScreen} />
+                <Tab.Screen name="Sign In" component={SignInScreen} />
               </>
             ) : (
               <>
@@ -184,8 +188,8 @@ function TournamentsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Tournaments" component={TournamentsScreen} />
+      <Stack.Screen name="Tournament Dashboard" component={TournamentDashboardScreen}/>
       {/* <Stack.Screen name="Timer" component={}/>
-      <Stack.Screen name="Tournament Dashboard" component={}/>
       <Stack.Screen name="TimerOptionsScreen" component={}/>
       <Stack.Screen name="SegmentListScreen" component={}/>
       <Stack.Screen name="SegmentEditScreen" component={}/>

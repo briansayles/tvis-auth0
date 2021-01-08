@@ -1,5 +1,6 @@
-import { styles, responsiveFontSize } from '../styles'
-import { Text, TouchableHighlight, View, TouchableOpacity, Icon, ActivityIndicator, Pressable} from 'react-native'
+import { styles, responsiveFontSize, responsiveWidth } from '../styles'
+import { TouchableHighlight, View, TouchableOpacity, Icon, ActivityIndicator, Pressable} from 'react-native'
+import { Text, Button, } from 'react-native-elements'
 import { SwipeListView } from 'react-native-swipe-list-view'
 import * as React from 'react'
 import { Ionicons } from '@expo/vector-icons'
@@ -8,7 +9,8 @@ export const SwipeableList = (props) =>{
     [refreshingState, setRefreshingState] = React.useState(false)
     return (
       <SwipeListView
-      style={{flex: 1, alignSelf: 'stretch', paddingHorizontal: responsiveFontSize(2), }}
+      style={[styles.swipeListView, {...props.style}]}
+      contentContainerStyle={[styles.swipeListViewContentContainer, {...props.contentContainerStyle}]}
       refreshing={refreshingState}
       onRefresh={()=>{
         if (props.refetch) {
@@ -21,7 +23,7 @@ export const SwipeableList = (props) =>{
       data={props.data}
       keyExtractor={props.keyExtractor}
       ListHeaderComponent={ <ListHeader title={props.headerTitle} create={props.create}/> }
-      rightOpenValue={-75*((props.rightButton1 ? 1 : 0) + (props.rightButton2 ? 1 : 0) + (props.rightButton3 ? 1 : 0))}
+      rightOpenValue={-responsiveFontSize(4)*((props.rightButton1 ? 1 : 0) + (props.rightButton2 ? 1 : 0) + (props.rightButton3 ? 1 : 0))}
       stickyHeaderIndices={[0]}
       disableRightSwipe = {true}
       swipeToOpenPercent = {10}
@@ -39,7 +41,7 @@ export const SwipeableList = (props) =>{
               style={[styles.backRightBtn, styles.backRightBtnLeft, {backgroundColor: props.rightButton3.backgroundColor}, {}]}
               onPress={() => {props.rightButton3.onPress(data.item)}}
             >
-              <Ionicons name={props.rightButton3.ioniconName} size={responsiveFontSize(2)} color="white"/>
+              <Ionicons name={props.rightButton3.ioniconName} color="white"/>
             </TouchableOpacity>
           }
           {props.rightButton2 && 
@@ -47,7 +49,7 @@ export const SwipeableList = (props) =>{
               style={[styles.backRightBtn, styles.backRightBtnCenter, {backgroundColor: props.rightButton2.backgroundColor}, {}]}
               onPress={() => {props.rightButton2.onPress(data.item)}}
             >
-              <Ionicons name={props.rightButton2.ioniconName} size={responsiveFontSize(2)} color="white"/>
+              <Ionicons name={props.rightButton2.ioniconName} color="white"/>
             </TouchableOpacity>
           }
           {props.rightButton1 && 
@@ -55,55 +57,12 @@ export const SwipeableList = (props) =>{
               style={[styles.backRightBtn, styles.backRightBtnRight, {backgroundColor: props.rightButton1.backgroundColor}, {}]}
               onPress={() => {props.rightButton1.onPress(data.item)}}
             >
-              <Ionicons name={props.rightButton1.ioniconName} size={responsiveFontSize(2)} color="white"/>
+              <Ionicons name={props.rightButton1.ioniconName} color="white"/>
             </TouchableOpacity>
           }
         </View>
       )}
     />
-  )
-}
-
-const RenderHiddenItem = (data, rowMap) => {
-  return (
-    <View style={styles.rowBack}>
-      <TouchableOpacity
-        style={[styles.backRightBtn, styles.backRightBtnLeft]}
-        onPress={() => {
-          navigateToTimerButtonPressed(data.item.id)
-        }}
-      >
-        <Icon
-          name='ios-timer'
-          color='white'
-          type='ionicon'
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.backRightBtn, styles.backRightBtnCenter]}
-        onPress={() => {
-          editTournamentButtonPressed(data.item.id)
-        }}
-      >
-        <Icon
-          name='edit'
-          color='white'
-          type='font-awesome'
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.backRightBtn, styles.backRightBtnRight]}
-        onPress={() => {
-          deleteTournamentButtonPressed(data.item.id, data.item.title)
-        }}
-      >
-        <Icon
-          name='ios-trash'
-          color='white'
-          type='ionicon'
-        />
-      </TouchableOpacity>
-    </View>
   )
 }
 

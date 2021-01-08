@@ -1,4 +1,4 @@
-# TourneyVision Client APp
+# TourneyVision Client App
 
 ## Technologies/Services Used
 
@@ -7,7 +7,9 @@
 - Heroku for database hosting
 - Postgresql for database
 - Expo for react-native client development
-- Apollo for GraphQL client
+- Apollo version 3 for GraphQL client
+- React-navigation
+- React Native Elements
 
 ## Authentication and Authorization
 

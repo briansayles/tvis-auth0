@@ -1,65 +1,69 @@
 import * as React from 'react';
-import { SafeAreaView, View, Text, Button, Platform, Alert, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { Text, Button, } from 'react-native-elements'
 import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
 import { styles, responsiveFontSize } from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
 import { SwipeableList } from '../components/SwipeableList'
+import { AppLayout } from '../components/AppLayout'
+import { ScrollView } from 'react-native-gesture-handler';
 
-export function TournamentsScreen() {
+
+export function TournamentsScreen(props) {
 	const {loading, data, error} = useSubscription(CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION)
   const [ createTournament, {loading: creating, data: createdData, error: createError} ] = useMutation(CREATE_TOURNAMENT_MUTATION, {})
+  const createItem = () => { createTournament() }
   const [ deleteTournament, {loading: deleting, data: deleteData, error: deleteError} ] = useMutation(DELETE_TOURNAMENT_MUTATION, {})
-
-  const navigateToTimerButtonPressed = ({id, title}) => {
-    Alert.alert('Go to Timer', 'Go to timer for: \n' + title + '/n/n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}])
-    // props.navigation.navigate('Details', {id: id})
-  }
-  const editItem = ({id, title}) => {
-    Alert.alert('Confirm Edit', 'Edit: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}])
-  }
   const deleteItem = ({id, title}) => {
     Alert.alert('Confirm Delete', 'Delete: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteTournament({variables: {id}})}, style: 'default'}])
   }
-  const createItem = () => { createTournament() }
-  if (loading || deleting) return (<ActivityIndicator/>)
+  const editItem = ({id, title}) => {
+    // Alert.alert('Confirm Edit', 'Edit: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}])
+    props.navigation.navigate('Tournament Dashboard', {id: id})
+  }
+  const navigateToTimerButtonPressed = ({id, title}) => {
+    Alert.alert('Go to Timer', 'Go to timer for: \n' + title + '/n/n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}])
+    // props.navigation.navigate('Tournament Dashboard', {id: id})
+  }
+  if (loading) return (<ActivityIndicator/>)
   if (error) return (<ErrorMessage error={error}/>)
   if (createError) return (<ErrorMessage error={createError}/>)
   if (deleteError) return (<ErrorMessage error={deleteError}/>)
   if (data) {
     return (
-      <SafeAreaView style={[styles.container, {}]}>
-        <SwipeableList 
-          headerTitle="Tournaments" 
-          data={data.current_user[0].user.tournaments} 
-          create={createItem} 
-          edit={editItem} 
-          delete={deleteItem}
-          keyExtractor={(item)=> item.id.toString()}
-          rightButton1={
-            {
-              backgroundColor:  'red',
-              onPress: deleteItem,
-              ioniconName: 'ios-trash'
+      <AppLayout>
+          <SwipeableList 
+            style={{}} // styles applied here will override the defaults
+            headerTitle="Tournaments" 
+            data={data.current_user[0].user.tournaments} 
+            create={createItem} 
+            edit={editItem}
+            keyExtractor={(item)=> item.id.toString()}
+            rightButton1={
+              {
+                backgroundColor:  'red',
+                onPress: deleteItem,
+                ioniconName: 'ios-trash'
+              }
             }
-          }
-          rightButton2={
-            {
-              backgroundColor:  'forestgreen',
-              onPress: navigateToTimerButtonPressed,
-              ioniconName: 'ios-timer-outline'
+            rightButton2={
+              {
+                backgroundColor:  'forestgreen',
+                onPress: navigateToTimerButtonPressed,
+                ioniconName: 'ios-timer-outline'
+              }
             }
-          }
-          renderItem = {(data, rowMap) => {
-            return(
-              <Pressable style={[styles.rowFront, {}]} onPress={() => {editItem(data.item)}}>
-                <Text style={[data.item.timers?.[0]?.is_active? styles.active : null, ]}>{data.item.title} {data.item.id}</Text>
-                <Ionicons name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-              </Pressable>
-            )
-          }}
-        />
-      </SafeAreaView>
+            renderItem = {(data, rowMap) => {
+              return(
+                <Pressable style={[styles.rowFront, {}]} onPress={() => {editItem(data.item)}}>
+                  <Text style={[data.item.timers?.[0]?.is_active? styles.active : null, ]}>{data.item.title} {data.item.id}</Text>
+                  <Ionicons name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+                </Pressable>
+              )
+            }}
+          />
+      </AppLayout>
     )
   }
 }
