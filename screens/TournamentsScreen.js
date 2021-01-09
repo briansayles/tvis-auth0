@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable, } from 'react-native';
 import { Text, Button, } from 'react-native-elements'
 import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
-import { styles, responsiveFontSize } from '../styles'
+import { styles, responsiveFontSize, } from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
 import { SwipeableList } from '../components/SwipeableList'
@@ -35,9 +35,10 @@ export function TournamentsScreen(props) {
       <AppLayout>
           <SwipeableList 
             style={{}} // styles applied here will override the defaults
-            headerTitle="Tournaments" 
+            headerTitle="Tournaments"
             data={data.current_user[0].user.tournaments} 
             create={createItem} 
+            collapsible
             edit={editItem}
             keyExtractor={(item)=> item.id.toString()}
             rightButton1={

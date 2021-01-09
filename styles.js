@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     paddingVertical: responsiveHeight(1),
   },
   swipeListViewContentContainer: {
-
+    
   },
   title: {
     fontSize: 20,
@@ -71,7 +71,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'whitesmoke',
     borderBottomColor: 'black',
-    borderBottomWidth: 1,
     justifyContent: 'space-between',
     width: responsiveWidth(95),
     height: responsiveFontSize(4),
@@ -83,7 +82,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'whitesmoke',
     borderBottomColor: 'black',
-    borderBottomWidth: 1,
     justifyContent: 'space-between',
     width: responsiveWidth(95),
     height: responsiveFontSize(4),
@@ -110,8 +108,10 @@ export const styles = StyleSheet.create({
   backRightBtnRight: {
       backgroundColor: 'red',
       right: 0,
-  },  
-
+  },
+  collapsed: {
+    height: 0,
+  },
   cardTitle: {
     fontSize: responsiveFontSize(2.25),
     fontWeight: 'bold',

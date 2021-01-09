@@ -28,6 +28,11 @@ export function TournamentDashboardScreen (props) {
   }
   const [ createSegment, {loading: creatingSegment, data: createSegmentData, error: createSegmentError} ] = useMutation(CREATE_SEGMENT_MUTATION, {})
   const createSegmentItem = () => {createSegment({variables: {tournament_id: data.tournaments_by_pk.id}})}
+  const [ createChip, {loading: creatingChip, data: createChipData, error: createChipError} ] = useMutation(CREATE_CHIP_MUTATION, {})
+  const createChipItem = () => {createChip({variables: {tournament_id: data.tournaments_by_pk.id}})}
+  const [ createCost, {loading: creatingCost, data: createCostData, error: createCostError} ] = useMutation(CREATE_COST_MUTATION, {})
+  const createCostItem = () => {createCost({variables: {tournament_id: data.tournaments_by_pk.id}})}
+  
   const _navigateToTimerButtonPressed = (id) => {
     props.navigation.navigate('Details', {id: id})
   }
@@ -68,8 +73,8 @@ export function TournamentDashboardScreen (props) {
   //   props.navigation.navigate('PayoutSetup', {id: id})
   // }
   const deleting = deletingSegment || deletingChip || deletingCost
-  const creating = false
-  const createError = false
+  const creating = creatingSegment || creatingChip || creatingCost
+  const createError = createSegmentError || createChipError || createCostError
   const deleteError = deleteSegmentError || deleteChipError || deleteCostError
 
   if (loading || creating || deleting) return (<ActivityIndicator/>)
@@ -85,7 +90,8 @@ export function TournamentDashboardScreen (props) {
       <AppLayout>
           <SwipeableList 
             style={{}} // styles applied here will override the defaults
-            headerTitle="Blinds Schedule" 
+            headerTitle="Blinds Schedule"
+            collapsible
             data={segments}
             create={createSegmentItem}
             rightButton1={
@@ -98,7 +104,7 @@ export function TournamentDashboardScreen (props) {
             keyExtractor={(item)=> item.id.toString()}
             renderItem = {(data, rowMap) => {
               return(
-                <Pressable style={[styles.rowFront, {}]} onPress={() => {editItem(data.item)}}>
+                <Pressable style={[styles.rowFront]} onPress={() => {editItem(data.item)}}>
                   <Text style={[, {flex: 4, }]}>{data.item.sBlind} / {data.item.bBlind} {data.item.ante > 0 ? ' + ' + data.item.ante + ' ante': ''}</Text>
                   <Text style={[, {flex: 2 ,textAlign: 'right', }]}>{data.item.duration} Minutes</Text>
                   <Text style={[, {flex: 0.25, }]}></Text>
@@ -107,6 +113,32 @@ export function TournamentDashboardScreen (props) {
               )
             }}
           />
+          <SwipeableList 
+            style={{}} // styles applied here will override the defaults
+            headerTitle="Chips"
+            collapsible
+            data={chips}
+            create={createChipItem}
+            rightButton1={
+              {
+                backgroundColor:  'red',
+                onPress: deleteChipItem,
+                ioniconName: 'ios-trash'
+              }
+            }
+            keyExtractor={(item)=> item.id.toString()}
+            renderItem = {(data, rowMap) => {
+              return(
+                <Pressable style={[styles.rowFront, {}]} onPress={() => {editItem(data.item)}}>
+                  <Text style={[, {flex: 2, color: data.item.color}]}>{data.item.denom}</Text>
+                  <Text style={[, {flex: 4 ,textAlign: 'right', }]}>{data.item.qty_available ? data.item.qty_available.toLocaleString('en') : '0'} Available</Text>
+                  <Text style={[, {flex: 0.25, }]}></Text>
+                  <Ionicons name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+                </Pressable>
+              )
+            }}
+          />
+
       </AppLayout>
     )
   }
@@ -136,6 +168,10 @@ const TOURNAMENT_QUERY = gql`
       }
       costs {
         id
+        cost_type {
+          name
+          long_name
+        }
       }
       segments_aggregate {
         aggregate {
@@ -207,8 +243,23 @@ const DELETE_COST_MUTATION = gql`
 
 const CREATE_SEGMENT_MUTATION = gql`
   mutation MyMutation($tournament_id: Int!, $sBlind: Int = 0, $duration: Int = 10, $bBlind: Int = 0, $ante: Int = 0) {
-    insert_segments(objects: {tournament_id: $tournament_id, ante: $ante, bBlind: $bBlind, duration: $duration, sBlind: $sBlind}) {
-      affected_rows
+    insert_segments_one(object: {tournament_id: $tournament_id, ante: $ante, bBlind: $bBlind, duration: $duration, sBlind: $sBlind}) {
+      id
+    }
+  }
+`
+
+const CREATE_CHIP_MUTATION = gql`
+  mutation MyMutation($tournament_id: Int!, $color: String = "#fff", $denom: Int = 1, $qty_available: Int = 100, ) {
+    insert_chips_one(object: {tournament_id: $tournament_id, denom: $denom, qty_available: $qty_available, color: $color}) {
+      id
+    }
+  }
+`
+const CREATE_COST_MUTATION = gql`
+  mutation MyMutation($cost_amount: numeric = 20, $cost_chipstack: Int = 1000, $cost_type_name: cost_types_enum = Buyin, $tournament_id: Int!) {
+    insert_costs_one(object: {cost_amount: $cost_amount, cost_chipstack: $cost_chipstack, cost_type_name: $cost_type_name, tournament_id: $tournament_id}) {
+      id
     }
   }
 `
