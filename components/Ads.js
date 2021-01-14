@@ -8,7 +8,7 @@ import {
 import { AdMobConfig } from '../config'
 import * as React from 'react'
 import { View } from 'react-native'
-import { responsiveHeight, responsiveWidth } from '../styles';
+import { styles, } from '../styles';
 
 export const BannerAd = (props) => {
   const getTestDeviceId = async () => {
@@ -20,7 +20,7 @@ export const BannerAd = (props) => {
   }
   getTestDeviceId()
   return (
-    <View style={{backgroundColor: 'transparent', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', bottom: 0, height: 50}}>
+    <View style={[styles.bannerAdContainer, {}]}>
       <AdMobBanner
         adUnitID={AdMobConfig.BANNER_ID}
         bannerSize="smartBannerPortrait"

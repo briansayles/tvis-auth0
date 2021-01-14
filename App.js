@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Platform, Alert, } from 'react-native';
 import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -73,7 +74,8 @@ export default function App({ navigation }) {
       let userToken;
 
       try {
-        userToken = await SecureStore.getItem('userToken');
+        userToken = await AsyncStorage.getItem('userToken');
+        // userToken = await SecureStore.getItem('userToken');
         // After restoring token, we may need to validate it in production apps
         const decoded = jwtDecode(userToken);
         const { exp } = decoded;
@@ -127,13 +129,16 @@ export default function App({ navigation }) {
             )
             dispatch({type: 'SIGN_OUT'})
           } 
-          await SecureStore.setItemAsync('userToken', jwtToken.toString())
-          await SecureStore.setItemAsync('expiry', expiry.toString())
+          await AsyncStorage.setItem('userToken', jwtToken.toString())
+          // await SecureStore.setItemAsync('userToken', jwtToken.toString())
+          await AsyncStorage.setItem('expiry', expiry.toString())
+          // await SecureStore.setItemAsync('expiry', expiry.toString())
           dispatch({ type: 'SIGN_IN', token: jwtToken });
         }
       },
       signOut: async () => {
-        await SecureStore.deleteItemAsync('userToken')
+        await AsyncStorage.setItem('userToken', null)
+        // await SecureStore.deleteItemAsync('userToken')
         dispatch({ type: 'SIGN_OUT' })
       },
     }),

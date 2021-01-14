@@ -1,161 +1,91 @@
-import { responsiveFontSize, responsiveWidth, responsiveHeight } from '../styles'
-import { TouchableHighlight, View, TouchableOpacity, Icon, ActivityIndicator, Pressable, StyleSheet} from 'react-native'
+import { responsiveFontSize, responsiveWidth, responsiveHeight, styles, colors } from '../styles'
+import { TouchableHighlight, View, TouchableOpacity, Icon, ActivityIndicator, Pressable, StyleSheet, SectionList} from 'react-native'
 import { Text, Button, } from 'react-native-elements'
-import { SwipeListView } from 'react-native-swipe-list-view'
-import * as React from 'react'
+import { SwipeRow} from 'react-native-swipe-list-view'
+import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 
-export function SwipeableList (props) {
-    const [refreshingState, setRefreshingState] = React.useState(false)
-    const [collapsedState, setCollapsedState] = React.useState(false)
-
-    const swipeableStyles = StyleSheet.create(
-      {
-        swipeListView: {
-          flex: 1,
-          backgroundColor: 'whitesmoke',
-          paddingHorizontal: responsiveWidth(1),
-        },
-        swipeListViewContentContainer: {
-
-        },
-        rowFront: {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: 'whitesmoke',
-          borderBottomColor: 'black',
-          justifyContent: 'space-between',
-          width: responsiveWidth(95),
-          height: collapsedState ? 0 : responsiveFontSize(4),
-          paddingHorizontal: responsiveFontSize(1),
-        },
-        rowBack: {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: 'whitesmoke',
-          borderBottomColor: 'black',
-          justifyContent: 'space-between',
-          width: responsiveWidth(95),
-          height: collapsedState ? 0 : responsiveFontSize(4),
-          paddingLeft: responsiveFontSize(1),
-        },
-        backRightBtn: {
-          alignItems: 'center',
-          bottom: 0,
-          justifyContent: 'center',
-          position: 'absolute',
-          top: 0,
-          width: responsiveFontSize(4),
-          right: 0,
-          height: collapsedState ? 0 : responsiveFontSize(4),
-        },
-        backRightBtnLeft: {
-            backgroundColor: 'blue',
-            right: responsiveFontSize(8),
-        },
-        backRightBtnCenter: {
-          backgroundColor: 'blue',
-          right: responsiveFontSize(4),
-      },
-        backRightBtnRight: {
-            backgroundColor: 'red',
-            right: 0,
-        },
-      }
-    )
-    return (
-      <SwipeListView
-        style={[swipeableStyles.swipeListView, {...props.style}]}
-        contentContainerStyle={[swipeableStyles.swipeListViewContentContainer, {...props.contentContainerStyle}]}
-        refreshing={refreshingState}
-        onRefresh={()=>{
-          if (props.refetch) {
-            setRefreshingState(true)
-            props.refetch().then(()=> 
-              setRefreshingState(false)
-            )
-          }
-        }}
-        data={props.data}
-        keyExtractor={props.keyExtractor}
-        ListHeaderComponent={ 
-          <ListHeader 
-            title={props.headerTitle + ' (' + props.data.length + ')'} 
-            create={props.create} 
-            showCollapseIcon={props.collapsible} 
-            isCollapsed={collapsedState} 
-            onToggleCollapse={() => setCollapsedState(!collapsedState)}
-          /> 
-        }
-        rightOpenValue={-responsiveFontSize(4)*((props.rightButton1 ? 1 : 0) + (props.rightButton2 ? 1 : 0) + (props.rightButton3 ? 1 : 0))}
-        stickyHeaderIndices={[0]}
-        disableRightSwipe = {true}
-        swipeToOpenPercent = {10}
-        swipeToClosePercent = {10}
-        closeOnRowBeginSwipe = {true}
-        closeOnRowOpen = {true}
-        closeOnRowPress = {true}
-        closeOnScroll = {true}
-
-        renderItem = {props.renderItem}
-        
-        renderHiddenItem={ (data, rowMap) => {
- 
-            return(
-              <View style={[swipeableStyles.rowBack, {}]}>
-                {props.rightButton3 && 
-                  <TouchableOpacity
-                    style={[swipeableStyles.backRightBtn, swipeableStyles.backRightBtnLeft, {backgroundColor: props.rightButton3.backgroundColor}, {}]}
-                    onPress={() => {props.rightButton3.onPress(data.item)}}
-                  >
-                    <Ionicons name={props.rightButton3.ioniconName} color="white"/>
-                  </TouchableOpacity>
-                }
-                {props.rightButton2 && 
-                  <TouchableOpacity
-                    style={[swipeableStyles.backRightBtn, swipeableStyles.backRightBtnCenter, {backgroundColor: props.rightButton2.backgroundColor}, {}]}
-                    onPress={() => {props.rightButton2.onPress(data.item)}}
-                  >
-                    <Ionicons name={props.rightButton2.ioniconName} color="white"/>
-                  </TouchableOpacity>
-                }
-                {props.rightButton1 && 
-                  <TouchableOpacity
-                    style={[swipeableStyles.backRightBtn, swipeableStyles.backRightBtnRight, {backgroundColor: props.rightButton1.backgroundColor}, {}]}
-                    onPress={() => {props.rightButton1.onPress(data.item)}}
-                  >
-                    <Ionicons name={props.rightButton1.ioniconName} color="white"/>
-                  </TouchableOpacity>
-                }
+export function SwipeableCollapsibleSectionList (props) {
+  const [collapsedState, setCollapsedState] = useState([])
+  useEffect(() => {
+    setCollapsedState(Array(props.sections.length).fill(false));
+    return () => {setCollapsedState(Array(props.sections.length).fill(false))}
+  }, []);
+  return (
+    <SectionList
+      sections={props.sections}
+      keyExtractor={(item, index) => {
+        return (item.__typename + index.toString())        
+      }}
+      stickySectionHeadersEnabled={true}
+      renderSectionHeader={({ section: { title, data, createFunction, sectionIndex, includeCountInTitle}}) => (
+        <View style={[styles.sectionTitle, {}]}>
+          <Pressable style={{flexDirection: 'row', alignItems: 'center', flex: 9, justifyContent: 'flex-start'}}
+            onPress={()=>{
+              setCollapsedState(
+                collapsedState.map((mappedItem, mappedIndex)=>{
+                  return (sectionIndex === mappedIndex ? !mappedItem : mappedItem)
+                })
+              )
+            }}
+          >
+            <Ionicons name={collapsedState[sectionIndex] ? 'ios-chevron-forward-circle' : 'ios-chevron-down-circle'} size={responsiveFontSize(2.5)}/>
+            <Text style={[styles.sectionTitleText, {}]}>{title} {includeCountInTitle ? '(' + data.length + ')':null}  </Text>
+          </Pressable>
+          <View style={{flex: 1}}>            
+            {createFunction && <Ionicons onPress={()=>createFunction()} name='ios-add-circle' size={responsiveFontSize(2.5)} color="green"/>}
+          </View>   
+        </View>
+      )}
+      renderItem= {({item, index, section: {sectionIndex, onPressFunction, deleteFunction, renderFrontRow}}, rowMap)=> {
+        // console.log(sectionIndex, index, collapsedState[sectionIndex])
+        return(
+            <SwipeRow
+              closeOnRowPress={true}
+              swipeToOpenPercent={10}
+              rightOpenValue={-responsiveWidth(10)}
+            >
+              <View style={[styles.rowBack, {}]}>
+                <View style={[styles.backRightBtn, styles.backRightBtnRight, collapsedState[sectionIndex] ? styles.collapsed : null, {}]}>
+                  <Ionicons name='ios-trash' color="white" size={responsiveFontSize(2)} onPress={()=>deleteFunction(item)}  />
+                </View>
               </View>
-            )
-
-        }
-      }
+              {renderFrontRow(item, index, collapsedState[sectionIndex])}              
+            </SwipeRow>
+        )
+      }}
     />
   )
 }
-
-
+const holdingPen = () => {
+  <>
+  <View style={[styles.rowBack, {}]}>
+  <View style={[styles.backRightBtn, styles.backRightBtnRight, {}]}>
+    <Ionicons name='ios-trash' color="white" size={responsiveFontSize(2)}/>
+  </View>
+</View>
+<View style={[styles.rowFront, {}]}>
+    {renderFrontRow(item, index)}
+    <Ionicons iconStyle={{flex: 1}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+</View>  
+</>
+}
 export const ListHeader = (props) => {
-  const handleSearchBoxChanged = (text) => {
-    props.onSearch(text)
-  }
-
   return (
     <View style={{
       padding: responsiveFontSize(0.25),
       flexDirection: 'row', 
       justifyContent: 'space-between', 
       alignItems: 'center',
-      backgroundColor: 'white',
+      backgroundColor: colors.background,
       borderBottomColor: '#888',
       borderBottomStyle: 'solid',
       borderBottomWidth: 2,
     }}>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        {props.showCollapseIcon &&
+          <Ionicons name={props.isCollapsed ? 'chevron-forward' : 'chevron-down'} size={responsiveFontSize(3)} color="black" onPress={props.onToggleCollapse}/>
+        }
         <Text style={{fontSize: responsiveFontSize(2)}}>
           {props.title + '  '}
         </Text>
@@ -176,9 +106,6 @@ export const ListHeader = (props) => {
           </View>
         }
       </View>   
-      {props.showCollapseIcon &&
-        <Ionicons name={props.isCollapsed ? 'chevron-forward' : 'chevron-down'} size={responsiveFontSize(3)} color="black" onPress={props.onToggleCollapse}/>
-      }
     </View>
   )
 }

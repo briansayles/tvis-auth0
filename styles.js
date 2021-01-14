@@ -15,10 +15,14 @@ export const responsiveWidth = (w) => {
   return width * w / 100
 }
 
+export const colors = {
+  background: 'lightgrey',
+}
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'whitesmoke',
+    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingHorizontal: responsiveWidth(1),
@@ -35,7 +39,7 @@ export const styles = StyleSheet.create({
   },
   swipeListView: {
     flex: 1,
-    backgroundColor: 'whitesmoke',
+    backgroundColor: colors.background,
     paddingHorizontal: responsiveWidth(1),
     paddingVertical: responsiveHeight(1),
   },
@@ -46,6 +50,23 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     marginTop: 40,
+  },
+  sectionTitle: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    borderBottomColor: 'grey',
+    borderBottomWidth: 1,
+    paddingTop: responsiveFontSize(1),
+    paddingBottom: responsiveFontSize(0.5),
+    paddingHorizontal: responsiveFontSize(0.5),
+  },
+  sectionTitleText: {
+    fontSize: responsiveFontSize(2),
+    fontWeight: 'bold',
+    paddingLeft: responsiveFontSize(0.5),
   },
   active: {
     fontWeight: 'bold',
@@ -66,36 +87,44 @@ export const styles = StyleSheet.create({
       color: '#FFF',
   },
   rowFront: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'whitesmoke',
+    // backgroundColor: '#CCC',
+    // justifyContent: 'center',
+    height: responsiveFontSize(4.5),
+
+    // flex: 1,
+    flexDirection: 'row',
+    backgroundColor: colors.background,
     borderBottomColor: 'black',
     justifyContent: 'space-between',
-    width: responsiveWidth(95),
-    height: responsiveFontSize(4),
     paddingHorizontal: responsiveFontSize(1),
+    width: responsiveWidth(90),
+    // backgroundColor: 'pink'
   },
   rowBack: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'whitesmoke',
+    height: responsiveFontSize(4.5),
+    // backgroundColor: '#8BC645',
+    // flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    // padding: 15,
+    // flex: 1,
+    // flexDirection: 'row',
+    // alignItems: 'center',
+    backgroundColor: colors.background,
     borderBottomColor: 'black',
-    justifyContent: 'space-between',
-    width: responsiveWidth(95),
-    height: responsiveFontSize(4),
-    paddingLeft: responsiveFontSize(1),
+    // justifyContent: 'space-between',
+    marginHorizontal: -responsiveFontSize(2),
+    width: responsiveWidth(90),
+    // backgroundColor: 'red',
   },
   backRightBtn: {
     alignItems: 'center',
-    bottom: 0,
     justifyContent: 'center',
     position: 'absolute',
-    top: 0,
-    width: responsiveFontSize(4),
+    backgroundColor: 'yellow',
     right: 0,
-    height: responsiveFontSize(4),
   },
   backRightBtnLeft: {
       backgroundColor: 'blue',
@@ -106,8 +135,8 @@ export const styles = StyleSheet.create({
     right: responsiveFontSize(4),
 },
   backRightBtnRight: {
-      backgroundColor: 'red',
-      right: 0,
+    backgroundColor: 'red',
+    right: 0,
   },
   collapsed: {
     height: 0,
@@ -138,5 +167,15 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 2,
   },
-
+  bold: {
+    fontWeight: 'bold',
+  },
+  bannerAdContainer: {
+    backgroundColor: colors.background, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    bottom: 0, 
+    height: 50
+  },
 });
