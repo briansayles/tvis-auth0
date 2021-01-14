@@ -21,7 +21,6 @@ export function TournamentsScreen(props) {
     Alert.alert('Confirm Delete', 'Delete: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteTournament({variables: {id}})}, style: 'default'}])
   }
   const editItem = ({id, title}) => {
-    // Alert.alert('Confirm Edit', 'Edit: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}])
     props.navigation.navigate('Tournament Dashboard', {id: id})
   }
   const navigateToTimerButtonPressed = ({id, title}) => {
@@ -101,14 +100,15 @@ const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
       }
     }
   }
-`;
+`
+
 const CREATE_TOURNAMENT_MUTATION = gql`
   mutation createTournament {
     insert_tournaments(objects: {
       title: "Default tournament title", 
       subtitle: "With default segments", 
       timers: {data: [
-        {is_active: true}
+        {is_active: false}
       ]}, 
       segments: {data: [
         {sBlind: 5, bBlind: 10, ante: 0, duration: 10}, 
@@ -143,7 +143,7 @@ const CREATE_TOURNAMENT_MUTATION = gql`
       }
     }
   }
-`;
+`
 
 const DELETE_TOURNAMENT_MUTATION = gql`
   mutation MyMutation($id: Int!) {

@@ -68,32 +68,13 @@ export function TournamentDashboardScreen (props) {
     const costs = sortEntryFees(Tournament.costs)
     const smallestChipReq = smallestChipArray(chips, segments)
     const sectionListData = [
-      {
-        key: 0,
-        title: "Chip Colors & Denominations",
-        data: chips,
-        createFunction: createChipItem,
-        sectionIndex: 0,
-        includeCountInTitle: true,
-        onPressFunction: editChipItem,
-        deleteFunction: deleteChipItem,
-        renderFrontRow: (item, index, collapsed) => {
-          return(
-            <View style={[ styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row'}]}>
-              <Text style={[ styles.bold, {flex: 2, color: item.color}]}>{item.denom}</Text>
-              <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>{item.qty_available ? item.qty_available.toLocaleString() : '0'} Available</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-            </View>
-          )
-        }
-      },
       { 
-        key: 1,
+        key: 0,
+        sectionIndex: 0,
         title: "Blinds Levels",
         data:   segments,
-        createFunction: createSegmentItem,
-        sectionIndex: 1,
         includeCountInTitle: true,
+        createFunction: createSegmentItem,
         onPressFunction: editSegmentItem,
         deleteFunction: deleteSegmentItem,
         renderFrontRow: (item, index, collapsed) => {
@@ -108,12 +89,31 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
+        key: 1,
+        sectionIndex: 1,
+        title: "Chip Colors & Denominations",
+        data: chips,
+        includeCountInTitle: true,
+        createFunction: createChipItem,
+        onPressFunction: editChipItem,
+        deleteFunction: deleteChipItem,
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <View style={[ styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row'}]}>
+              <Text style={[ styles.bold, {flex: 2, color: item.color}]}>{item.denom}</Text>
+              <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>{item.qty_available ? item.qty_available.toLocaleString() : '0'} Available</Text>
+              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+            </View>
+          )
+        }
+      },
+      {
         key: 2,
+        sectionIndex: 2,
         title: "Entry Fees",
         data: costs,
-        createFunction: createCostItem,
-        sectionIndex: 2,
         includeCountInTitle: true,
+        createFunction: createCostItem,
         onPressFunction: editCosttItem,
         deleteFunction: deleteCostItem,
         renderFrontRow: (item, index, collapsed) => {
