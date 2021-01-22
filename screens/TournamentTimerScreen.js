@@ -55,6 +55,8 @@ export const TournamentTimerScreen = (props) => {
     const tickStart = new Date()
     const msPerMinute = 60 * 1000
     const noticeMilliseconds = noticeSeconds * 1000
+    // console.log(noticeSeconds)
+    // console.log(noticeMilliseconds)
     const Tournament = data.tournaments_by_pk
     let { segments}  = Tournament
     let timer = Tournament.timers[0]
@@ -89,7 +91,7 @@ export const TournamentTimerScreen = (props) => {
     })
     if (currentSegmentIndex > csi && currentSegmentIndex > 0 && csi != null && timerActive && ms > 30000) { // using ms>30000 (30 seconds) to avoid multiple calls
       endOfRoundFunction(timer.endOfRoundSpeech || "")
-    } else if (ms < noticeMilliseconds && ms >= noticeMilliseconds && timerActive && ms > noticeMilliseconds - 1000) {
+    } else if (ms < noticeMilliseconds && timerActive && ms > noticeMilliseconds - 0.95*AppOptions.timerUpdateInterval) {
       noticeFunction(timer.oneMinuteRemainingSpeech || "One minute remaining in this round.")
     }
     setNextSegment(currentSegmentIndex < segments.length -1 ? segments[currentSegmentIndex + 1] : null)
@@ -114,7 +116,7 @@ export const TournamentTimerScreen = (props) => {
         (playbackStatus) => {
           if (playbackStatus.didJustFinish) {
             Speech.speak(
-              (customSpeech + "The blinds are now " + (display.currentBlinds + display.currentAnte).replace("/", " and ")).replace("false","").replace("Ante: ", "with an ante of "),
+              (customSpeech + "The blinds are now " + (display.currentBlinds + display.currentAnte).replace("k", " thousand ").replace("/", " and ")).replace("false","").replace("Ante: ", "with an ante of "),
               {
                 rate: 1.00,
                 pitch: 1,

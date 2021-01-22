@@ -157,7 +157,7 @@ export function tick(endOfRoundFunction, noticeSeconds, noticeFunction) {
 
 export function sortSegments (segments) {
 	return segments.slice(0).sort((a,b) => {
-		return (parseInt(a.sBlind) + parseInt(a.bBlind) + parseInt(a.ante) - parseInt(b.sBlind) - parseInt(b.bBlind) - parseInt(b.ante))
+		return (parseInt(a.sBlind || 0) + parseInt(a.bBlind || 0) + parseInt(a.ante || 0) - parseInt(b.sBlind || 0) - parseInt(b.bBlind || 0) - parseInt(b.ante || 0))
 	})
 }
 

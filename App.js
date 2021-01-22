@@ -12,18 +12,22 @@ import { ApolloProvider } from '@apollo/client'
 import { Auth0Config} from './config'
 import { Ionicons } from '@expo/vector-icons'
 
+import { makeApolloClient } from './apolloClient'
 import { HomeScreen } from './screens/HomeScreen'
 import { SettingsScreen} from './screens/SettingsScreen'
 import { TournamentsScreen } from './screens/TournamentsScreen'
 import { SignInScreen } from './screens/SignInScreen'
-import { makeApolloClient } from './apolloClient'
 import { TournamentDashboardScreen } from './screens/TournamentDashboardScreen'
 import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
+import { SegmentEditScreen } from './screens/SegmentEditScreen';
+import { ChipEditScreen } from './screens/ChipEditScreen' 
+import { CostEditScreen } from './screens/CostEditScreen';
 
 const authorizationEndpoint = Auth0Config.authorizeURI
 const useProxy = Platform.select({ web: false, default: true });
 const redirectUri = AuthSession.makeRedirectUri({ useProxy });
 export const AuthContext = React.createContext()
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
 
@@ -196,15 +200,17 @@ function TournamentsStack() {
       <Stack.Screen name="Tournaments" component={TournamentsScreen} />
       <Stack.Screen name="Tournament Dashboard" component={TournamentDashboardScreen}/>
       <Stack.Screen name="Timer" component={TournamentTimerScreen}/>
-            {/* <Stack.Screen name="TimerOptionsScreen" component={}/>
+      <Stack.Screen name="Segment Editor" component={SegmentEditScreen}/>
+      <Stack.Screen name="Chip Editor" component={ChipEditScreen}/>
+      <Stack.Screen name="Cost Editor" component={CostEditScreen}/>
+      {/* 
+      <Stack.Screen name="TimerOptionsScreen" component={}/>
       <Stack.Screen name="SegmentListScreen" component={}/>
-      <Stack.Screen name="SegmentEditScreen" component={}/>
       <Stack.Screen name="ChipListScreen" component={}/>
-      <Stack.Screen name="ChipEditScreen" component={}/>
       <Stack.Screen name="CostListScreen" component={}/>
-      <Stack.Screen name="CostEditScreen" component={}/>
       <Stack.Screen name="BuyListScreen" component={}/>
-      <Stack.Screen name="BuyEditScreen" component={}/> */}
+      <Stack.Screen name="BuyEditScreen" component={}/> 
+      */}
     </Stack.Navigator>
   );
 }

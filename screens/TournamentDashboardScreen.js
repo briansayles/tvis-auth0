@@ -29,16 +29,28 @@ export function TournamentDashboardScreen (props) {
   const deleteCostItem = ({id, cost_type: {long_name}, cost_amount}) => {
     Alert.alert('Confirm Delete', 'Delete: \n' + cost_amount.toLocaleString(undefined, {style: 'currency', currency: 'usd'}) + ' ' + long_name + '?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteCost({variables: {id}})}, style: 'default'}])
   }
-  const [ createSegment, {loading: creatingSegment, data: createSegmentData, error: createSegmentError} ] = useMutation(CREATE_SEGMENT_MUTATION, {})
+  const [ createSegment, {loading: creatingSegment, data: createSegmentData, error: createSegmentError} ] = useMutation(CREATE_SEGMENT_MUTATION, {
+    onCompleted: ({insert_segments_one}) => {
+      editSegmentItem(insert_segments_one)
+    },
+  })
   const createSegmentItem = () => {createSegment({variables: {tournament_id: data.tournaments_by_pk.id}})}
-  const [ createChip, {loading: creatingChip, data: createChipData, error: createChipError} ] = useMutation(CREATE_CHIP_MUTATION, {})
+  const [ createChip, {loading: creatingChip, data: createChipData, error: createChipError} ] = useMutation(CREATE_CHIP_MUTATION, {
+    onCompleted: ({insert_chips_one}) => {
+      editChipItem(insert_chips_one)
+    },
+  })
   const createChipItem = () => {createChip({variables: {tournament_id: data.tournaments_by_pk.id}})}
-  const [ createCost, {loading: creatingCost, data: createCostData, error: createCostError} ] = useMutation(CREATE_COST_MUTATION, {})
+  const [ createCost, {loading: creatingCost, data: createCostData, error: createCostError} ] = useMutation(CREATE_COST_MUTATION, {
+    onCompleted: ({insert_costs_one}) => {
+      editCostItem(insert_costs_one)
+    },
+  })
   const createCostItem = () => {createCost({variables: {tournament_id: data.tournaments_by_pk.id}})}
   
-  const editSegmentItem = (item) => { console.log('pressed ' + item.id)}
-  const editChipItem = (item) => { console.log('pressed ' + item.id)}
-  const editCosttItem = (item) => { console.log('pressed ' + item.id)}
+  const editSegmentItem = (item) => { props.navigation.navigate('Segment Editor', {id: item.id})}
+  const editChipItem = (item) => { props.navigation.navigate('Chip Editor', {id: item.id})}
+  const editCostItem = (item) => { props.navigation.navigate('Cost Editor', {id: item.id})}
 
   const _navigateToTimerButtonPressed = (id) => {
     props.navigation.navigate('Details', {id: id})
@@ -63,7 +75,7 @@ export function TournamentDashboardScreen (props) {
   if (deleteError) return (<ErrorMessage error={deleteError}/>)
   if (data) {
     const Tournament = data.tournaments_by_pk
-    const segments = (Tournament.segments)
+    const segments = sortSegments(Tournament.segments)
     const chips = sortChips(Tournament.chips)
     const costs = sortEntryFees(Tournament.costs)
     const smallestChipReq = smallestChipArray(chips, segments)
@@ -126,7 +138,7 @@ export function TournamentDashboardScreen (props) {
         data: costs,
         includeCountInTitle: true,
         createFunction: createCostItem,
-        onPressFunction: editCosttItem,
+        onPressFunction: editCostItem,
         rightButtons: [
           {
             onPress: deleteCostItem,
@@ -201,21 +213,21 @@ const TOURNAMENT_SUBSCRIPTION = gql`
 `
 
 const DELETE_SEGMENT_MUTATION = gql`
-  mutation MyMutation($id: Int!) {
+  mutation DeleteSegment($id: Int!) {
     delete_segments(where: {id: {_eq: $id}}) {
       affected_rows
     }
   }
 `
 const DELETE_CHIP_MUTATION = gql`
-  mutation MyMutation($id: Int!) {
+  mutation DeleteChip($id: Int!) {
     delete_chips(where: {id: {_eq: $id}}) {
       affected_rows
     }
   }
 `
 const DELETE_COST_MUTATION = gql`
-  mutation MyMutation($id: Int!) {
+  mutation DeleteCost($id: Int!) {
     delete_costs(where: {id: {_eq: $id}}) {
       affected_rows
     }
@@ -223,7 +235,7 @@ const DELETE_COST_MUTATION = gql`
 `
 
 const CREATE_SEGMENT_MUTATION = gql`
-  mutation MyMutation($tournament_id: Int!, $sBlind: Int = 0, $duration: Int = 10, $bBlind: Int = 0, $ante: Int = 0) {
+  mutation CreateSegment($tournament_id: Int!, $sBlind: Int = 0, $duration: Int = 10, $bBlind: Int = 0, $ante: Int = 0) {
     insert_segments_one(object: {tournament_id: $tournament_id, ante: $ante, bBlind: $bBlind, duration: $duration, sBlind: $sBlind}) {
       id
     }
@@ -231,14 +243,14 @@ const CREATE_SEGMENT_MUTATION = gql`
 `
 
 const CREATE_CHIP_MUTATION = gql`
-  mutation MyMutation($tournament_id: Int!, $color: String = "#fff", $denom: Int = 1, $qty_available: Int = 100, ) {
+  mutation CreateChip($tournament_id: Int!, $color: String = "#fff", $denom: Int = 1, $qty_available: Int = 100, ) {
     insert_chips_one(object: {tournament_id: $tournament_id, denom: $denom, qty_available: $qty_available, color: $color}) {
       id
     }
   }
 `
 const CREATE_COST_MUTATION = gql`
-  mutation MyMutation($cost_amount: numeric = 20, $cost_chipstack: Int = 1000, $cost_type_name: cost_types_enum = Buyin, $tournament_id: Int!) {
+  mutation CreateCost($cost_amount: numeric = 20, $cost_chipstack: Int = 1000, $cost_type_name: cost_types_enum = Buyin, $tournament_id: Int!) {
     insert_costs_one(object: {cost_amount: $cost_amount, cost_chipstack: $cost_chipstack, cost_type_name: $cost_type_name, tournament_id: $tournament_id}) {
       id
     }

@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { ActivityIndicator } from 'react-native';
-import { SafeAreaView, View, } from 'react-native';
+import { View, } from 'react-native';
 import { Text, Button, Image } from 'react-native-elements'
 import { AuthContext } from '../App'
-import { BannerAd } from '../components/Ads'
 import { AppLayout } from '../components/AppLayout'
 
 import { styles, responsiveHeight, responsiveWidth } from '../styles'

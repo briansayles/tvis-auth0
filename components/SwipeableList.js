@@ -47,7 +47,6 @@ export function SwipeableCollapsibleSectionList (props) {
       renderItem= {({item, index, section: {sectionIndex, rightButtons, renderFrontRow}})=> {
         return(
           <SwipeRow
-            // ref={item.__typename + index.toString()}
             closeOnRowPress={true}
             swipeToOpenPercent={10}
             rightOpenValue={-60}
@@ -59,6 +58,7 @@ export function SwipeableCollapsibleSectionList (props) {
                   styles.backRightBtn, 
                   collapsedState[sectionIndex] ? styles.collapsed : null,
                   {backgroundColor: buttonData.backgroundColor, right: buttonIndex * responsiveFontSize(buttonSize + buttonSpacing)}]}
+                  key={buttonIndex}
                 >
                   <Ionicons 
                     name={buttonData.iconName} 
