@@ -76,15 +76,21 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: true,
         createFunction: createSegmentItem,
         onPressFunction: editSegmentItem,
-        deleteFunction: deleteSegmentItem,
+        rightButtons: [
+          {
+            onPress: deleteSegmentItem,
+            iconName: 'trash',
+            backgroundColor: 'red',
+          },
+        ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
-            <View style={[ styles.rowFront, collapsed ? styles.collapsed: null, {flexDirection: 'row'}]}>
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editSegmentItem(item)}}>
               <Text style={[ styles.bold, {flex: 0.5, textAlign: 'left'}]}>{index + 1}{collapsed ? 'C': ''}:</Text>
               <Text style={[ styles.bold, {flex: 4, }]}>{item.sBlind.toLocaleString()} / {item.bBlind.toLocaleString()} {item.ante > 0 ? ' + ' + item.ante.toLocaleString() + ' ante': ''}</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.duration.toLocaleString()} Minutes</Text>
               <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-            </View>
+            </Pressable>
           )
         }
       },
@@ -96,14 +102,20 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: true,
         createFunction: createChipItem,
         onPressFunction: editChipItem,
-        deleteFunction: deleteChipItem,
+        rightButtons: [
+          {
+            onPress: deleteChipItem,
+            iconName: 'trash',
+            backgroundColor: 'red',
+          },
+        ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
-            <View style={[ styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row'}]}>
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editChipItem(item)}}>
               <Text style={[ styles.bold, {flex: 2, color: item.color}]}>{item.denom}</Text>
               <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>{item.qty_available ? item.qty_available.toLocaleString() : '0'} Available</Text>
               <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-            </View>
+            </Pressable>
           )
         }
       },
@@ -115,14 +127,20 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: true,
         createFunction: createCostItem,
         onPressFunction: editCosttItem,
-        deleteFunction: deleteCostItem,
+        rightButtons: [
+          {
+            onPress: deleteCostItem,
+            iconName: 'trash',
+            backgroundColor: 'red',
+          },
+        ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
-            <View style={[ styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row'}]}>
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editCostItem(item)}}>
               <Text style={[ , {flex: 4, color: item.color}]}>{item.cost_amount.toLocaleString(undefined, {style: 'currency', currency: 'usd'})} {item.cost_type.long_name}</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.cost_chipstack.toLocaleString()} chips</Text>
               <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-             </View>
+             </Pressable>
           )
         }
       },
@@ -166,6 +184,10 @@ const TOURNAMENT_SUBSCRIPTION = gql`
         cost_type {
           long_name
         }
+      }
+      timers (limit: 1) {
+        is_active
+        last_updated_at
       }
       segments_aggregate {
         aggregate {

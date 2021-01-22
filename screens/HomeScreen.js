@@ -6,7 +6,7 @@ import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { BannerAd } from '../components/Ads'
 import { AppLayout } from '../components/AppLayout'
 
-export function HomeScreen () {
+export function HomeScreen (props) {
   const {signOut} = React.useContext(AuthContext);
   return (
     <AppLayout>

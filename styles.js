@@ -126,18 +126,18 @@ export const styles = StyleSheet.create({
     backgroundColor: 'yellow',
     right: 0,
   },
-  backRightBtnLeft: {
-      backgroundColor: 'blue',
-      right: responsiveFontSize(8),
-  },
-  backRightBtnCenter: {
-    backgroundColor: 'blue',
-    right: responsiveFontSize(4),
-},
-  backRightBtnRight: {
-    backgroundColor: 'red',
-    right: 0,
-  },
+//   backRightBtnLeft: {
+//       backgroundColor: 'blue',
+//       right: responsiveFontSize(8),
+//   },
+//   backRightBtnCenter: {
+//     backgroundColor: 'blue',
+//     right: responsiveFontSize(4),
+// },
+//   backRightBtnRight: {
+//     backgroundColor: 'red',
+//     right: 0,
+//   },
   collapsed: {
     height: 0,
   },

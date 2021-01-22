@@ -9,7 +9,7 @@ import { AppLayout } from '../components/AppLayout'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 
 
-export function SignInScreen() {
+export function SignInScreen(props) {
   const {signIn} = React.useContext(AuthContext);
 
   return (

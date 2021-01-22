@@ -18,6 +18,7 @@ import { TournamentsScreen } from './screens/TournamentsScreen'
 import { SignInScreen } from './screens/SignInScreen'
 import { makeApolloClient } from './apolloClient'
 import { TournamentDashboardScreen } from './screens/TournamentDashboardScreen'
+import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
 
 const authorizationEndpoint = Auth0Config.authorizeURI
 const useProxy = Platform.select({ web: false, default: true });
@@ -194,8 +195,8 @@ function TournamentsStack() {
     <Stack.Navigator>
       <Stack.Screen name="Tournaments" component={TournamentsScreen} />
       <Stack.Screen name="Tournament Dashboard" component={TournamentDashboardScreen}/>
-      {/* <Stack.Screen name="Timer" component={}/>
-      <Stack.Screen name="TimerOptionsScreen" component={}/>
+      <Stack.Screen name="Timer" component={TournamentTimerScreen}/>
+            {/* <Stack.Screen name="TimerOptionsScreen" component={}/>
       <Stack.Screen name="SegmentListScreen" component={}/>
       <Stack.Screen name="SegmentEditScreen" component={}/>
       <Stack.Screen name="ChipListScreen" component={}/>

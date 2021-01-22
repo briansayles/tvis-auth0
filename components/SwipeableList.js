@@ -7,11 +7,15 @@ import { Ionicons } from '@expo/vector-icons'
 
 export function SwipeableCollapsibleSectionList (props) {
   const [collapsedState, setCollapsedState] = useState([])
+  const buttonSize = 2.5
+  const buttonSpacing = 1.5
+
   useEffect(() => {
     setCollapsedState(Array(props.sections.length).fill(false));
     return () => {setCollapsedState(Array(props.sections.length).fill(false))}
   }, []);
-  const functionWrapper = (wrappedFunction) => {
+  const functionWrapper = (wrappedFunction, index) => {
+    // ref.closeRow()
     wrappedFunction
   }
   return (
@@ -36,25 +40,38 @@ export function SwipeableCollapsibleSectionList (props) {
             <Text style={[styles.sectionTitleText, {}]}>{title} {includeCountInTitle ? '(' + data.length + ')':null}  </Text>
           </Pressable>
           <View style={{flex: 1}}>            
-            {createFunction && <Ionicons onPress={()=>createFunction()} name='ios-add-circle' size={responsiveFontSize(2.5)} color="green"/>}
+            {createFunction && <Ionicons onPress={()=>functionWrapper(createFunction())} name='ios-add-circle' size={responsiveFontSize(2.5)} color="green"/>}
           </View>   
         </View>
       )}
-      renderItem= {({item, index, section: {sectionIndex, onPressFunction, deleteFunction, renderFrontRow}}, rowMap)=> {
-        // console.log(sectionIndex, index, collapsedState[sectionIndex])
+      renderItem= {({item, index, section: {sectionIndex, rightButtons, renderFrontRow}})=> {
         return(
-            <SwipeRow
-              closeOnRowPress={true}
-              swipeToOpenPercent={10}
-              rightOpenValue={-responsiveWidth(10)}
-            >
-              <View style={[styles.rowBack, {}]}>
-                <View style={[styles.backRightBtn, styles.backRightBtnRight, collapsedState[sectionIndex] ? styles.collapsed : null, {}]}>
-                  <Ionicons name='ios-trash' color="white" size={responsiveFontSize(2)} onPress={()=>functionWrapper(deleteFunction(item))}  />
+          <SwipeRow
+            // ref={item.__typename + index.toString()}
+            closeOnRowPress={true}
+            swipeToOpenPercent={10}
+            rightOpenValue={-60}
+            rightOpenValue={-responsiveFontSize(rightButtons.length * (buttonSize + 2 * buttonSpacing))}
+          >
+            <View style={[styles.rowBack, {}]}>
+              {rightButtons.map((buttonData, buttonIndex) => { return (
+                <View style={[
+                  styles.backRightBtn, 
+                  collapsedState[sectionIndex] ? styles.collapsed : null,
+                  {backgroundColor: buttonData.backgroundColor, right: buttonIndex * responsiveFontSize(buttonSize + buttonSpacing)}]}
+                >
+                  <Ionicons 
+                    name={buttonData.iconName} 
+                    color='white' 
+                    size={responsiveFontSize(3)} 
+                    onPress={()=>functionWrapper(buttonData.onPress(item), index)}
+                  />
                 </View>
-              </View>
-              {renderFrontRow(item, index, collapsedState[sectionIndex])}              
-            </SwipeRow>
+              )
+              })}
+            </View>
+            {renderFrontRow(item, index, collapsedState[sectionIndex])}              
+          </SwipeRow>
         )
       }}
     />

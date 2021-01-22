@@ -5,7 +5,7 @@ import { gql} from '@apollo/client'
 import { styles } from '../styles'
 
 
-export function SettingsScreen() {
+export function SettingsScreen(props) {
   return (
     <SafeAreaView style={[styles.container, {} ]}>
       <Text>Settings SCREEN</Text>

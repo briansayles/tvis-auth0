@@ -5,7 +5,7 @@ import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
 import { styles, responsiveFontSize, } from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
-import { SwipeableList, } from '../components/SwipeableList'
+import { SwipeableList, SwipeableCollapsibleSectionList} from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
 import { ScrollView } from 'react-native-gesture-handler';
 import { SwipeRow } from 'react-native-swipe-list-view'
@@ -24,61 +24,49 @@ export function TournamentsScreen(props) {
     props.navigation.navigate('Tournament Dashboard', {id: id})
   }
   const navigateToTimerButtonPressed = ({id, title}) => {
-    Alert.alert('Go to Timer', 'Go to timer for: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}])
-    // props.navigation.navigate('Tournament Dashboard', {id: id})
+    props.navigation.navigate('Timer', {id: id})
   }
   if (loading) return (<ActivityIndicator/>)
   if (error) return (<ErrorMessage error={error}/>)
   if (createError) return (<ErrorMessage error={createError}/>)
   if (deleteError) return (<ErrorMessage error={deleteError}/>)
   if (data) {
+    const sectionListData = [
+      {
+        key: 0,
+        sectionIndex: 0,
+        title: "My Tournaments",
+        data:   data.current_user[0].user.tournaments,
+        includeCountInTitle: true,
+        createFunction: createItem,
+        onPressFunction: editItem,
+        deleteFunction: deleteItem,
+        rightButtons: [
+          {
+            onPress: deleteItem,
+            iconName: 'trash',
+            backgroundColor: 'red',
+          },
+          {
+            onPress: navigateToTimerButtonPressed,
+            iconName: 'ios-timer-outline',
+            backgroundColor: 'forestgreen',
+          },
+        ], 
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editItem(item)}}>
+              <Text style={[item.timers?.[0]?.is_active? styles.active : null, {flex: 6}]}>{item.title} {item.id}</Text>
+              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+            </Pressable>
+          )
+        }
+      },
+    ]
     return (
       <AppLayout>
-        <SectionList
-          sections={[
-            {
-              title: 'My Tournaments',
-              data: data.current_user[0].user.tournaments,
-              createFunction: createItem,
-            },
-          ]}
-          renderItem={({item, index})=>{
-            return(
-              <SwipeRow
-                closeOnRowPress={true}
-                swipeToOpenPercent={10}
-                rightOpenValue={-responsiveFontSize(10)}
-              >
-                  <View style={[styles.rowBack, collapsedState ? styles.collapsed : null, {}]}>
-                    <Pressable
-                      style={[styles.backRightBtn, styles.backRightBtnCenter, collapsedState ? styles.collapsed : null, {backgroundColor: 'forestgreen'}, {}]}
-                      onPress={() => {navigateToTimerButtonPressed(item)}}
-                    >
-                      <Ionicons name='ios-timer-outline' color="white"/>
-                    </Pressable>
-                    <Pressable
-                      style={[styles.backRightBtn, styles.backRightBtnRight, collapsedState ? styles.collapsed : null, {backgroundColor: 'red'}, {}]}
-                      onPress={() => {deleteItem(item)}}
-                    >
-                      <Ionicons name='ios-trash' color="white"/>
-                    </Pressable>
-                  </View>
-                  <View style={[styles.rowFront, collapsedState ? styles.collapsed : null, {}]}>
-                    <Pressable style={[styles.rowFront, collapsedState ? styles.collapsed : null, {} ]} onPress={() => {editItem(item)}}>
-                      <Text style={[item.timers?.[0]?.is_active? styles.active : null, ]}>{item.title} {item.id}</Text>
-                      <Ionicons name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-                    </Pressable>
-                  </View>
-              </SwipeRow>
-            )
-          }}
-          renderSectionHeader={({ section: { title, data, createFunction}}) => (
-            <View style={[styles.sectionTitle, {}]}>
-              <Text style={[styles.sectionTitleText, {}]}>{title} ({data.length})  </Text>
-              <Ionicons onPress={()=>createFunction()} name='ios-add-circle' size={responsiveFontSize(2.5)} color="green"/>
-              <Ionicons onPress={()=>setCollapsedState(!collapsedState)} name={collapsedState ? 'ios-chevron-forward-circle' : 'ios-chevron-down-circle'} size={responsiveFontSize(2.5)}/>
-            </View>
-          )}
+        <SwipeableCollapsibleSectionList
+          sections={sectionListData}
         />
       </AppLayout>
     )
