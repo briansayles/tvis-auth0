@@ -15,7 +15,7 @@ export const BannerAd = (props) => {
    const testDeviceID = await setTestDeviceIDAsync('EMULATOR');
   }
   const bannerError = (error) => {
-    console.log(AdMobConfig.BannerAd)
+    console.log(AdMobConfig.BANNER_ID)
     console.log(error.toString())
   }
   getTestDeviceId()
@@ -24,6 +24,27 @@ export const BannerAd = (props) => {
       <AdMobBanner
         adUnitID={AdMobConfig.BANNER_ID}
         bannerSize="smartBannerPortrait"
+        servePersonalizedAds
+        onDidFailToReceiveAdWithError={bannerError}
+      />
+    </View>
+  )
+}
+
+export const PopupVideoAd = (props) => {
+  const getTestDeviceId = async () => {
+    const testDeviceID = await setTestDeviceIDAsync('EMULATOR');
+  }
+  const bannerError = (error) => {
+    console.log(AdMobConfig.VIDEO_ID)
+    console.log(error.toString())
+  }
+  getTestDeviceId()
+  return (
+    <View style={[styles.bannerAdContainer, {}]}>
+      <AdMobBanner
+        adUnitID={AdMobConfig.VIDEO_ID}
+        bannerSize="mediumRectangle"
         servePersonalizedAds
         onDidFailToReceiveAdWithError={bannerError}
       />

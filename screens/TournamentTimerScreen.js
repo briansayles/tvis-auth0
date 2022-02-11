@@ -12,6 +12,16 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { GraphQLConfig, AppOptions } from '../config'
 import { smallestChipArray, msToTime, numberToSuffixedString, sortChips, sortSegments, responsiveFontSize, responsiveWidth, responsiveHeight} from '../utilities/functions'
 import { AppLayout } from '../components/AppLayout'
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  PublisherBanner,
+  AdMobRewarded,
+  setTestDeviceIDAsync,
+} from 'expo-ads-admob';
+
+
+import { AdMobConfig } from '../config'
 
 export const TournamentTimerScreen = (props) => {
   const { data, loading, error, } = useSubscription(TOURNAMENT_SUBSCRIPTION, { variables: { id: props.route.params.id}})
@@ -136,6 +146,9 @@ export const TournamentTimerScreen = (props) => {
           }
         }
       )
+      // await AdMobInterstitial.setAdUnitID(AdMobConfig.INTERSTITIAL_ID)
+      // await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
+      // await AdMobInterstitial.showAdAsync()
     } catch (error) {
       console.log(error)
     }
