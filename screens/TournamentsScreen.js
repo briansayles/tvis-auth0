@@ -1,4 +1,5 @@
 import React, {useState} from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable, SectionList, TouchableOpacity} from 'react-native';
 import { Text, Button, } from 'react-native-elements'
 import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
@@ -7,11 +8,13 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
 import { SwipeableList, SwipeableCollapsibleSectionList} from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
+import reactDom from 'react-dom';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SwipeRow } from 'react-native-swipe-list-view'
 
 
 export function TournamentsScreen(props) {
+
   const {loading, data, error} = useSubscription(CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION)
   const [ collapsedState, setCollapsedState] = useState(false)
   const [ createTournament, {loading: creating, data: createdData, error: createError} ] = useMutation(CREATE_TOURNAMENT_MUTATION, {})
@@ -23,20 +26,21 @@ export function TournamentsScreen(props) {
   const editItem = ({id, title}) => {
     props.navigation.navigate('Tournament Dashboard', {id: id})
   }
-  const navigateToTimerButtonPressed = ({id, title}) => {
-    props.navigation.navigate('Timer', {id: id})
+  
+  const navigateToTimerButtonPressed = ({id, title, Timers} ) => {
+    props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
   }
-  if (loading) return (<ActivityIndicator/>)
-  if (error) return (<ErrorMessage error={error}/>)
-  if (createError) return (<ErrorMessage error={createError}/>)
-  if (deleteError) return (<ErrorMessage error={deleteError}/>)
+  if (loading) return (<AppLayout><ActivityIndicator/></AppLayout>)
+  if (error) return (<AppLayout><ErrorMessage error={error}/></AppLayout>)
+  if (createError) return (<AppLayout><ErrorMessage error={createError}/></AppLayout>)
+  if (deleteError) return (<AppLayout><ErrorMessage error={deleteError}/></AppLayout>)
   if (data) {
     const sectionListData = [
       {
         key: 0,
         sectionIndex: 0,
         title: "My Tournaments",
-        data:   data.current_user[0].user.tournaments,
+        data:   data.Tournament,
         includeCountInTitle: true,
         createFunction: createItem,
         onPressFunction: editItem,
@@ -56,7 +60,7 @@ export function TournamentsScreen(props) {
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editItem(item)}}>
-              <Text style={[item.timers?.[0]?.is_active? styles.active : null, {flex: 6}]}>{item.title} {item.id}</Text>
+              <Text style={[item.Timers[0]?.is_active? styles.active : null, {flex: 6}]}>{item.title}</Text>
               <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
             </Pressable>
           )
@@ -75,16 +79,13 @@ export function TournamentsScreen(props) {
 
 const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
   subscription currentUserTournamentListSubscription {
-    current_user {
-      user {
-        tournaments ( order_by: {id: desc}) {
-          id
-          title
-          timers (limit: 1) {
-            is_active
-            last_updated_at
-          }
-        }
+    Tournament {
+      id
+      title
+      subtitle
+      Timers (limit: 1) {
+        id
+        active
       }
     }
   }
@@ -92,13 +93,13 @@ const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
 
 const CREATE_TOURNAMENT_MUTATION = gql`
   mutation createTournament {
-    insert_tournaments(objects: {
+    insert_Tournament_one(object: {
       title: "Default tournament title", 
       subtitle: "With default segments", 
-      timers: {data: [
-        {is_active: false}
+      Timers: {data: [
+        {active: false}
       ]}, 
-      segments: {data: [
+      Segments: {data: [
         {sBlind: 5, bBlind: 10, ante: 0, duration: 10}, 
         {sBlind: 10, bBlind: 20, ante: 0, duration: 10},
         {sBlind: 15, bBlind: 30, ante: 0, duration: 10}, 
@@ -114,29 +115,28 @@ const CREATE_TOURNAMENT_MUTATION = gql`
         {sBlind: 400, bBlind: 800, ante: 80, duration: 10},
         {sBlind: 500, bBlind: 1000, ante: 100, duration: 10},
       ]}, 
-      chips: {data: [
+      Chips: {data: [
         {color: "#f00", denom: 5}, 
         {color: "#0f0", denom: 25}, 
         {color: "#000", denom: 100}, 
         {color: "#00f", denom: 500}
       ]},
     })
-    { returning {
-        id
-        title
-        timers (limit: 1) {
-          is_active
-          last_updated_at
-        }
+    { 
+      id
+      title
+      Timers(limit: 1) {
+        active
+        updatedAt
       }
     }
   }
 `
 
 const DELETE_TOURNAMENT_MUTATION = gql`
-  mutation MyMutation($id: Int!) {
-    delete_tournaments(where: {id: {_eq: $id}}) {
-      affected_rows
+  mutation MyMutation($id: uuid!) {
+    delete_Tournament_by_pk(id: $id) {
+      id
     }
   }
 `

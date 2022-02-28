@@ -5,7 +5,7 @@ import ReactNative, {
 import { Button, Icon, Input, Text, } from 'react-native-elements'
 import { KeyboardAwareScrollView, } from 'react-native-keyboard-aware-scroll-view'
 import {Ionicons, } from '@expo/vector-icons'
-
+import {Picker as RNPPicker} from '@react-native-picker/picker'
 import { responsiveFontSize } from '../utilities/functions'
 
 export const theme= {
@@ -146,7 +146,7 @@ export const SubmitButton = (props) => {
 }
 
 export class Picker extends Component {
-  static Item = ReactNative.Picker.Item
+  static Item = RNPPicker.Item
 
   constructor(props, context) {
     super(props, context)
@@ -212,7 +212,7 @@ export class Picker extends Component {
             paddingHorizontal: 10,
           }, flatStyle]}
         >
-          <ReactNative.Picker
+          <RNPPicker
             {...this.props}
             style={textStyle}
           />

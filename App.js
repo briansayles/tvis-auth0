@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { Platform, Alert, } from 'react-native';
+import * as React from 'react'
+import { Platform, Alert, } from 'react-native'
 import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import * as AuthSession from 'expo-auth-session';
-import jwtDecode from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import * as AuthSession from 'expo-auth-session'
+import jwtDecode from 'jwt-decode'
 import { ApolloProvider } from '@apollo/client'
 import { Auth0Config} from './config'
 import { Ionicons } from '@expo/vector-icons'
@@ -19,16 +19,19 @@ import { TournamentsScreen } from './screens/TournamentsScreen'
 import { SignInScreen } from './screens/SignInScreen'
 import { TournamentDashboardScreen } from './screens/TournamentDashboardScreen'
 import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
-import { SegmentEditScreen } from './screens/SegmentEditScreen';
+import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
-import { CostEditScreen } from './screens/CostEditScreen';
+import { CostEditScreen } from './screens/CostEditScreen'
+
+// import { AuthContext } from './Contexts'
 
 const authorizationEndpoint = Auth0Config.authorizeURI
-const useProxy = Platform.select({ web: false, default: true });
-const redirectUri = AuthSession.makeRedirectUri({ useProxy });
+const useProxy = Platform.select({ web: false, default: true })
+const redirectUri = AuthSession.makeRedirectUri({ useProxy })
+
 export const AuthContext = React.createContext()
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
 
 export default function App({ navigation }) {
@@ -47,12 +50,14 @@ export default function App({ navigation }) {
     (prevState, action) => {
       switch (action.type) {
         case 'RESTORE_TOKEN':
+          console.log(action.token)
           return {
             ...prevState,
             userToken: action.token,
             isLoading: false,
           };
         case 'SIGN_IN':
+          console.log(action.token)
           return {
             ...prevState,
             isSignout: false,
@@ -142,14 +147,14 @@ export default function App({ navigation }) {
         }
       },
       signOut: async () => {
-        await AsyncStorage.setItem('userToken', null)
+        await AsyncStorage.removeItem('userToken')
+        await AsyncStorage.removeItem('expiry')
         // await SecureStore.deleteItemAsync('userToken')
         dispatch({ type: 'SIGN_OUT' })
       },
     }),
     []
   );
-
 
   return (
     <AuthContext.Provider value={authContext}>
@@ -203,14 +208,6 @@ function TournamentsStack() {
       <Stack.Screen name="Segment Editor" component={SegmentEditScreen}/>
       <Stack.Screen name="Chip Editor" component={ChipEditScreen}/>
       <Stack.Screen name="Cost Editor" component={CostEditScreen}/>
-      {/* 
-      <Stack.Screen name="TimerOptionsScreen" component={}/>
-      <Stack.Screen name="SegmentListScreen" component={}/>
-      <Stack.Screen name="ChipListScreen" component={}/>
-      <Stack.Screen name="CostListScreen" component={}/>
-      <Stack.Screen name="BuyListScreen" component={}/>
-      <Stack.Screen name="BuyEditScreen" component={}/> 
-      */}
     </Stack.Navigator>
   );
 }

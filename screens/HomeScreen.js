@@ -5,6 +5,7 @@ import { AuthContext } from '../App'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { BannerAd } from '../components/Ads'
 import { AppLayout } from '../components/AppLayout'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function HomeScreen (props) {
   const {signOut} = React.useContext(AuthContext);

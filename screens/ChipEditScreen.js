@@ -14,8 +14,8 @@ export const ChipEditScreen = (props) => {
   
   useEffect(()=>{
     if (data) {
-      setInitialValues(data.chips_by_pk)
-      setFormValues(data.chips_by_pk)
+      setInitialValues(data.Chip_by_pk)
+      setFormValues(data.Chip_by_pk)
     }
   },[data])
   
@@ -49,9 +49,9 @@ export const ChipEditScreen = (props) => {
         />
         <MyInput
           title="Quantity Availalbe"
-          value={(formValues.qty_available || 0).toString()}
+          value={(formValues.qtyAvailable || 0).toString()}
           placeholder="Enter number of these chips on hand..."
-          onChangeText={(text) => handleInputChange('qty_available', parseInt(!text ? 0 : text))}
+          onChangeText={(text) => handleInputChange('qtyAvailable', parseInt(!text ? 0 : text))}
           keyboardType="numeric"
         />
         <Picker
@@ -77,23 +77,23 @@ export const ChipEditScreen = (props) => {
 }
 
 const UPDATE_CHIP_MUTATION = gql`
-  mutation updateChip($color: String = "#fff", $denom: Int = 1, $qty_available: Int = 0, $id: Int!) {
-    update_chips_by_pk(pk_columns: {id: $id}, _set: {color: $color, denom: $denom, qty_available: $qty_available}) {
+  mutation updateChip($color: String = "#fff", $denom: Int = 1, $qtyAvailable: Int = 0, $id: uuid!) {
+    update_Chip_by_pk(pk_columns: {id: $id}, _set: {color: $color, denom: $denom, qtyAvailable: $qtyAvailable}) {
       color
       denom
       id
-      qty_available
+      qtyAvailable
     }
   }
 `
 
 const GET_CHIP_QUERY = gql`
-  query getChip($id: Int!) {
-    chips_by_pk(id: $id) {
+  query getChip($id: uuid!) {
+    Chip_by_pk(id: $id) {
       color
       denom
       id
-      qty_available
+      qtyAvailable
     }
   }
 `

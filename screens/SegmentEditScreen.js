@@ -13,8 +13,8 @@ export const SegmentEditScreen = (props) => {
   
   useEffect(()=>{
     if (data) {
-      setInitialValues(data.segments_by_pk)
-      setFormValues(data.segments_by_pk)
+      setInitialValues(data.Segment_by_pk)
+      setFormValues(data.Segment_by_pk)
     }
   },[data])
   
@@ -86,8 +86,8 @@ export const SegmentEditScreen = (props) => {
 }
 
 const UPDATE_SEGMENT_MUTATION = gql`
-  mutation updateSegment($bBlind: Int = 0, $ante: Int = 0, $duration: Int = 0, $sBlind: Int = 0, $id: Int!) {
-    update_segments_by_pk(pk_columns: {id: $id}, _set: {sBlind: $sBlind, bBlind: $bBlind, ante: $ante, duration: $duration}) {
+  mutation updateSegment($bBlind: Int = 0, $ante: Int = 0, $duration: Int = 0, $sBlind: Int = 0, $id: uuid!) {
+    update_Segment_by_pk(pk_columns: {id: $id}, _set: {sBlind: $sBlind, bBlind: $bBlind, ante: $ante, duration: $duration}) {
       id
       sBlind
       bBlind
@@ -98,8 +98,8 @@ const UPDATE_SEGMENT_MUTATION = gql`
 `
 
 const GET_SEGMENT_QUERY = gql`
-  query getSegment($id: Int!) {
-    segments_by_pk(id: $id) {
+  query getSegment($id: uuid!) {
+    Segment_by_pk(id: $id) {
       id
       sBlind
       bBlind

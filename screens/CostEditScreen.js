@@ -13,8 +13,8 @@ export const CostEditScreen = (props) => {
   
   useEffect(()=>{
     if (data) {
-      setInitialValues(data.costs_by_pk)
-      setFormValues(data.costs_by_pk)
+      setInitialValues(data.Cost_by_pk)
+      setFormValues(data.Cost_by_pk)
     }
   },[data])
 
@@ -41,24 +41,24 @@ export const CostEditScreen = (props) => {
       <FormView>
         <MyInput
           title="Price"
-          value={(formValues.cost_amount || 0).toString()}
+          value={(formValues.price || 0).toString()}
           placeholder="Enter price here..."
-          onChangeText={(text) => handleInputChange('cost_amount', !text ? 0 : text)}
+          onChangeText={(text) => handleInputChange('price', !text ? 0 : text)}
           keyboardType="numeric"
         />
         <MyInput
           title="Chips"
-          value={(formValues.cost_chipstack || 0).toString()}
+          value={(formValues.chipStack || 0).toString()}
           placeholder="Enter chip value..."
-          onChangeText={(text) => handleInputChange('cost_chipstack', parseInt(!text ? 0 : text))}
+          onChangeText={(text) => handleInputChange('chipStack', parseInt(!text ? 0 : text))}
           keyboardType="numeric"
         />
         <Picker
           prompt="Choose entry fee type"
           title="Entry Fee Type"
-          initialValue={initialValues.cost_type_name || "Pick entry fee type..."}
-          selectedValue={formValues.cost_type_name}
-          onValueChange={(itemValue, itemIndex) => handleInputChange('cost_type_name', itemValue)}
+          initialValue={initialValues.costType || "Pick entry fee type..."}
+          selectedValue={formValues.costType}
+          onValueChange={(itemValue, itemIndex) => handleInputChange('costType', itemValue)}
         >
           {dictionaryLookup("EntryFeeOptions").map((item, i) => (
             <Picker.Item key={i} label={item.longName} value={item.shortName}/>
@@ -76,23 +76,23 @@ export const CostEditScreen = (props) => {
 }
 
 const UPDATE_COST_MUTATION = gql`
-  mutation updateCost($cost_amount: numeric = 0, $cost_chipstack: Int = 0, $cost_type_name: cost_types_enum = Buyin, $id: Int!) {
-    update_costs_by_pk(pk_columns: {id: $id}, _set: {cost_amount: $cost_amount, cost_chipstack: $cost_chipstack, cost_type_name: $cost_type_name}) {
+  mutation updateCost($price: Float = 0, $chipStack: Int = 0, $costType: Cost_Type_enum = Buyin, $id: uuid!) {
+    update_Cost_by_pk(pk_columns: {id: $id}, _set: {price: $price, chipStack: $chipStack, costType: $costType}) {
       id
-      cost_amount
-      cost_chipstack
-      cost_type_name
+      price
+      chipStack
+      costType
     }
   }
 `
 
 const GET_COST_QUERY = gql`
-  query getCost($id: Int!) {
-    costs_by_pk(id: $id) {
+  query getCost($id: uuid!) {
+    Cost_by_pk(id: $id) {
       id
-      cost_amount
-      cost_chipstack
-      cost_type_name
+      price
+      chipStack
+      costType
     }
   }
 `
