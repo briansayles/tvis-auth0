@@ -12,7 +12,7 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { AppOptions } from '../config'
 import { smallestChipArray, msToTime, numberToSuffixedString, sortChips, sortSegments, responsiveFontSize, responsiveWidth, responsiveHeight} from '../utilities/functions'
 import { AppLayout } from '../components/AppLayout'
-import { CurvedTransition } from 'react-native-reanimated';
+// import { CurvedTransition } from 'react-native-reanimated';
 
 const initialState = {
   newCSI: 0,
