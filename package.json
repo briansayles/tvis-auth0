@@ -45,7 +45,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo web",
-    "eject": "expo eject"
-  },
+    "eject": "expo eject",
+    "config-export": "echo 'Update Expo CONFIG_EXPORTS secret with value: \n\n' && cat config.js |base64",
+    "eas-build-pre-install": "echo $CONFIG_EXPORTS | base64 -di > ./config.js"  },
   "private": true
 }

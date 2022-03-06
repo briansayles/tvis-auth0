@@ -11,8 +11,10 @@ export function SwipeableCollapsibleSectionList (props) {
   const buttonSpacing = 1.5
 
   useEffect(() => {
-    setCollapsedState(Array(props.sections.length).fill(false));
-    return () => {setCollapsedState(Array(props.sections.length).fill(false))}
+    var initiallyCollapsedArray = []
+    props.sections.forEach((item, index) => { initiallyCollapsedArray.push(item.initiallyCollapsed || false)})
+    setCollapsedState(initiallyCollapsedArray);
+    return () => {setCollapsedState(Array(props.sections.length).fill(initiallyCollapsedArray))}
   }, []);
   const functionWrapper = (wrappedFunction, index) => {
     // ref.closeRow()
@@ -49,7 +51,6 @@ export function SwipeableCollapsibleSectionList (props) {
           <SwipeRow
             closeOnRowPress={true}
             swipeToOpenPercent={10}
-            rightOpenValue={-60}
             rightOpenValue={-responsiveFontSize(rightButtons.length * (buttonSize + 2 * buttonSpacing))}
           >
             <View style={[styles.rowBack, {}]}>

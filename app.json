@@ -5,7 +5,7 @@
     "description": "TourneyVision",
     "slug": "tvis",
     "privacy": "unlisted",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "orientation": "default",
     "primaryColor": "#cccccc",
     "icon": "./assets/icons/app-icon.png",
@@ -20,11 +20,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tourneyvision.tourneyvision",
+      "buildNumber": "0.0.1",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-3013833975597353~9684490974"
       }
     },
     "android": {
+      "package": "com.tourneyvision.tourneyvision",
+      "versionCode": 1,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-3013833975597353~9684490974"
       }

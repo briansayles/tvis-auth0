@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useSubscription, gql } from '@apollo/client'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { ActivityIndicator, Alert, View, ScrollView, RefreshControl, Pressable, SafeAreaView, SectionList, TouchableOpacity} from 'react-native'
 import { Text, Card, Button, Icon, } from 'react-native-elements';
 import { styles, responsiveFontSize, responsiveWidth, responsiveHeight} from '../styles'
@@ -7,6 +7,7 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
 import { SwipeableCollapsibleSectionList } from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
+import { FormView, Picker, SubmitButton, MyInput, } from '../components/FormComponents'
 import { SwipeRow } from 'react-native-swipe-list-view'
 
 
@@ -14,8 +15,26 @@ import { smallestChipArray, sortSegments, sortChips, sortEntryFees, numberToSuff
 
 export function TournamentDashboardScreen (props) {
   const [refreshingState, setRefreshingState] = useState(false)
+  const [initialValues, setInitialValues] = useState(null)
+  const [formValues, setFormValues] = useState(null)
 
   const {data, loading, error, client, refetch} = useSubscription(TOURNAMENT_SUBSCRIPTION, {variables: {id: props.route.params.id}})
+
+  const navigateToTimerButtonPressed = ({id, title, Timers} ) => {
+    props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
+  }
+  const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION)
+  const deleteItem = ({id, title}) => {
+    Alert.alert('Confirm Delete', 'Delete: \n' + title + '\n\n' + id + ' ?', 
+    [
+      {text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, 
+      {text: 'OK', onPress: async ()=> {
+        await deleteTournament({variables: {id}})
+        props.navigation.navigate("Tournaments")
+      }, style: 'default'
+      }
+    ])
+  }
   const editButtonColor = dictionaryLookup("editButtonColor")
   const [ deleteSegment, {loading: deletingSegment, data: deleteSegmentData, error: deleteSegmentError} ] = useMutation(DELETE_SEGMENT_MUTATION, {})
   const deleteSegmentItem = ({id, sBlind, bBlind, ante}) => {
@@ -63,13 +82,37 @@ export function TournamentDashboardScreen (props) {
   // const _navigateToGeneralInfoEdit = (tourney) => {
   //   props.navigation.navigate('GeneralInfoEdit', {tourney: tourney})
   // }
+  
+  useEffect(()=>{
+    if (data) {
+      setInitialValues(data.Tournament_by_pk)
+      setFormValues(data.Tournament_by_pk)
+    }
+  },[data])
+  
+  const [updateTournament] = useMutation(UPDATE_TOURNAMENT_MUTATION, {
+    variables: {
+      ...formValues,
+    },
+  })
 
-  const deleting = deletingSegment || deletingChip || deletingCost
+  const handleInputChange = (fieldName, value) => {
+    setFormValues({...formValues, [fieldName]:value})
+  }
+
+  const isDirty = () => {
+    let result = false
+    try {
+      Object.keys(formValues).forEach((key, index) => { if (formValues[key] !== initialValues[key]) result = true })
+    } catch {}
+    return result
+  }
+  const deleting = deletingSegment || deletingChip || deletingCost || deletingTournament
   const creating = creatingSegment || creatingChip || creatingCost
   const createError = createSegmentError || createChipError || createCostError
   const deleteError = deleteSegmentError || deleteChipError || deleteCostError
 
-  if (loading) return (<ActivityIndicator/>)
+  if (loading || deletingTournament || deleteTournamentData) return (<ActivityIndicator/>)
   if (error) return (<ErrorMessage error={error}/>)
   if (createError) return (<ErrorMessage error={createError}/>)
   if (deleteError) return (<ErrorMessage error={deleteError}/>)
@@ -83,8 +126,70 @@ export function TournamentDashboardScreen (props) {
       { 
         key: 0,
         sectionIndex: 0,
+        title: "Tournament Info",
+        data: [Tournament],
+        initiallyCollapsed: true,
+        includeCountInTitle: false,
+        createFunction: null,
+        onPressFunction: ()=>{},
+        rightButtons: [],
+        renderFrontRow: (item, index, collapsed) => {
+          return (
+            <FormView contentContainerStyle={[collapsed ? styles.collapsed : null, {} ]} >
+              <MyInput
+                title="Title"
+                value={(formValues?.title ? formValues.title : "")}
+                placeholder="Enter tournament title here..."
+                onChangeText={(text) => handleInputChange('title', text)}
+                keyboardType="default"
+              />
+              <MyInput
+                title="Subtitle"
+                value={(formValues?.subtitle ? formValues.subtitle : "")}
+                placeholder="Enter tournament subtitle here..."
+                onChangeText={(text) => handleInputChange('subtitle', text)}
+                keyboardType="default"
+              />
+              <SubmitButton 
+                mutation={updateTournament}
+                disabled={!isDirty()}
+              />
+            </FormView>            
+          )
+        }
+      },
+      {
+        key: 1,
+        sectionIndex: 1,
+        title: "Entry Fees",
+        data: costs,
+        initiallyCollapsed: true,
+        includeCountInTitle: true,
+        createFunction: createCostItem,
+        onPressFunction: editCostItem,
+        rightButtons: [
+          {
+            onPress: deleteCostItem,
+            iconName: 'trash',
+            backgroundColor: 'red',
+          },
+        ], 
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editCostItem(item)}}>
+              <Text style={[ , {flex: 4, }]}>{item.price.toLocaleString(undefined, {style: 'currency', currency: 'usd'})} {dictionaryLookup(item.costType, "EntryFeeOptions", "long")}</Text>
+              <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.chipStack.toLocaleString()} chips</Text>
+              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+             </Pressable>
+          )
+        }
+      },
+      { 
+        key: 2,
+        sectionIndex: 2,
         title: "Blinds Levels",
         data:   segments,
+        initiallyCollapsed: true,
         includeCountInTitle: true,
         createFunction: createSegmentItem,
         onPressFunction: editSegmentItem,
@@ -107,10 +212,11 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
-        key: 1,
-        sectionIndex: 1,
+        key: 3,
+        sectionIndex: 3,
         title: "Chip Colors & Denominations",
         data: chips,
+        initiallyCollapsed: true,
         includeCountInTitle: true,
         createFunction: createChipItem,
         onPressFunction: editChipItem,
@@ -131,34 +237,13 @@ export function TournamentDashboardScreen (props) {
           )
         }
       },
-      {
-        key: 2,
-        sectionIndex: 2,
-        title: "Entry Fees",
-        data: costs,
-        includeCountInTitle: true,
-        createFunction: createCostItem,
-        onPressFunction: editCostItem,
-        rightButtons: [
-          {
-            onPress: deleteCostItem,
-            iconName: 'trash',
-            backgroundColor: 'red',
-          },
-        ], 
-        renderFrontRow: (item, index, collapsed) => {
-          return(
-            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editCostItem(item)}}>
-              <Text style={[ , {flex: 4, }]}>{item.price.toLocaleString(undefined, {style: 'currency', currency: 'usd'})} {dictionaryLookup(item.costType, "EntryFeeOptions", "long")}</Text>
-              <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.chipStack.toLocaleString()} chips</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-             </Pressable>
-          )
-        }
-      },
     ]
     return (
       <AppLayout>
+        <View style={{flex: 1, flexDirection: 'row'}}>
+          <Ionicons iconStyle={{flex: 2}} size={responsiveFontSize(6)} onPress={() => deleteItem(Tournament)} name= 'trash' color='red'/>
+          <Ionicons iconStyle={{flex: 2}} size={responsiveFontSize(6)} onPress={() => navigateToTimerButtonPressed(Tournament)} name= 'ios-timer-outline' color='forestgreen'/>
+        </View>
         <SwipeableCollapsibleSectionList
           sections={sectionListData}
         />
@@ -166,6 +251,16 @@ export function TournamentDashboardScreen (props) {
     )
   }
 }
+
+const UPDATE_TOURNAMENT_MUTATION = gql`
+  mutation UpdateTournament($id: uuid!, $subtitle: String = "", $title: String = "") {
+    update_Tournament_by_pk(pk_columns: {id: $id}, _set: {title: $title, subtitle: $subtitle}) {
+      id
+      subtitle
+      title
+    }
+  }
+`
 
 const TOURNAMENT_SUBSCRIPTION = gql`
   subscription TournamentSubscription($id: uuid!) {
@@ -207,6 +302,14 @@ const TOURNAMENT_SUBSCRIPTION = gql`
     }
   }
 `
+const DELETE_TOURNAMENT_MUTATION = gql`
+  mutation MyMutation($id: uuid!) {
+    delete_Tournament_by_pk(id: $id) {
+      id
+    }
+  }
+`
+
 
 const DELETE_SEGMENT_MUTATION = gql`
   mutation DeleteSegment($id: uuid!) {
