@@ -1,7 +1,6 @@
 import { SafeAreaView, View, ActivityIndicator } from 'react-native'
 import { Text, Button, Image, } from 'react-native-elements'
 import * as React from 'react'
-// import { AuthContext } from '../App'
 import { AuthContext } from '../Contexts'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { BannerAd } from '../components/Ads'

@@ -11,7 +11,6 @@ import jwtDecode from 'jwt-decode'
 import { ApolloProvider } from '@apollo/client'
 import { Auth0Config} from './config'
 import { Ionicons } from '@expo/vector-icons'
-
 import { makeApolloClient } from './apolloClient'
 import { HomeScreen } from './screens/HomeScreen'
 import { SettingsScreen} from './screens/SettingsScreen'
@@ -22,14 +21,7 @@ import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
 import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
 import { CostEditScreen } from './screens/CostEditScreen'
-
 import { AuthContext } from './Contexts'
-
-// const authorizationEndpoint = Auth0Config.authorizeURI
-// const useProxy = Platform.select({ web: false, default: true })
-// const redirectUri = AuthSession.makeRedirectUri({ useProxy })
-
-// export const AuthContext = React.createContext()
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
