@@ -2,7 +2,8 @@ import * as React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { View, } from 'react-native';
 import { Text, Button, Image } from 'react-native-elements'
-import { AuthContext } from '../App'
+// import { AuthContext } from '../App'
+import { AuthContext } from '../Contexts'
 import { AppLayout } from '../components/AppLayout'
 
 import { styles, responsiveHeight, responsiveWidth } from '../styles'

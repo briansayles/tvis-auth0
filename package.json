@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@apollo/client": "^3.3.6",
+    "@apollo/client": "^3.5.10",
     "@apollo/react-hooks": "^4.0.0",
     "@auth0/auth0-react": "^1.2.0",
     "@expo/metro-config": "^0.3.11",
@@ -16,6 +16,7 @@
     "expo-ads-admob": "~12.0.0",
     "expo-auth-session": "~3.5.0",
     "expo-av": "~10.2.0",
+    "expo-cli": "^5.3.0",
     "expo-crypto": "~10.1.1",
     "expo-keep-awake": "~10.0.1",
     "expo-linear-gradient": "~11.0.3",
@@ -23,6 +24,7 @@
     "expo-secure-store": "~11.1.0",
     "expo-speech": "~10.1.0",
     "expo-updates": "~0.11.6",
+    "global": "^4.4.0",
     "graphql": "^15.4.0",
     "jwt-decode": "2.2.0",
     "react": "17.0.1",
@@ -47,6 +49,7 @@
     "web": "expo web",
     "eject": "expo eject",
     "config-export": "echo 'Update Expo CONFIG_EXPORTS secret with value: \n\n' && cat config.js |base64",
-    "eas-build-pre-install": "echo $CONFIG_EXPORTS | base64 -di > ./config.js"  },
+    "eas-build-pre-install": "echo $CONFIG_EXPORTS | base64 -di > ./config.js"
+  },
   "private": true
 }

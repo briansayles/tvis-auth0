@@ -23,13 +23,13 @@ import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
 import { CostEditScreen } from './screens/CostEditScreen'
 
-// import { AuthContext } from './Contexts'
+import { AuthContext } from './Contexts'
 
-const authorizationEndpoint = Auth0Config.authorizeURI
-const useProxy = Platform.select({ web: false, default: true })
-const redirectUri = AuthSession.makeRedirectUri({ useProxy })
+// const authorizationEndpoint = Auth0Config.authorizeURI
+// const useProxy = Platform.select({ web: false, default: true })
+// const redirectUri = AuthSession.makeRedirectUri({ useProxy })
 
-export const AuthContext = React.createContext()
+// export const AuthContext = React.createContext()
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
