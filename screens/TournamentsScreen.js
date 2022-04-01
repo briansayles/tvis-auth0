@@ -1,5 +1,4 @@
 import React, {useState} from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable, SectionList, TouchableOpacity} from 'react-native';
 import { Text, Button, } from 'react-native-elements'
 import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
