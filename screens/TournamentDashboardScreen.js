@@ -25,7 +25,7 @@ export function TournamentDashboardScreen (props) {
   }
   const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION)
   const deleteItem = ({id, title}) => {
-    Alert.alert('Confirm Delete', 'Delete: \n' + title + '\n\n' + id + ' ?', 
+    Alert.alert('Confirm Delete', 'Delete: \n' + title + ' ?', 
     [
       {text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, 
       {text: 'OK', onPress: async ()=> {
@@ -71,18 +71,6 @@ export function TournamentDashboardScreen (props) {
   const editChipItem = (item) => { props.navigation.navigate('Chip Editor', {id: item.id})}
   const editCostItem = (item) => { props.navigation.navigate('Cost Editor', {id: item.id})}
 
-  // const _navigateToTimerButtonPressed = (id) => {
-  //   props.navigation.navigate('Details', {id: id})
-  // }
-
-  // const _navigateToTimerEditorButtonPressed = (timer) => {
-  //   props.navigation.navigate('TimerEdit', {timer})
-  // }
-
-  // const _navigateToGeneralInfoEdit = (tourney) => {
-  //   props.navigation.navigate('GeneralInfoEdit', {tourney: tourney})
-  // }
-  
   useEffect(()=>{
     if (data) {
       setInitialValues(data.Tournament_by_pk)
@@ -123,10 +111,40 @@ export function TournamentDashboardScreen (props) {
     const costs = sortEntryFees(Tournament.Costs)
     const smallestChipReq = smallestChipArray(chips, segments)
     const sectionListData = [
-      { 
+      {
         key: 0,
         sectionIndex: 0,
+        title: Tournament.Timers[0].active ? "TIMER (Running) " : "TIMER (Stopped)",
+        titleStyles: [styles.green],
+        data: [Tournament],
+        initiallyCollapsed: false,
+        includeCountInTitle: false,
+        rightButtons: [],
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {navigateToTimerButtonPressed(item)}}>
+              <Text style={[ styles.bold, styles.green, {flex: 6 ,textAlign: 'left', }]}>GO TO TIMER</Text>
+              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+            </Pressable>
+          )
+        } 
+      },
+      {
+        key: 1,
+        sectionIndex: 1,
+        title: "",
+        titleStyles: [],
+        data: [],
+        initiallyCollapsed: true,
+        includeCountInTitle: false,
+        rightButtons: [],
+        renderFrontRow: () => {return null}
+      },
+      { 
+        key: 2,
+        sectionIndex: 2,
         title: "Tournament Info",
+        titleStyles: [],
         data: [Tournament],
         initiallyCollapsed: true,
         includeCountInTitle: false,
@@ -159,9 +177,10 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
-        key: 1,
-        sectionIndex: 1,
+        key: 3,
+        sectionIndex: 3,
         title: "Entry Fees",
+        titleStyles: [],
         data: costs,
         initiallyCollapsed: true,
         includeCountInTitle: true,
@@ -185,9 +204,10 @@ export function TournamentDashboardScreen (props) {
         }
       },
       { 
-        key: 2,
-        sectionIndex: 2,
+        key: 4,
+        sectionIndex: 4,
         title: "Blinds Levels",
+        titleStyles: [],
         data:   segments,
         initiallyCollapsed: true,
         includeCountInTitle: true,
@@ -212,9 +232,10 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
-        key: 3,
-        sectionIndex: 3,
+        key: 5,
+        sectionIndex: 5,
         title: "Chip Colors & Denominations",
+        titleStyles: [],
         data: chips,
         initiallyCollapsed: true,
         includeCountInTitle: true,
@@ -237,13 +258,38 @@ export function TournamentDashboardScreen (props) {
           )
         }
       },
+      {
+        key: 6,
+        sectionIndex: 6,
+        title: "",
+        titleStyles: [],
+        data: [],
+        initiallyCollapsed: true,
+        includeCountInTitle: false,
+        rightButtons: [],
+        renderFrontRow: () => {return null}
+      },
+      {
+        key: 7,
+        sectionIndex: 7,
+        title: "DELETE",
+        titleStyles: [styles.red],
+        data: [Tournament],
+        initiallyCollapsed: true,
+        includeCountInTitle: false,
+        rightButtons: [],
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {deleteItem(item)}}>
+              <Text style={[ styles.bold, styles.red, {flex: 6 ,textAlign: 'left', }]}>DELETE THIS TOURNAMENT</Text>
+              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+            </Pressable>
+          )
+        } 
+      },
     ]
     return (
       <AppLayout>
-        <View style={{flex: 1, flexDirection: 'row'}}>
-          <Ionicons iconStyle={{flex: 2}} size={responsiveFontSize(6)} onPress={() => deleteItem(Tournament)} name= 'trash' color='red'/>
-          <Ionicons iconStyle={{flex: 2}} size={responsiveFontSize(6)} onPress={() => navigateToTimerButtonPressed(Tournament)} name= 'ios-timer-outline' color='forestgreen'/>
-        </View>
         <SwipeableCollapsibleSectionList
           sections={sectionListData}
         />

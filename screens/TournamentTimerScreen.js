@@ -7,19 +7,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
 import { useKeepAwake} from 'expo-keep-awake';
 import useDimensions from '@rnhooks/dimensions'
+import CircularProgress from 'react-native-circular-progress-indicator'
 
 import { ErrorMessage } from '../components/ErrorMessage'
 import { AppOptions } from '../config'
 import { smallestChipArray, msToTime, numberToSuffixedString, sortChips, sortSegments, responsiveFontSize, responsiveWidth, responsiveHeight} from '../utilities/functions'
 import { AppLayout } from '../components/AppLayout'
-// import { CurvedTransition } from 'react-native-reanimated';
 
 const initialState = {
   newCSI: 0,
   remainingTimeMS: 0,
   lastSI: 0,
-  currentBlindsText: "---/--- Ante: ---",
-  nextBlindsText: "---/--- Ante: ---",
+  currentBlindsText: "---/--- + ---",
+  nextBlindsText: "---/--- + ---",
   currentDurationText: "-- Minutes",
   nextDurationText: "-- Minutes",
   isActive: false,
@@ -75,8 +75,11 @@ const stateCalculator = (payload) => {
     currentBlindsText: (calculatedSegmentIndex <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex].sBlind.toString() + 
       "/" + sortedSegmentsArray[calculatedSegmentIndex].bBlind.toString() +
-      (sortedSegmentsArray[calculatedSegmentIndex].ante > 0 ? " Ante: " + sortedSegmentsArray[calculatedSegmentIndex].ante.toString() : ""))
-      :"----/---- Ante: ----",
+      (sortedSegmentsArray[calculatedSegmentIndex].ante > 0 ? " + " + sortedSegmentsArray[calculatedSegmentIndex].ante.toString() : ""))
+      :"----/---- + ----",
+    currentDurationMS: (calculatedSegmentIndex <= sortedSegmentsArray.length - 1) ? (
+      sortedSegmentsArray[calculatedSegmentIndex].duration * 60000)
+      : 0,
     currentDurationText: (calculatedSegmentIndex <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex].duration.toString() + 
       (sortedSegmentsArray[calculatedSegmentIndex].duration > 1 ? " Minutes" : "Minute"))
@@ -84,7 +87,7 @@ const stateCalculator = (payload) => {
     nextBlindsText: (calculatedSegmentIndex != null && calculatedSegmentIndex + 1 <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex +1 ].sBlind.toString() + 
       "/" + sortedSegmentsArray[calculatedSegmentIndex + 1].bBlind.toString() +
-      (sortedSegmentsArray[calculatedSegmentIndex + 1].ante > 0 ? " Ante: " + sortedSegmentsArray[calculatedSegmentIndex + 1].ante.toString() : ""))
+      (sortedSegmentsArray[calculatedSegmentIndex + 1].ante > 0 ? " + " + sortedSegmentsArray[calculatedSegmentIndex + 1].ante.toString() : ""))
       :"None",
     nextDurationText: (calculatedSegmentIndex != null && calculatedSegmentIndex + 1 <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex + 1].duration.toString() + 
@@ -105,7 +108,7 @@ const reducer =(state, action) => {
   let newState
   switch (action.type) {
     case 'SETUP': {
-      const { isActive, title, smallestChipReq, timer, subtitle, sortedSegmentsArray, sortedChipsArray, newCSI, lastSI, currentBlindsText, currentDurationText, nextBlindsText, nextDurationText, currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, currentSegmentCumulativeDuration, } = stateCalculator(action.payload)
+      const { isActive, title, smallestChipReq, timer, subtitle, sortedSegmentsArray, sortedChipsArray, newCSI, lastSI, currentBlindsText, currentDurationMS, currentDurationText, nextBlindsText, nextDurationText, currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, currentSegmentCumulativeDuration, } = stateCalculator(action.payload)
       const remainingTimeMS = remainingTimeCalculator(isActive, currentSegmentFinishTime, currentSegmentCumulativeDuration, timer.elapsed)
       return {
         ...state,
@@ -118,6 +121,7 @@ const reducer =(state, action) => {
         newCSI,
         lastSI,
         currentBlindsText,
+        currentDurationMS, 
         currentDurationText,
         nextBlindsText,
         nextDurationText,
@@ -131,7 +135,7 @@ const reducer =(state, action) => {
      }
     } 
     case 'END_OF_ROUND': {
-      const { isActive, title, smallestChipReq, timer, subtitle, sortedSegmentsArray, sortedChipsArray, newCSI, lastSI, currentBlindsText, currentDurationText, nextBlindsText, nextDurationText, currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, currentSegmentCumulativeDuration,} = stateCalculator(action.payload)
+      const { isActive, title, smallestChipReq, timer, subtitle, sortedSegmentsArray, sortedChipsArray, newCSI, lastSI, currentBlindsText, currentDurationMS, currentDurationText, nextBlindsText, nextDurationText, currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, currentSegmentCumulativeDuration,} = stateCalculator(action.payload)
       const remainingTimeMS = remainingTimeCalculator(isActive, currentSegmentFinishTime, currentSegmentCumulativeDuration, timer.elapsed)
       return {
         ...state,
@@ -144,6 +148,7 @@ const reducer =(state, action) => {
         newCSI,
         lastSI,
         currentBlindsText,
+        currentDurationMS, 
         currentDurationText,
         nextBlindsText,
         nextDurationText,
@@ -151,7 +156,7 @@ const reducer =(state, action) => {
         currentSegmentNoticeTime,
         noticeStatus,
         currentTime: new Date(),
-        countdownText: msToTime(remainingTimeMS),
+        // countdownText: msToTime(remainingTimeMS),
         sortedSegmentsArray,
         sortedChipsArray,
         }
@@ -169,7 +174,7 @@ const reducer =(state, action) => {
         ...state,
         currentTime: new Date(),
         remainingTimeMS,
-        countdownText: msToTime(remainingTimeMS)
+        // countdownText: msToTime(remainingTimeMS)
       }
     }
     default: {
@@ -189,8 +194,8 @@ export const TournamentTimerScreen = (props) => {
   const { fontScale, width, height, scale } = useDimensions('screen')
   const { data, loading, error, } = useSubscription(TOURNAMENT_SUBSCRIPTION, { variables: { id: props.route.params.id}, onSubscriptionData: ({subscriptionData: {data}}) => {}})
   const [state, dispatch] = useReducer(reducer, initialState)
-  const { newCSI, remainingTimeMS, lastSI, currentBlindsText, nextBlindsText, currentDurationText, nextDurationText, isActive, smallestChipReq, title,
-          currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, countdownText, sortedSegmentsArray, sortedChipsArray, timer} = state
+  const { newCSI, remainingTimeMS, lastSI, currentBlindsText, nextBlindsText, currentDurationMS, currentDurationText, nextDurationText, isActive, smallestChipReq, title,
+          currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, sortedSegmentsArray, sortedChipsArray, timer} = state
 
   useEffect(()=>{
     if (!data) {return}
@@ -208,7 +213,7 @@ export const TournamentTimerScreen = (props) => {
           playSoundEffect("The tournament has reached the end of the final round.  The timer has been stopped.", 1.5, true)
           toggleTimerButtonPressed()
         } else {
-          speech = "The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("Ante: ", "with an ante of ")
+          speech = "The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
           dispatch({type: 'END_OF_ROUND', payload: data.Tournament_by_pk})
           playSoundEffect(speech, 1.5, true)
         }
@@ -223,7 +228,6 @@ export const TournamentTimerScreen = (props) => {
     let lastMinuteTimeOut
     if (!currentSegmentNoticeTime || !isActive) return
     lastMinuteTimeOut = setTimeout(()=> {
-      console.log('1 minute remaining.')
       dispatch({type: 'ONE_MINUTE_REMAINING'})
       if (!playingSound) playSoundEffect("Last minute of this round.", 3, true)
     }, new Date(currentSegmentNoticeTime).valueOf() - new Date().valueOf())
@@ -280,7 +284,6 @@ export const TournamentTimerScreen = (props) => {
         }
       )
     } catch (error) {
-      console.log(error)
       setPlayingSound(false)
     }
   }
@@ -416,7 +419,7 @@ export const TournamentTimerScreen = (props) => {
             style={{ flex: 11, width: Math.min(height*14/9, width)*0.95, alignItems: 'stretch', margin: responsiveFontSize(1), padding: responsiveFontSize(1), borderRadius: responsiveFontSize(3) }}
           >
             <View style={{flex: 8, flexDirection:'row', }}>
-              <View style={{flex: orientation == 'portrait' ? 2 : 1, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'flex-end', paddingLeft: 5}}>
+              <View style={{flex: orientation == 'portrait' ? 0 : 1, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'flex-end', paddingLeft: 5}}>
                 {orientation == 'landscape' && sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
                   if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
                     return (
@@ -429,7 +432,7 @@ export const TournamentTimerScreen = (props) => {
                 })}
               </View>
               <View style={{flex: 4, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center',}}>
-                <View style={{flex: 5, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', }}>
+                <View style={{flex: 2, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', }}>
                   <Text
                     style={[styles.blindsText, noticeStatus && styles.blindsNoticeText]}
                   >
@@ -440,9 +443,21 @@ export const TournamentTimerScreen = (props) => {
                   >
                     {currentDurationText}
                   </Text>
-                  <Text style={[styles.timerText, noticeStatus && styles.timerNoticeText]}>
-                    {countdownText}
-                  </Text>
+                  </View>
+                <View style={{flex: 8, flexDirection: 'column',  justifyContent: 'space-evenly', alignItems: 'center', }}>
+                  <CircularProgress
+                    value={remainingTimeMS}
+                    radius={90}
+                    duration={500}
+                    progressValueColor={noticeStatus ? 'red' : '#ecf0f1'}
+                    activeStrokeColor={noticeStatus ? 'red' : 'limegreen'}
+                    initialValue={currentDurationMS}
+                    maxValue={currentDurationMS}
+                    progressFormatter={(remainingTimeMS) => {
+                      'worklet'
+                      return msToTime(remainingTimeMS)
+                    }}
+                  />
                 </View>
                 <View style={{flex: 4, flexDirection: 'column',  justifyContent: 'space-evenly', alignItems: 'center', }}>
                   <Text
@@ -465,7 +480,7 @@ export const TournamentTimerScreen = (props) => {
                   </View>
                 }
               </View>
-              <View style={{flex: orientation == 'portrait' ? 2 : 1, flexDirection: 'column', paddingRight: 5}}>
+              <View style={{flex: orientation == 'portrait' ? 0 : 1, flexDirection: 'column', paddingRight: 5}}>
                 { orientation == 'landscape' && userIsOwner &&
                   <View style={{flex: 2, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center'}}>
                     {<Button title="" buttonStyle={{backgroundColor: 'transparent'}} icon={<Icon name='restore' size={responsiveFontSize(3)}/>} onPress={()=> resetTimerButtonPressed()}></Button>}

@@ -170,6 +170,12 @@ export const styles = StyleSheet.create({
   bold: {
     fontWeight: 'bold',
   },
+  red: {
+    color: 'red',
+  },
+  green: {
+    color: 'green'
+  },
   bannerAdContainer: {
     backgroundColor: colors.background, 
     flexDirection: 'row', 

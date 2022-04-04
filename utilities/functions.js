@@ -62,6 +62,7 @@ export function dictionaryLookup(value, section, returnType) {
 }
 
 export function	msToTime(duration, includeFractions, alwaysIncludeHours) {
+	'worklet'
   var negative = false
   if(duration<0) {
   	negative = true

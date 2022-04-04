@@ -27,10 +27,10 @@ export function SwipeableCollapsibleSectionList (props) {
         return (item.__typename + index.toString())        
       }}
       stickySectionHeadersEnabled={true}
-      renderSectionHeader={({ section: { title, data, createFunction, sectionIndex, includeCountInTitle}}) => (
+      renderSectionHeader={({ section: { title, data, createFunction, sectionIndex, includeCountInTitle, titleStyles}}) => (
         <View style={[styles.sectionTitle, {}]}>
           <Pressable style={{flexDirection: 'row', alignItems: 'center', flex: 9, justifyContent: 'flex-start'}}
-            onPress={()=>{
+            onPress={()=> {
               setCollapsedState(
                 collapsedState.map((mappedItem, mappedIndex)=>{
                   return (sectionIndex === mappedIndex ? !mappedItem : mappedItem)
@@ -38,8 +38,8 @@ export function SwipeableCollapsibleSectionList (props) {
               )
             }}
           >
-            <Ionicons name={collapsedState[sectionIndex] ? 'ios-chevron-forward-circle' : 'ios-chevron-down-circle'} size={responsiveFontSize(2.5)}/>
-            <Text style={[styles.sectionTitleText, {}]}>{title} {includeCountInTitle ? '(' + data.length + ')':null}  </Text>
+            {title != "" && <Ionicons name={collapsedState[sectionIndex] ? 'ios-chevron-forward-circle' : 'ios-chevron-down-circle'} size={responsiveFontSize(2.5)}/>}
+            <Text style={[titleStyles, styles.sectionTitleText, {}]}>{title} {includeCountInTitle ? '(' + data.length + ')':null}  </Text>
           </Pressable>
           <View style={{flex: 1}}>            
             {createFunction && <Ionicons onPress={()=>functionWrapper(createFunction())} name='ios-add-circle' size={responsiveFontSize(2.5)} color="green"/>}
