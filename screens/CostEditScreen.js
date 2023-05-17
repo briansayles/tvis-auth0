@@ -43,43 +43,45 @@ export const CostEditScreen = (props) => {
   if (data && formValues !== null && initialValues !== null) {
     return (
       <FormView>
-        <MyInput
-          title="Price"
-          value={(formValues.price || 0).toString()}
-          placeholder="Enter price here..."
-          onChangeText={(text) => handleInputChange('price', !text ? 0 : text)}
-          keyboardType="numeric"
-        />
-        <MyInput
-          title="Chips"
-          value={(formValues.chipStack || 0).toString()}
-          placeholder="Enter chip value..."
-          onChangeText={(text) => handleInputChange('chipStack', parseInt(!text ? 0 : text))}
-          keyboardType="numeric"
-        />
-        <Picker
-          prompt="Choose entry fee type"
-          title="Entry Fee Type"
-          initialValue={initialValues.costType || "Pick entry fee type..."}
-          selectedValue={formValues.costType}
-          onValueChange={(itemValue, itemIndex) => handleInputChange('costType', itemValue)}
-        >
-          {dictionaryLookup("EntryFeeOptions").map((item, i) => (
-            <Picker.Item key={i} label={item.longName} value={item.shortName}/>
-          ))
-          }
-        </Picker>
-        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'space-between'}}>
+        <View style={{flex: 8, flexDirection: 'column', justifyContent: 'flex-start'}}>
+          <MyInput
+            title="Price"
+            value={formValues.price.toString().replace(/^0+/, '')}
+            placeholder="Enter price here..."
+            onChangeText={(text) => handleInputChange('price', (!text ? 0 : text))}
+            keyboardType="numeric"
+          />
+          <MyInput
+            title="Chips"
+            value={parseInt(formValues.chipStack).toString().replace(/^0+/, '')}
+            placeholder="Enter chip value..."
+            onChangeText={(text) => handleInputChange('chipStack', (!text ? 0 : text))}
+            keyboardType="numeric"
+          />
+          <Picker
+            prompt="Choose entry fee type"
+            title="Entry Fee Type"
+            initialValue={initialValues.costType || "Pick entry fee type..."}
+            selectedValue={formValues.costType}
+            onValueChange={(itemValue, itemIndex) => handleInputChange('costType', itemValue)}
+          >
+            {dictionaryLookup("EntryFeeOptions").map((item, i) => (
+              <Picker.Item key={i} label={item.longName} value={item.shortName}/>
+            ))
+            }
+          </Picker>
+        </View>
+        <View style={{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           <DeleteButton
             mutation={deleteCost}
-            navigation={props.navigation}
+            navigation={()=> props.navigation.goBack()}
             confirmationString={'Are you sure you want to delete this ' + data.costs_by_pk.costType.toString() + '?'}
             confirmationTitleString='Confirm Deletion'
           />
           <SubmitButton 
             mutation={updateCost}
             disabled={!isDirty()}
-            navigation={props.navigation}
+            navigation={()=> props.navigation.goBack()}
           />
         </View>
       </FormView>        

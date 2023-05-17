@@ -43,48 +43,50 @@ export const SegmentEditScreen = (props) => {
   if (data && formValues !== null && initialValues !== null) {
     return (
       <FormView>
-        <MyInput
-          title="Small Blind"
-          value={(formValues?.sBlind || 0).toString()}
-          placeholder="Enter small blind here..."
-          onChangeText={(text) => handleInputChange('sBlind', (!text ? 0 : text))}
-          keyboardType="numeric"
-        />
-        <MyInput
-          title="Big Blind"
-          value={(formValues?.bBlind || 0).toString()}
-          placeholder="Enter big blind here..."
-          onChangeText={(text) => handleInputChange('bBlind', (!text ? 0 : text))}
-          keyboardType="numeric"
-          onFocus={(currentText = '') => {
-            setFormValues({...formValues, bBlind: formValues.bBlind || (formValues.sBlind) * 2})
-          }}
-        />
-        <MyInput
-          title="Ante"
-          value={(formValues?.ante || 0).toString()}
-          placeholder="Enter ante here..."
-          onChangeText={(text) => handleInputChange('ante', (!text ? 0 : text))}
-          keyboardType="numeric"
-        />
-        <MyInput
-          title="Duration"
-          value={(formValues?.duration || 0).toString()}
-          placeholder="Enter duration here..."
-          onChangeText={(text) => handleInputChange('duration', (!text ? 0 : text))}
-          keyboardType="numeric"
-        />
-        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'space-between'}}>
+        <View style={{flex: 8, flexDirection: 'column', justifyContent: 'flex-start'}}>
+          <MyInput
+            title="Small Blind"
+            value={(formValues.sBlind.toString()).replace(/^0+/, '')}
+            placeholder="Enter small blind here..."
+            onChangeText={(text) => handleInputChange('sBlind', (!text ? 0 : text))}
+            keyboardType="numeric"
+          />
+          <MyInput
+            title="Big Blind"
+            value={(formValues.bBlind).toString().replace(/^0+/, '')}
+            placeholder="Enter big blind here..."
+            onChangeText={(text) => handleInputChange('bBlind', (!text ? 0 : text))}
+            keyboardType="numeric"
+            onFocus={(currentText = '') => {
+              setFormValues({...formValues, bBlind: formValues.bBlind || (formValues.sBlind) * 2})
+            }}
+          />
+          <MyInput
+            title="Ante"
+            value={(formValues.ante).toString().replace(/^0+/, '')}
+            placeholder="Enter ante here..."
+            onChangeText={(text) => handleInputChange('ante', (!text ? 0 : text))}
+            keyboardType="numeric"
+          />
+          <MyInput
+            title="Duration (Minutes)"
+            value={(formValues.duration).toString().replace(/^0+/, '')}
+            placeholder="Enter duration here..."
+            onChangeText={(text) => handleInputChange('duration', (!text ? 0 : text))}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           <DeleteButton
             mutation={deleteSegment}
-            navigation={props.navigation}
+            navigation={()=> props.navigation.goBack()}
             confirmationString={'Are you sure you want to delete this segment?'}
             confirmationTitleString='Confirm Deletion'
           />
           <SubmitButton 
             mutation={updateSegment}
             disabled={!isDirty()}
-            navigation={props.navigation}
+            navigation={()=> props.navigation.goBack()}
           />
         </View>
       </FormView>

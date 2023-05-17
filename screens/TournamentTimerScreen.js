@@ -195,7 +195,7 @@ export const TournamentTimerScreen = (props) => {
   const { data, loading, error, } = useSubscription(TOURNAMENT_SUBSCRIPTION, { variables: { id: props.route.params.id}, onData: ({data: {data}}) => {}})
   const [state, dispatch] = useReducer(reducer, initialState)
   const { newCSI, remainingTimeMS, lastSI, currentBlindsText, nextBlindsText, currentDurationMS, currentDurationText, nextDurationText, isActive, smallestChipReq, title,
-          currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, sortedSegmentsArray, sortedChipsArray, timer} = state
+          currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, sortedSegmentsArray, sortedChipsArray, timer, subtitle} = state
 
   useEffect(()=>{
     if (!data) {return}
@@ -413,21 +413,22 @@ export const TournamentTimerScreen = (props) => {
     return (
       <AppLayout>
         <View style={[{flex: 1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch'}]}>
-          <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
-            <Text style={[{flex: 1}, styles.titleText, { textAlign: 'center'}]}>{title}</Text>
-          </View>
           <LinearGradient
-            colors={[ '#257a2f', '#194a2f', '#226a2f' ]}
-            style={{ flex: 11, width: Math.min(height*14/9, width)*0.95, alignItems: 'stretch', margin: responsiveFontSize(1), padding: responsiveFontSize(1), borderRadius: responsiveFontSize(3) }}
-          >
+              colors={[ '#257a2f', '#194a2f', '#226a2f' ]}
+              style={{ flex: 11, width: Math.min(height*14/9, width)*0.95, alignItems: 'stretch', margin: responsiveFontSize(1), padding: responsiveFontSize(1), borderRadius: responsiveFontSize(3) }}
+            >
+            <View style={{flex: orientation=='portrait' ? 1.25 : 0.8, flexDirection: orientation=='portrait' ? 'column' : 'row', justifyContent: 'center', alignItems: 'center', }}>
+              <Text style={[styles.titleText, { textAlign:  orientation=='portrait' ? 'center' : 'left'}]}>{title}</Text>
+              <Text style={[styles.titleText, { textAlign:  orientation=='portrait' ? 'center' : 'left'}]}> {subtitle} </Text>
+            </View>
             <View style={{flex: 8, flexDirection:'row', }}>
-              {orientation == 'landscape' && <View style={{flex: 1, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'flex-end', paddingLeft: 5}}>
+              {orientation == 'landscape' && <View style={{flex: 1, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'flex-start', paddingLeft: 5}}>
                 {sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
                   if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
                     return (
-                      <Animated.View key={i} style={{flexDirection: 'row', alignItems: 'center', opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
-                        <Text style={[styles.chipText]} >{numberToSuffixedString(u.denom)}  </Text>
-                        <Icon name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(5)}/>
+                      <Animated.View key={i} style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
+                        <Icon style={[, {flex: 2}]} name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(5)}/>
+                        <Text style={[styles.chipText, {flex: 3, textAlign: 'right'}]} >{numberToSuffixedString(u.denom)}  </Text>
                       </Animated.View>
                     )
                   }
@@ -541,7 +542,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: Math.min(responsiveHeight(4.5), responsiveWidth(4.5)),
-    color: '#000',
+    color: '#222',
+    fontWeight: 'bold'
   },
   chipText: {
     fontSize: responsiveFontSize(2.5),

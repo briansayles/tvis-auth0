@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Platform, Alert, Button, View, Text} from 'react-native'
+import { Alert,} from 'react-native'
 import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
 import { NavigationContainer } from '@react-navigation/native'
@@ -8,22 +8,20 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import * as AuthSession from 'expo-auth-session'
 import jwt_decode from 'jwt-decode'
 import { ApolloProvider } from '@apollo/client'
-import { Auth0Config} from './config'
 import { Ionicons } from '@expo/vector-icons'
 import { makeApolloClient } from './apolloClient'
 import { HomeScreen } from './screens/HomeScreen'
 import { SettingsScreen} from './screens/SettingsScreen'
 import { TournamentsScreen } from './screens/TournamentsScreen'
-import { SignInScreen } from './screens/SignInScreen'
 import { TournamentDashboardScreen } from './screens/TournamentDashboardScreen'
+import { TournamentInfoEditScreen } from './screens/TournamentInfoEditScreen'
 import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
 import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
 import { CostEditScreen } from './screens/CostEditScreen'
-import { AuthContext, redirectUri, authorizationEndpoint } from './Contexts'
+import { AuthContext, } from './Contexts'
 import * as WebBrowser from 'expo-web-browser';
-import { useAuthRequest, useAutoDiscovery, ResponseType, TokenResponse } from 'expo-auth-session';
-import { styles, responsiveHeight, responsiveWidth } from './styles'
+import { ResponseType, } from 'expo-auth-session';
 import * as Linking from 'expo-linking'
 import {authReducer, authData} from './authReducer'
 
@@ -81,9 +79,10 @@ export default function App({ navigation }) {
 
     bootstrapAsync();
   }, []);
-
+  const redirectUri = Linking.createURL()
   const authContext = React.useMemo(
     () => ({
+      redirect: redirectUri.toString(),
       signIn: async data => {
         const request = await AuthSession.loadAsync(
           {
@@ -93,9 +92,9 @@ export default function App({ navigation }) {
             },
             clientId: "0oa9e8otx3qmfThsn5d7",
             scopes: ["openid", "profile"],
-            redirectUri: Linking.createURL(),
+            redirectUri,
           }, "https://dev-08567763.okta.com/oauth2/default/"
-        )
+          )
         const result = await request.promptAsync({})
         if (result.error) {
           Alert.alert(
@@ -127,6 +126,13 @@ export default function App({ navigation }) {
         await SecureStore.deleteItemAsync('userToken')
         await SecureStore.deleteItemAsync('expiry')
         dispatch({ type: 'SIGN_OUT' })
+      },
+      userName: async () => {
+        const jwtToken = await SecureStore.getItemAsync('userToken')
+        const decoded = jwt_decode(jwtToken)
+        const { sub, exp } = decoded
+        console.log(sub)
+        return sub
       },
     }),
     []
@@ -180,6 +186,7 @@ function TournamentsStack() {
     <Stack.Navigator>
       <Stack.Screen name="Tournaments" component={TournamentsScreen} />
       <Stack.Screen name="Tournament Dashboard" component={TournamentDashboardScreen}/>
+      <Stack.Screen name="Tournament Info Editor" component={TournamentInfoEditScreen}/>
       <Stack.Screen name="Timer" component={TournamentTimerScreen}/>
       <Stack.Screen name="Segment Editor" component={SegmentEditScreen}/>
       <Stack.Screen name="Chip Editor" component={ChipEditScreen}/>

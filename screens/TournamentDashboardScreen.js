@@ -70,6 +70,7 @@ export function TournamentDashboardScreen (props) {
   const editSegmentItem = (item) => { props.navigation.navigate('Segment Editor', {id: item.id})}
   const editChipItem = (item) => { props.navigation.navigate('Chip Editor', {id: item.id})}
   const editCostItem = (item) => { props.navigation.navigate('Cost Editor', {id: item.id})}
+  const editTournamentInfoItem = (item) => {props.navigation.navigate('Tournament Info Editor', {id: props.route.params.id})}
 
   useEffect(()=>{
     if (data) {
@@ -124,55 +125,40 @@ export function TournamentDashboardScreen (props) {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {navigateToTimerButtonPressed(item)}}>
               <Text style={[ styles.bold, styles.green, {flex: 6 ,textAlign: 'left', }]}>GO TO TIMER</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
         } 
       },
-      {
-        key: 1,
-        sectionIndex: 1,
-        title: "",
-        titleStyles: [],
-        data: [],
-        initiallyCollapsed: true,
-        includeCountInTitle: false,
-        rightButtons: [],
-        renderFrontRow: () => {return null}
-      },
+      // {
+      //   key: 1,
+      //   sectionIndex: 1,
+      //   title: "",
+      //   titleStyles: [],
+      //   data: [],
+      //   initiallyCollapsed: true,
+      //   includeCountInTitle: false,
+      //   rightButtons: [],
+      //   renderFrontRow: () => {return null}
+      // },
       { 
         key: 2,
         sectionIndex: 2,
         title: "Tournament Info",
         titleStyles: [],
         data: [Tournament],
-        initiallyCollapsed: true,
+        initiallyCollapsed: false,
         includeCountInTitle: false,
         createFunction: null,
         onPressFunction: ()=>{},
         rightButtons: [],
         renderFrontRow: (item, index, collapsed) => {
           return (
-            <FormView contentContainerStyle={[collapsed ? styles.collapsed : null, {} ]} >
-              <MyInput
-                title="Title"
-                value={(formValues?.title ? formValues.title : "")}
-                placeholder="Enter tournament title here..."
-                onChangeText={(text) => handleInputChange('title', text)}
-                keyboardType="default"
-              />
-              <MyInput
-                title="Subtitle"
-                value={(formValues?.subtitle ? formValues.subtitle : "")}
-                placeholder="Enter tournament subtitle here..."
-                onChangeText={(text) => handleInputChange('subtitle', text)}
-                keyboardType="default"
-              />
-              <SubmitButton 
-                mutation={updateTournament}
-                disabled={!isDirty()}
-              />
-            </FormView>            
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editTournamentInfoItem(item)}}>
+              <Text style={[styles.bold, {}]}>{item.title}</Text>
+              <Text style={[, {}]}>{item.subtitle}</Text>
+              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
+            </Pressable>
           )
         }
       },
@@ -182,23 +168,23 @@ export function TournamentDashboardScreen (props) {
         title: "Entry Fees",
         titleStyles: [],
         data: costs,
-        initiallyCollapsed: true,
+        initiallyCollapsed: false,
         includeCountInTitle: true,
         createFunction: createCostItem,
         onPressFunction: editCostItem,
         rightButtons: [
-          {
-            onPress: deleteCostItem,
-            iconName: 'trash',
-            backgroundColor: 'red',
-          },
+          // {
+          //   onPress: deleteCostItem,
+          //   iconName: 'trash',
+          //   backgroundColor: 'red',
+          // },
         ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editCostItem(item)}}>
-              <Text style={[ , {flex: 4, }]}>{item.price.toLocaleString(undefined, {style: 'currency', currency: 'usd'})} {dictionaryLookup(item.costType, "EntryFeeOptions", "long")}</Text>
-              <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.chipStack.toLocaleString()} chips</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+              <Text style={[ , {flex: 4, }]}>{(item.price || 0).toLocaleString(undefined, {style: 'currency', currency: 'usd'})} {dictionaryLookup(item.costType, "EntryFeeOptions", "long")}</Text>
+              <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{(item.chipStack || 0).toLocaleString()} chips</Text>
+              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
              </Pressable>
           )
         }
@@ -209,16 +195,16 @@ export function TournamentDashboardScreen (props) {
         title: "Blinds Levels",
         titleStyles: [],
         data:   segments,
-        initiallyCollapsed: true,
+        initiallyCollapsed: false,
         includeCountInTitle: true,
         createFunction: createSegmentItem,
         onPressFunction: editSegmentItem,
         rightButtons: [
-          {
-            onPress: deleteSegmentItem,
-            iconName: 'trash',
-            backgroundColor: 'red',
-          },
+          // {
+          //   onPress: deleteSegmentItem,
+          //   iconName: 'trash',
+          //   backgroundColor: 'red',
+          // },
         ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
@@ -226,7 +212,7 @@ export function TournamentDashboardScreen (props) {
               <Text style={[ styles.bold, {flex: 0.5, textAlign: 'left'}]}>{index + 1}{collapsed ? 'C': ''}:</Text>
               <Text style={[ styles.bold, {flex: 4, }]}>{item.sBlind.toLocaleString()} / {item.bBlind.toLocaleString()} {item.ante > 0 ? ' + ' + item.ante.toLocaleString() + ' ante': ''}</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.duration.toLocaleString()} Minutes</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
         }
@@ -237,56 +223,56 @@ export function TournamentDashboardScreen (props) {
         title: "Chip Colors & Denominations",
         titleStyles: [],
         data: chips,
-        initiallyCollapsed: true,
+        initiallyCollapsed: false,
         includeCountInTitle: true,
         createFunction: createChipItem,
         onPressFunction: editChipItem,
         rightButtons: [
-          {
-            onPress: deleteChipItem,
-            iconName: 'trash',
-            backgroundColor: 'red',
-          },
+          // {
+          //   onPress: deleteChipItem,
+          //   iconName: 'trash',
+          //   backgroundColor: 'red',
+          // },
         ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editChipItem(item)}}>
               <Text style={[ styles.bold, {flex: 2, color: item.color}]}>{item.denom}</Text>
-              <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>{item.qtyAvailable ? item.qtyAvailable.toLocaleString() : '0'} Available</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+              {/* <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>{item.qtyAvailable ? item.qtyAvailable.toLocaleString() : '0'} Available</Text> */}
+              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
         }
       },
-      {
-        key: 6,
-        sectionIndex: 6,
-        title: "",
-        titleStyles: [],
-        data: [],
-        initiallyCollapsed: true,
-        includeCountInTitle: false,
-        rightButtons: [],
-        renderFrontRow: () => {return null}
-      },
-      {
-        key: 7,
-        sectionIndex: 7,
-        title: "DELETE",
-        titleStyles: [styles.red],
-        data: [Tournament],
-        initiallyCollapsed: true,
-        includeCountInTitle: false,
-        rightButtons: [],
-        renderFrontRow: (item, index, collapsed) => {
-          return(
-            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {deleteItem(item)}}>
-              <Text style={[ styles.bold, styles.red, {flex: 6 ,textAlign: 'left', }]}>DELETE THIS TOURNAMENT</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
-            </Pressable>
-          )
-        } 
-      },
+      // {
+      //   key: 6,
+      //   sectionIndex: 6,
+      //   title: "",
+      //   titleStyles: [],
+      //   data: [],
+      //   initiallyCollapsed: true,
+      //   includeCountInTitle: false,
+      //   rightButtons: [],
+      //   renderFrontRow: () => {return null}
+      // },
+      // {
+      //   key: 7,
+      //   sectionIndex: 7,
+      //   title: "DELETE",
+      //   titleStyles: [styles.red],
+      //   data: [Tournament],
+      //   initiallyCollapsed: true,
+      //   includeCountInTitle: false,
+      //   rightButtons: [],
+      //   renderFrontRow: (item, index, collapsed) => {
+      //     return(
+      //       <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {deleteItem(item)}}>
+      //         <Text style={[ styles.bold, styles.red, {flex: 6 ,textAlign: 'left', }]}>DELETE THIS TOURNAMENT</Text>
+      //         {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
+      //       </Pressable>
+      //     )
+      //   } 
+      // },
     ]
     return (
       <AppLayout>

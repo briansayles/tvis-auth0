@@ -50,11 +50,11 @@ export const styles = StyleSheet.create({
   swipeListViewContentContainer: {
     
   },
-  title: {
-    fontSize: 20,
-    textAlign: 'center',
-    marginTop: 40,
-  },
+  // title: {
+  //   fontSize: 20,
+  //   textAlign: 'center',
+  //   marginTop: 40,
+  // },
   sectionTitle: {
     flex: 1,
     flexDirection: 'row',

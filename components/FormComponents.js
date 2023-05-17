@@ -90,7 +90,7 @@ export const ListHeader = (props) => {
 export const FormView = (props) => {
   return(
     <KeyboardAwareScrollView
-      contentContainerStyle={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', padding: responsiveFontSize(4), marginTop: responsiveFontSize(4)}}
+      contentContainerStyle={{flex: 1, flexDirection: 'column', justifyContent: 'space-between', padding: responsiveFontSize(4), marginTop: responsiveFontSize(4)}}
       {...props}
     >
       {props.children}
@@ -120,7 +120,7 @@ export const DeleteButton = (props) => {
           {text: 'OK', onPress: ()=>{
             props.mutation().then(()=> {
               setBusy(false)
-              if (props.navigation) props.navigation.goBack()  
+              if (props.navigation) {props.navigation()}  
             })
           }, 
           style: 'default'}])
@@ -159,7 +159,7 @@ export const SubmitButton = (props) => {
   	setBusy(true)
   	props.mutation().then(() => {
   		setBusy(false)
-      props.navigation?.goBack()
+      if (props.navigation) {props.navigation()}  
   	})
   }  
   return (

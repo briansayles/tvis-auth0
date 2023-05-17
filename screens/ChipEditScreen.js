@@ -1,13 +1,10 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, View, Alert } from 'react-native'
 
 import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
-import { Ionicons } from '@expo/vector-icons'
-import { responsiveFontSize } from '../utilities/functions'
-
 
 export const ChipEditScreen = (props) => {
   const [initialValues, setInitialValues] = useState(null)
@@ -46,43 +43,45 @@ export const ChipEditScreen = (props) => {
   if (data && formValues !== null && initialValues !== null) {
     return (
       <FormView>
-        <MyInput
-          title="Denomination"
-          value={(formValues.denom || 0).toString()}
-          placeholder="Enter denomination here..."
-          onChangeText={(text) => handleInputChange('denom', (!text ? 0 : text))}
-          keyboardType="numeric"
-        />
-        <MyInput
-          title="Quantity Availalbe"
-          value={(formValues.qtyAvailable || 0).toString()}
-          placeholder="Enter number of these chips on hand..."
-          onChangeText={(text) => handleInputChange('qtyAvailable', parseInt(!text ? 0 : text))}
-          keyboardType="numeric"
-        />
-        <Picker
-          prompt="Choose a color"
-          title="Chip color"
-          initialValue={initialValues.color || "Pick color..."}
-          selectedValue={formValues.color || '#fff'}
-          onValueChange={(itemValue, itemIndex) => handleInputChange('color', itemValue)}
-        >
-          {dictionaryLookup("ChipColorOptions").map((item, i) => (
-            <Picker.Item key={i} label={item.longName} value={item.shortName}/>
-          ))
-          }
-        </Picker>
-        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'space-between'}}>
+        <View style={{flex: 8, flexDirection: 'column', justifyContent: 'flex-start'}}>
+          <MyInput
+            title="Denomination"
+            value={(formValues.denom).toString().replace(/^0+/, '')}
+            placeholder="Enter denomination here..."
+            onChangeText={(text) => handleInputChange('denom', (!text ? 0 : text))}
+            keyboardType="numeric"
+          />
+          {/* <MyInput
+            title="Quantity Availalbe"
+            value={(formValues.qtyAvailable || 0).toString()}
+            placeholder="Enter number of these chips on hand..."
+            onChangeText={(text) => handleInputChange('qtyAvailable', parseInt(text) || 0)}
+            keyboardType="numeric"
+          /> */}
+          <Picker
+            prompt="Choose a color"
+            title="Chip color"
+            initialValue={initialValues.color || "Pick color..."}
+            selectedValue={formValues.color || '#fff'}
+            onValueChange={(itemValue, itemIndex) => handleInputChange('color', itemValue)}
+          >
+            {dictionaryLookup("ChipColorOptions").map((item, i) => (
+              <Picker.Item key={i} label={item.longName} value={item.shortName}/>
+            ))
+            }
+          </Picker>
+        </View>
+        <View style={{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           <DeleteButton
             mutation={deleteChip}
-            navigation={props.navigation}
+            navigation={()=> props.navigation.goBack()}
             confirmationString={'Are you sure you want to delete this T-' + data.chips_by_pk.denom.toString() + ' chip?'}
             confirmationTitleString='Confirm Deletion'
           />
           <SubmitButton 
             mutation={updateChip}
             disabled={!isDirty()}
-            navigation={props.navigation}
+            navigation={()=> props.navigation.goBack()}
           />
         </View>
       </FormView>

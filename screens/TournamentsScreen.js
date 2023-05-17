@@ -45,22 +45,23 @@ export function TournamentsScreen(props) {
         onPressFunction: editItem,
         deleteFunction: deleteItem,
         rightButtons: [
-          {
-            onPress: deleteItem,
-            iconName: 'trash',
-            backgroundColor: 'red',
-          },
-          {
-            onPress: navigateToTimerButtonPressed,
-            iconName: 'ios-timer-outline',
-            backgroundColor: 'forestgreen',
-          },
+        //   {
+        //     onPress: deleteItem,
+        //     iconName: 'trash',
+        //     backgroundColor: 'red',
+        //   },
+        //   {
+        //     onPress: navigateToTimerButtonPressed,
+        //     iconName: 'ios-timer-outline',
+        //     backgroundColor: 'forestgreen',
+        //   },
         ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editItem(item)}}>
-              <Text style={[item.Timers[0]?.is_active? styles.active : null, {flex: 6}]}>{item.title}</Text>
-              <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/>
+              <Text style={[item.Timers[0]?.is_active? styles.active : null, {}]}>{item.title}</Text>
+              <Text style={[item.Timers[0]?.is_active? styles.active : null, {}]}>{item.subtitle}</Text>
+              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
         }
