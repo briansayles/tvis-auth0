@@ -1,8 +1,8 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
-import { ActivityIndicator, } from 'react-native'
+import { ActivityIndicator, View} from 'react-native'
 
-import { FormView, Picker, SubmitButton, MyInput, } from '../components/FormComponents'
+import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
 
@@ -10,20 +10,24 @@ export const SegmentEditScreen = (props) => {
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_SEGMENT_QUERY, {variables: {id: props.route.params.id}})
-  
-  useEffect(()=>{
-    if (data) {
-      setInitialValues(data.Segment_by_pk)
-      setFormValues(data.Segment_by_pk)
+  const [ deleteSegment, {loading: deletingSegment, data: deleteSegmentData, error: deleteSegmentError} ] = useMutation(DELETE_SEGMENT_MUTATION, {
+    variables: {
+      id: props.route.params.id
     }
-  },[data])
-  
+  })
   const [updateSegment] = useMutation(UPDATE_SEGMENT_MUTATION, {
     variables: {
       ...formValues,
     },
   })
 
+  useEffect(()=>{
+    if (data) {
+      setInitialValues(data.segments_by_pk)
+      setFormValues(data.segments_by_pk)
+    }
+  },[data])
+  
   const handleInputChange = (fieldName, value) => {
     setFormValues({...formValues, [fieldName]:value})
   }
@@ -43,42 +47,46 @@ export const SegmentEditScreen = (props) => {
           title="Small Blind"
           value={(formValues?.sBlind || 0).toString()}
           placeholder="Enter small blind here..."
-          onChangeText={(text) => handleInputChange('sBlind', parseInt(!text ? 0 : text))}
+          onChangeText={(text) => handleInputChange('sBlind', (!text ? 0 : text))}
           keyboardType="numeric"
         />
         <MyInput
           title="Big Blind"
           value={(formValues?.bBlind || 0).toString()}
           placeholder="Enter big blind here..."
-          onChangeText={(text) => handleInputChange('bBlind', parseInt(!text ? 0 : text))}
+          onChangeText={(text) => handleInputChange('bBlind', (!text ? 0 : text))}
           keyboardType="numeric"
           onFocus={(currentText = '') => {
-            setFormValues({...formValues, bBlind: formValues.bBlind || parseInt(formValues.sBlind) * 2})
+            setFormValues({...formValues, bBlind: formValues.bBlind || (formValues.sBlind) * 2})
           }}
         />
         <MyInput
           title="Ante"
           value={(formValues?.ante || 0).toString()}
           placeholder="Enter ante here..."
-          onChangeText={(text) => handleInputChange('ante', parseInt(!text ? 0 : text))}
+          onChangeText={(text) => handleInputChange('ante', (!text ? 0 : text))}
           keyboardType="numeric"
         />
-        <Picker
-          prompt="Choose your duration"
-          title="Duration (in minutes)"
-          initialValue={initialValues?.duration || "Pick duration..."}
-          selectedValue={formValues?.duration}
-          onValueChange={(itemValue, itemIndex) => handleInputChange('duration', parseInt(!itemValue ? 0 : itemValue))}
-        >
-          {dictionaryLookup("DurationOptions").map((item, i) => (
-            <Picker.Item key={i} label={item.longName} value={parseInt(item.shortName)}/>
-          ))
-          }
-        </Picker>
-        <SubmitButton 
-          mutation={updateSegment}
-          disabled={!isDirty()}
+        <MyInput
+          title="Duration"
+          value={(formValues?.duration || 0).toString()}
+          placeholder="Enter duration here..."
+          onChangeText={(text) => handleInputChange('duration', (!text ? 0 : text))}
+          keyboardType="numeric"
         />
+        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'space-between'}}>
+          <DeleteButton
+            mutation={deleteSegment}
+            navigation={props.navigation}
+            confirmationString={'Are you sure you want to delete this segment?'}
+            confirmationTitleString='Confirm Deletion'
+          />
+          <SubmitButton 
+            mutation={updateSegment}
+            disabled={!isDirty()}
+            navigation={props.navigation}
+          />
+        </View>
       </FormView>
     )
   }
@@ -86,8 +94,8 @@ export const SegmentEditScreen = (props) => {
 }
 
 const UPDATE_SEGMENT_MUTATION = gql`
-  mutation updateSegment($bBlind: Int = 0, $ante: Int = 0, $duration: Int = 0, $sBlind: Int = 0, $id: uuid!) {
-    update_Segment_by_pk(pk_columns: {id: $id}, _set: {sBlind: $sBlind, bBlind: $bBlind, ante: $ante, duration: $duration}) {
+  mutation updateSegment($bBlind: numeric = 0, $ante: numeric = 0, $duration: numeric = 0, $sBlind: numeric = 0, $id: uuid!) {
+    update_segments_by_pk(pk_columns: {id: $id}, _set: {sBlind: $sBlind, bBlind: $bBlind, ante: $ante, duration: $duration}) {
       id
       sBlind
       bBlind
@@ -97,9 +105,17 @@ const UPDATE_SEGMENT_MUTATION = gql`
   }
 `
 
+const DELETE_SEGMENT_MUTATION = gql`
+  mutation DeleteSegment($id: uuid!) {
+    delete_segments_by_pk(id: $id) {
+      id
+    }
+  }
+`
+
 const GET_SEGMENT_QUERY = gql`
   query getSegment($id: uuid!) {
-    Segment_by_pk(id: $id) {
+    segments_by_pk(id: $id) {
       id
       sBlind
       bBlind

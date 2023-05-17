@@ -1,8 +1,8 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
-import { ActivityIndicator, } from 'react-native'
+import { ActivityIndicator, View} from 'react-native'
 
-import { FormView, Picker, SubmitButton, MyInput, } from '../components/FormComponents'
+import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
 
@@ -10,19 +10,23 @@ export const CostEditScreen = (props) => {
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_COST_QUERY, {variables: {id: props.route.params.id}})
-  
-  useEffect(()=>{
-    if (data) {
-      setInitialValues(data.Cost_by_pk)
-      setFormValues(data.Cost_by_pk)
+  const [ deleteCost, {loading: deletingCost, data: deleteCostData, error: deleteCostError} ] = useMutation(DELETE_COST_MUTATION, {
+    variables: {
+      id: props.route.params.id
     }
-  },[data])
-
+  })
   const [updateCost] = useMutation(UPDATE_COST_MUTATION, {
     variables: {
       ...formValues,
     },
   })
+
+  useEffect(()=>{
+    if (data) {
+      setInitialValues(data.costs_by_pk)
+      setFormValues(data.costs_by_pk)
+    }
+  },[data])
 
   const handleInputChange = (fieldName, value) => {
     setFormValues({...formValues, [fieldName]:value})
@@ -65,10 +69,19 @@ export const CostEditScreen = (props) => {
           ))
           }
         </Picker>
-        <SubmitButton 
-          mutation={updateCost}
-          disabled={!isDirty()}
-        />
+        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'space-between'}}>
+          <DeleteButton
+            mutation={deleteCost}
+            navigation={props.navigation}
+            confirmationString={'Are you sure you want to delete this ' + data.costs_by_pk.costType.toString() + '?'}
+            confirmationTitleString='Confirm Deletion'
+          />
+          <SubmitButton 
+            mutation={updateCost}
+            disabled={!isDirty()}
+            navigation={props.navigation}
+          />
+        </View>
       </FormView>        
     )
   }
@@ -76,8 +89,8 @@ export const CostEditScreen = (props) => {
 }
 
 const UPDATE_COST_MUTATION = gql`
-  mutation updateCost($price: Float = 0, $chipStack: Int = 0, $costType: Cost_Type_enum = Buyin, $id: uuid!) {
-    update_Cost_by_pk(pk_columns: {id: $id}, _set: {price: $price, chipStack: $chipStack, costType: $costType}) {
+  mutation updateCost($price: numeric = 0, $chipStack: Int = 0, $costType: cost_types_enum = Buyin, $id: uuid!) {
+    update_costs_by_pk(pk_columns: {id: $id}, _set: {price: $price, chipStack: $chipStack, costType: $costType}) {
       id
       price
       chipStack
@@ -86,9 +99,17 @@ const UPDATE_COST_MUTATION = gql`
   }
 `
 
+const DELETE_COST_MUTATION = gql`
+  mutation DeleteCost($id: uuid!) {
+    delete_costs_by_pk(id: $id) {
+      id
+    }
+  }
+`
+
 const GET_COST_QUERY = gql`
   query getCost($id: uuid!) {
-    Cost_by_pk(id: $id) {
+    costs_by_pk(id: $id) {
       id
       price
       chipStack

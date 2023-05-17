@@ -20,6 +20,10 @@ export const colors = {
 }
 
 export const styles = StyleSheet.create({
+  appleButton: {
+    height: responsiveHeight(5),
+    width: responsiveWidth(40),
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -101,7 +105,15 @@ export const styles = StyleSheet.create({
     width: responsiveWidth(90),
     // backgroundColor: 'pink'
   },
-  rowBack: {
+  rowBack:{
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    backgroundColor: 'cyan',
+    height: 25,
+    width: 150,
+  },
+  rowBackOld: {
     alignItems: 'center',
     height: responsiveFontSize(4.5),
     // backgroundColor: '#8BC645',

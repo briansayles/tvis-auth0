@@ -49,18 +49,19 @@ export function SwipeableCollapsibleSectionList (props) {
       renderItem= {({item, index, section: {sectionIndex, rightButtons, renderFrontRow}})=> {
         return(
           <SwipeRow
-            closeOnRowPress={true}
+            closeOnRowPress={false}
             swipeToOpenPercent={10}
-            rightOpenValue={-responsiveFontSize(rightButtons.length * (buttonSize + 2 * buttonSpacing))}
+            rightOpenValue={-responsiveFontSize(5*rightButtons.length * (buttonSize + 2 * buttonSpacing))}
           >
-            <View style={[styles.rowBack, {}]}>
-              {rightButtons.map((buttonData, buttonIndex) => { return (
+            <View style={[{}]}>
+              {rightButtons.map((buttonData, buttonIndex) => {return (
                 <View style={[
                   styles.backRightBtn, 
                   collapsedState[sectionIndex] ? styles.collapsed : null,
                   {backgroundColor: buttonData.backgroundColor, right: buttonIndex * responsiveFontSize(buttonSize + buttonSpacing)}]}
                   key={buttonIndex}
                 >
+                  <Text style={{color: 'black'}}>BTN</Text>
                   <Ionicons 
                     name={buttonData.iconName} 
                     color='white' 
@@ -70,6 +71,7 @@ export function SwipeableCollapsibleSectionList (props) {
                 </View>
               )
               })}
+              <Ionicons name='trash' color='white' size={responsiveFontSize(3)} onPress={()=> {}}/>
             </View>
             {renderFrontRow(item, index, collapsedState[sectionIndex])}              
           </SwipeRow>

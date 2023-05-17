@@ -1,6 +1,6 @@
 import React, { Component, useState } from 'react'
 import ReactNative, {
-  Platform, View, TouchableOpacity, TouchableHighlight, StyleSheet, ActionSheetIOS, ActivityIndicator
+  Platform, View, TouchableOpacity, TouchableHighlight, StyleSheet, ActionSheetIOS, ActivityIndicator, Alert
 } from 'react-native'
 import { Button, Icon, Input, Text, } from 'react-native-elements'
 import { KeyboardAwareScrollView, } from 'react-native-keyboard-aware-scroll-view'
@@ -109,12 +109,57 @@ export const MyInput = (props) => {
   )  
 }
 
+export const DeleteButton = (props) => {
+  [busy, setBusy] = useState(false)
+  const handlePress = () => {
+  	setBusy(true)
+    if (props.confirmationString && props.confirmationTitleString) {
+      Alert.alert(props.confirmationTitleString, props.confirmationString, 
+        [
+          {text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, 
+          {text: 'OK', onPress: ()=>{
+            props.mutation().then(()=> {
+              setBusy(false)
+              if (props.navigation) props.navigation.goBack()  
+            })
+          }, 
+          style: 'default'}])
+    }
+  }
+  return (
+    <Button 
+      icon={busy ? <ActivityIndicator/> : <Icon
+        name='trash'
+        color='#fff'
+        type='ionicon'
+      />}
+      iconRight
+      buttonStyle={{ 
+        borderRadius: responsiveFontSize(1), 
+        marginTop: responsiveFontSize(3), 
+        paddingLeft: responsiveFontSize(1), 
+        paddingRight: responsiveFontSize(1), 
+        // marginLeft: 0, 
+        // marginRight: 0, 
+        // marginBottom: 0, 
+        backgroundColor: '#f00', 
+        alignSelf: 'flex-end'
+      }}
+      title='Delete  '
+      titleStyle={{fontSize: 18, color: '#fff'}}
+      onPress={() => handlePress()}
+      {...props}
+    />
+  )
+}
+
 export const SubmitButton = (props) => {
   [busy, setBusy] = useState(false)
   const handlePress = () => {
   	setBusy(true)
   	props.mutation().then(() => {
   		setBusy(false)
+      props.navigation?.goBack()
   	})
   }  
   return (

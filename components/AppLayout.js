@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SafeAreaView, View, } from 'react-native';
 
-import { BannerAd } from '../components/Ads'
+// import { BannerAd } from '../components/Ads'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 
 export function AppLayout(props) {
@@ -10,9 +10,9 @@ export function AppLayout(props) {
       <View style={[styles.appContainer, {}]}>
         {props.children}
       </View>
-      <View style={[styles.adContainer, {}]}>
+      {/* <View style={[styles.adContainer, {}]}>
         <BannerAd/>      
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 }

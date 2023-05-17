@@ -1,30 +1,36 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
-import { ActivityIndicator, } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 
-import { FormView, Picker, SubmitButton, MyInput, } from '../components/FormComponents'
+import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
+import { Ionicons } from '@expo/vector-icons'
+import { responsiveFontSize } from '../utilities/functions'
 
 
 export const ChipEditScreen = (props) => {
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_CHIP_QUERY, {variables: {id: props.route.params.id}})
-  
-  useEffect(()=>{
-    if (data) {
-      setInitialValues(data.Chip_by_pk)
-      setFormValues(data.Chip_by_pk)
+  const [ deleteChip, {loading: deletingChip, data: deleteChipData, error: deleteChipError} ] = useMutation(DELETE_CHIP_MUTATION, {
+    variables: {
+      id: props.route.params.id
     }
-  },[data])
-  
+  })
   const [updateChip] = useMutation(UPDATE_CHIP_MUTATION, {
     variables: {
       ...formValues,
     },
   })
 
+  useEffect(()=>{
+    if (data) {
+      setInitialValues(data.chips_by_pk)
+      setFormValues(data.chips_by_pk)
+    }
+  },[data])
+  
   const handleInputChange = (fieldName, value) => {
     setFormValues({...formValues, [fieldName]:value})
   }
@@ -44,7 +50,7 @@ export const ChipEditScreen = (props) => {
           title="Denomination"
           value={(formValues.denom || 0).toString()}
           placeholder="Enter denomination here..."
-          onChangeText={(text) => handleInputChange('denom', parseInt(!text ? 0 : text))}
+          onChangeText={(text) => handleInputChange('denom', (!text ? 0 : text))}
           keyboardType="numeric"
         />
         <MyInput
@@ -66,10 +72,19 @@ export const ChipEditScreen = (props) => {
           ))
           }
         </Picker>
-        <SubmitButton 
-          mutation={updateChip}
-          disabled={!isDirty()}
-        />
+        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', alignContent: 'space-between'}}>
+          <DeleteButton
+            mutation={deleteChip}
+            navigation={props.navigation}
+            confirmationString={'Are you sure you want to delete this T-' + data.chips_by_pk.denom.toString() + ' chip?'}
+            confirmationTitleString='Confirm Deletion'
+          />
+          <SubmitButton 
+            mutation={updateChip}
+            disabled={!isDirty()}
+            navigation={props.navigation}
+          />
+        </View>
       </FormView>
     )
   }
@@ -77,8 +92,8 @@ export const ChipEditScreen = (props) => {
 }
 
 const UPDATE_CHIP_MUTATION = gql`
-  mutation updateChip($color: String = "#fff", $denom: Int = 1, $qtyAvailable: Int = 0, $id: uuid!) {
-    update_Chip_by_pk(pk_columns: {id: $id}, _set: {color: $color, denom: $denom, qtyAvailable: $qtyAvailable}) {
+  mutation updateChip($color: String = "#fff", $denom: numeric = 1, $qtyAvailable: Int = 0, $id: uuid!) {
+    update_chips_by_pk(pk_columns: {id: $id}, _set: {color: $color, denom: $denom, qtyAvailable: $qtyAvailable}) {
       color
       denom
       id
@@ -86,10 +101,17 @@ const UPDATE_CHIP_MUTATION = gql`
     }
   }
 `
+const DELETE_CHIP_MUTATION = gql`
+  mutation DeleteChip($id: uuid!) {
+    delete_chips_by_pk(id: $id) {
+      id
+    }
+  }
+`
 
 const GET_CHIP_QUERY = gql`
   query getChip($id: uuid!) {
-    Chip_by_pk(id: $id) {
+    chips_by_pk(id: $id) {
       color
       denom
       id

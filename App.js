@@ -1,12 +1,12 @@
 import * as React from 'react'
-import { Platform, Alert, } from 'react-native'
+import { Platform, Alert, Button, View, Text} from 'react-native'
 import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import * as AuthSession from 'expo-auth-session'
-import jwtDecode from 'jwt-decode'
+import jwt_decode from 'jwt-decode'
 import { ApolloProvider } from '@apollo/client'
 import { Auth0Config} from './config'
 import { Ionicons } from '@expo/vector-icons'
@@ -20,53 +20,43 @@ import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
 import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
 import { CostEditScreen } from './screens/CostEditScreen'
-import { AuthContext, redirectUri, useProxy, authorizationEndpoint } from './Contexts'
+import { AuthContext, redirectUri, authorizationEndpoint } from './Contexts'
+import * as WebBrowser from 'expo-web-browser';
+import { useAuthRequest, useAutoDiscovery, ResponseType, TokenResponse } from 'expo-auth-session';
+import { styles, responsiveHeight, responsiveWidth } from './styles'
+import * as Linking from 'expo-linking'
+import {authReducer, authData} from './authReducer'
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
+WebBrowser.maybeCompleteAuthSession()
 
 export default function App({ navigation }) {
+  var randomString = function(length) {
+    var text = "";
+    var possible = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for(var i = 0; i < length; i++) {
+        text = possible.charAt(Math.floor(Math.random() * possible.length))
+    }
+    return text
+  }
+
   React.useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DUCK_OTHERS,
+      interruptionModeIOS: 2,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DUCK_OTHERS,
+      interruptionModeAndroid: 2,
       playThroughEarpieceAndroid: true,
       staysActiveInBackground: true,
     })
   }, [])
+
   const [state, dispatch] = React.useReducer(
-    (prevState, action) => {
-      switch (action.type) {
-        case 'RESTORE_TOKEN':
-          console.log(action.token)
-          return {
-            ...prevState,
-            userToken: action.token,
-            isLoading: false,
-          };
-        case 'SIGN_IN':
-          return {
-            ...prevState,
-            isSignout: false,
-            userToken: action.token,
-          };
-        case 'SIGN_OUT':
-          return {
-            ...prevState,
-            isSignout: true,
-            userToken: null,
-          };
-      }
-    },
-    {
-      isLoading: true,
-      isSignout: false,
-      userToken: null,
-    }
-  );
+    authReducer,
+    authData
+  )
 
   React.useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
@@ -74,15 +64,15 @@ export default function App({ navigation }) {
       let userToken;
 
       try {
-        userToken = await SecureStore.getItemAsync('userToken');
+        userToken = await SecureStore.getItemAsync('userToken')
         // After restoring token, we may need to validate it in production apps
-        const decoded = jwtDecode(userToken);
+        const decoded = jwt_decode(userToken);
         const { exp } = decoded;
         const expiry = new Date(exp*1000)
         if (expiry < Date.now()) {
           dispatch({type: 'SIGN_OUT'})
         } else {
-          dispatch({ type: 'RESTORE_TOKEN', token: userToken });
+          dispatch({ type: 'RESTORE_TOKEN', token: userToken })
         }
       } catch (e) {
         // Restoring token failed
@@ -97,18 +87,16 @@ export default function App({ navigation }) {
       signIn: async data => {
         const request = await AuthSession.loadAsync(
           {
-            redirectUri,
-            clientId: Auth0Config.clientId,
-            responseType: 'code token id_token',
-            scopes: ['openid', 'profile', 'email', 'read:client_grants'],
+            responseType: ResponseType.Token,
             extraParams: {
-              nonce: 'nonce',
+              nonce: randomString(12),
             },
-            audience: Auth0Config.audience
-          },
-          { authorizationEndpoint }       
+            clientId: "0oa9e8otx3qmfThsn5d7",
+            scopes: ["openid", "profile"],
+            redirectUri: Linking.createURL(),
+          }, "https://dev-08567763.okta.com/oauth2/default/"
         )
-        const result = await request.promptAsync(authorizationEndpoint, {useProxy})
+        const result = await request.promptAsync({})
         if (result.error) {
           Alert.alert(
             'Authentication error',
@@ -117,9 +105,9 @@ export default function App({ navigation }) {
           dispatch({type: 'SIGN_OUT'})
         }
         if (result.type === 'success') {
-          const jwtToken = result.params.id_token;
-          const decoded = jwtDecode(jwtToken);
-          const { name, exp } = decoded;
+          const jwtToken = JSON.stringify(result.params.access_token)
+          const decoded = jwt_decode(jwtToken)
+          const { sub, exp } = decoded
           const expiry = new Date(exp*1000)
           if (expiry < Date.now()) {
             Alert.alert(
@@ -127,8 +115,10 @@ export default function App({ navigation }) {
               'The authentication token has expired. Please re-login.'
             )
             dispatch({type: 'SIGN_OUT'})
-          } 
-          await SecureStore.setItemAsync('userToken', jwtToken.toString())
+          }
+          // console.log('storing userToken:')
+          // console.log(jwtToken)
+          await SecureStore.setItemAsync('userToken', jwtToken)
           await SecureStore.setItemAsync('expiry', expiry.toString())
           dispatch({ type: 'SIGN_IN', token: jwtToken });
         }
@@ -169,7 +159,7 @@ export default function App({ navigation }) {
           >
             {state.userToken == null ? (
               <>
-                <Tab.Screen name="Sign In" component={SignInScreen} />
+                <Tab.Screen name="Home" component={HomeScreen} />
               </>
             ) : (
               <>

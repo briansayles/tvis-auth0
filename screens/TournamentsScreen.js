@@ -39,7 +39,7 @@ export function TournamentsScreen(props) {
         key: 0,
         sectionIndex: 0,
         title: "My Tournaments",
-        data:   data.Tournament,
+        data:   data.tournaments,
         includeCountInTitle: true,
         createFunction: createItem,
         onPressFunction: editItem,
@@ -78,7 +78,7 @@ export function TournamentsScreen(props) {
 
 const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
   subscription currentUserTournamentListSubscription {
-    Tournament {
+    tournaments(order_by: {updated_at: desc_nulls_last}) {
       id
       title
       subtitle
@@ -92,7 +92,7 @@ const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
 
 const CREATE_TOURNAMENT_MUTATION = gql`
   mutation createTournament {
-    insert_Tournament_one(object: {
+    insert_tournaments_one(object: {
       title: "Default tournament title", 
       subtitle: "With default segments", 
       Timers: {data: [
@@ -126,7 +126,7 @@ const CREATE_TOURNAMENT_MUTATION = gql`
       title
       Timers(limit: 1) {
         active
-        updatedAt
+        updated_at
       }
     }
   }
@@ -134,7 +134,7 @@ const CREATE_TOURNAMENT_MUTATION = gql`
 
 const DELETE_TOURNAMENT_MUTATION = gql`
   mutation MyMutation($id: uuid!) {
-    delete_Tournament_by_pk(id: $id) {
+    delete_tournaments_by_pk(id: $id) {
       id
     }
   }

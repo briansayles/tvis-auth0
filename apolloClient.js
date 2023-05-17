@@ -6,18 +6,20 @@ import { SubscriptionClient } from "subscriptions-transport-ws";
 import { GraphQLConfig } from './config'
 
 export const makeApolloClient = (token) => {
+  var bearerString = 'Bearer ' + token
+  bearerString = bearerString.replace(/['"]+/g, '')
   const httpLink = new HttpLink({
-    uri: "https://" + GraphQLConfig.endpoint,
+    uri: "https://tvis-graphql-api.hasura.app/v1/graphql",
     headers: {
-      Authorization: `Bearer ${token}`
+      Authorization: `${bearerString}`
     }
   });
   const wsLink = new WebSocketLink(new SubscriptionClient(
-    "wss://"+GraphQLConfig.endpoint, {
+    "wss://tvis-graphql-api.hasura.app/v1/graphql", {
     reconnect: true,
     connectionParams: {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `${bearerString}`
       }
     }
   }));

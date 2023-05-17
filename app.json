@@ -35,7 +35,8 @@
     "githubUrl": "https://github.com/briansayles/tvis-auth0",
     "platforms": [
       "android",
-      "ios"
+      "ios",
+      "web"
     ]
   }
 }
