@@ -91,7 +91,7 @@ export const CostEditScreen = (props) => {
 }
 
 const UPDATE_COST_MUTATION = gql`
-  mutation updateCost($price: numeric = 0, $chipStack: Int = 0, $costType: cost_types_enum = Buyin, $id: uuid!) {
+  mutation UpdateCost($price: numeric = 0, $chipStack: Int = 0, $costType: cost_types_enum = Buyin, $id: uuid!) {
     update_costs_by_pk(pk_columns: {id: $id}, _set: {price: $price, chipStack: $chipStack, costType: $costType}) {
       id
       price
@@ -110,7 +110,7 @@ const DELETE_COST_MUTATION = gql`
 `
 
 const GET_COST_QUERY = gql`
-  query getCost($id: uuid!) {
+  query Cost($id: uuid!) {
     costs_by_pk(id: $id) {
       id
       price

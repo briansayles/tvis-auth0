@@ -71,6 +71,18 @@ export function TournamentDashboardScreen (props) {
   const editChipItem = (item) => { props.navigation.navigate('Chip Editor', {id: item.id})}
   const editCostItem = (item) => { props.navigation.navigate('Cost Editor', {id: item.id})}
   const editTournamentInfoItem = (item) => {props.navigation.navigate('Tournament Info Editor', {id: props.route.params.id})}
+  
+  const [updateSegmentsDurations] = useMutation(UPDATE_DURATIONS_MUTATATION)
+  const editAllSegmentDurations = (duration) => {
+    updateSegmentsDurations(
+      {
+        variables: {
+          tournamentId: props.route.params.id,
+          duration: duration,
+        }
+      }
+    )
+  }
 
   useEffect(()=>{
     if (data) {
@@ -223,7 +235,7 @@ export function TournamentDashboardScreen (props) {
         title: "Chip Colors & Denominations",
         titleStyles: [],
         data: chips,
-        initiallyCollapsed: false,
+        initiallyCollapsed: true,
         includeCountInTitle: true,
         createFunction: createChipItem,
         onPressFunction: editChipItem,
@@ -244,35 +256,39 @@ export function TournamentDashboardScreen (props) {
           )
         }
       },
-      // {
-      //   key: 6,
-      //   sectionIndex: 6,
-      //   title: "",
-      //   titleStyles: [],
-      //   data: [],
-      //   initiallyCollapsed: true,
-      //   includeCountInTitle: false,
-      //   rightButtons: [],
-      //   renderFrontRow: () => {return null}
-      // },
-      // {
-      //   key: 7,
-      //   sectionIndex: 7,
-      //   title: "DELETE",
-      //   titleStyles: [styles.red],
-      //   data: [Tournament],
-      //   initiallyCollapsed: true,
-      //   includeCountInTitle: false,
-      //   rightButtons: [],
-      //   renderFrontRow: (item, index, collapsed) => {
-      //     return(
-      //       <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {deleteItem(item)}}>
-      //         <Text style={[ styles.bold, styles.red, {flex: 6 ,textAlign: 'left', }]}>DELETE THIS TOURNAMENT</Text>
-      //         {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
-      //       </Pressable>
-      //     )
-      //   } 
-      // },
+      {
+        key: 6,
+        sectionIndex: 6,
+        title: "Quick Modifications",
+        titleStyles: [],
+        data: [ 5, 7.5, 10, 15, 20, 30, 45, 60],
+        initiallyCollapsed: true,
+        includeCountInTitle: false,
+        createFunction: null,
+        rightButtons: [],
+        renderFrontRow: (item, index, collapsed) => {
+          return ( 
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editAllSegmentDurations(item)}}>
+              <Text>Set all blinds to {item.toString()} minutes</Text>
+            </Pressable>
+          )
+        }
+      },
+      {
+        key: 7,
+        sectionIndex: 7,
+        title: "",
+        titleStyles: [styles.red],
+        data: [],
+        initiallyCollapsed: true,
+        includeCountInTitle: false,
+        rightButtons: [],
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <View></View>
+          )
+        } 
+      },
     ]
     return (
       <AppLayout>
@@ -335,7 +351,7 @@ const TOURNAMENT_SUBSCRIPTION = gql`
   }
 `
 const DELETE_TOURNAMENT_MUTATION = gql`
-  mutation MyMutation($id: uuid!) {
+  mutation DeleteTournament($id: uuid!) {
     delete_tournaments_by_pk(id: $id) {
       id
     }
@@ -384,6 +400,18 @@ const CREATE_COST_MUTATION = gql`
   mutation CreateCost($tournamentId: uuid!, $price: numeric = 20, $chipStack: Int = 1000, $costType: cost_types_enum = Buyin, ) {
     insert_costs_one(object: {tournamentId: $tournamentId, price: $price, chipStack: $chipStack, costType: $costType, }) {
       id
+    }
+  }
+`
+
+const UPDATE_DURATIONS_MUTATATION = gql`
+  mutation UpdateSegmentsDuration($duration: numeric, $tournamentId: uuid = null) {
+    update_segments_many(updates: {where: {tournamentId: {_eq: $tournamentId}}, _set: {duration: $duration}}) {
+      affected_rows
+      returning {
+        duration
+        id
+      }
     }
   }
 `

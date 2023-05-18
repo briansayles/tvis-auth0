@@ -91,7 +91,7 @@ export const ChipEditScreen = (props) => {
 }
 
 const UPDATE_CHIP_MUTATION = gql`
-  mutation updateChip($color: String = "#fff", $denom: numeric = 1, $qtyAvailable: Int = 0, $id: uuid!) {
+  mutation UpdateChip($color: String = "#fff", $denom: numeric = 1, $qtyAvailable: Int = 0, $id: uuid!) {
     update_chips_by_pk(pk_columns: {id: $id}, _set: {color: $color, denom: $denom, qtyAvailable: $qtyAvailable}) {
       color
       denom
@@ -109,7 +109,7 @@ const DELETE_CHIP_MUTATION = gql`
 `
 
 const GET_CHIP_QUERY = gql`
-  query getChip($id: uuid!) {
+  query Chip($id: uuid!) {
     chips_by_pk(id: $id) {
       color
       denom

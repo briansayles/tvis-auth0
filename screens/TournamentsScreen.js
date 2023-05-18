@@ -7,8 +7,6 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
 import { SwipeableList, SwipeableCollapsibleSectionList} from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
-import reactDom from 'react-dom';
-import { ScrollView } from 'react-native-gesture-handler';
 import { SwipeRow } from 'react-native-swipe-list-view'
 
 
@@ -29,11 +27,34 @@ export function TournamentsScreen(props) {
   const navigateToTimerButtonPressed = ({id, title, Timers} ) => {
     props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
   }
+
+  React.useEffect(()=> {
+    if (data?.tournaments?.length == 0) {
+      const createFirstTournament = async () => {
+        Alert.alert(
+          'Creating your first tournament', 
+          'Since You don\'t have any tournaments right now, we\'re going to create one for you to get you started.\n\nOnce it\'s done, just tap on it to edit it to your liking.', 
+          [
+            {
+              text: 'Got it. Thanks!', 
+              onPress: ()=>{
+                createItem() 
+              },
+              style: 'default'
+            }
+          ]
+        )
+      }
+      createFirstTournament()
+    }
+  }, [data])
+
   if (loading) return (<AppLayout><ActivityIndicator/></AppLayout>)
   if (error) return (<AppLayout><ErrorMessage error={error}/></AppLayout>)
   if (createError) return (<AppLayout><ErrorMessage error={createError}/></AppLayout>)
   if (deleteError) return (<AppLayout><ErrorMessage error={deleteError}/></AppLayout>)
   if (data) {
+
     const sectionListData = [
       {
         key: 0,
@@ -134,7 +155,7 @@ const CREATE_TOURNAMENT_MUTATION = gql`
 `
 
 const DELETE_TOURNAMENT_MUTATION = gql`
-  mutation MyMutation($id: uuid!) {
+  mutation DeleteTournament($id: uuid!) {
     delete_tournaments_by_pk(id: $id) {
       id
     }

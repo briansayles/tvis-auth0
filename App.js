@@ -7,7 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import * as AuthSession from 'expo-auth-session'
 import jwt_decode from 'jwt-decode'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider, } from '@apollo/client'
 import { Ionicons } from '@expo/vector-icons'
 import { makeApolloClient } from './apolloClient'
 import { HomeScreen } from './screens/HomeScreen'
@@ -19,11 +19,10 @@ import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
 import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
 import { CostEditScreen } from './screens/CostEditScreen'
-import { AuthContext, } from './Contexts'
+import { AuthContext, authReducer, authData, redirectUri, } from './Contexts'
 import * as WebBrowser from 'expo-web-browser';
 import { ResponseType, } from 'expo-auth-session';
-import * as Linking from 'expo-linking'
-import {authReducer, authData} from './authReducer'
+import { AuthConfig } from './config'
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -58,42 +57,45 @@ export default function App({ navigation }) {
 
   React.useEffect(() => {
     // Fetch the token from storage then navigate to our appropriate place
-    const bootstrapAsync = async () => {
+    bootstrapAsync = async () => {
       let userToken;
-
       try {
         userToken = await SecureStore.getItemAsync('userToken')
+        // console.log(userToken)
         // After restoring token, we may need to validate it in production apps
         const decoded = jwt_decode(userToken);
+        console.log(JSON.stringify(decoded))
         const { exp } = decoded;
         const expiry = new Date(exp*1000)
         if (expiry < Date.now()) {
+          // console.log('bootstraping. expired.')
           dispatch({type: 'SIGN_OUT'})
         } else {
+          // console.log('bootstrapping. restoring token.')
           dispatch({ type: 'RESTORE_TOKEN', token: userToken })
         }
       } catch (e) {
         // Restoring token failed
       }
     };
-
     bootstrapAsync();
   }, []);
-  const redirectUri = Linking.createURL()
+
   const authContext = React.useMemo(
     () => ({
       redirect: redirectUri.toString(),
       signIn: async data => {
+        console.log('signIn...')
         const request = await AuthSession.loadAsync(
           {
             responseType: ResponseType.Token,
             extraParams: {
               nonce: randomString(12),
             },
-            clientId: "0oa9e8otx3qmfThsn5d7",
+            clientId: AuthConfig.clientId,
             scopes: ["openid", "profile"],
             redirectUri,
-          }, "https://dev-08567763.okta.com/oauth2/default/"
+          }, AuthConfig.authorizeURI
           )
         const result = await request.promptAsync({})
         if (result.error) {
@@ -106,7 +108,8 @@ export default function App({ navigation }) {
         if (result.type === 'success') {
           const jwtToken = JSON.stringify(result.params.access_token)
           const decoded = jwt_decode(jwtToken)
-          const { sub, exp } = decoded
+          console.log(decoded)
+          const { sub, exp, id } = decoded
           const expiry = new Date(exp*1000)
           if (expiry < Date.now()) {
             Alert.alert(
@@ -115,25 +118,42 @@ export default function App({ navigation }) {
             )
             dispatch({type: 'SIGN_OUT'})
           }
-          // console.log('storing userToken:')
-          // console.log(jwtToken)
           await SecureStore.setItemAsync('userToken', jwtToken)
           await SecureStore.setItemAsync('expiry', expiry.toString())
           dispatch({ type: 'SIGN_IN', token: jwtToken });
         }
       },
       signOut: async () => {
+        // console.log('signOut...')
         await SecureStore.deleteItemAsync('userToken')
         await SecureStore.deleteItemAsync('expiry')
         dispatch({ type: 'SIGN_OUT' })
       },
       userName: async () => {
-        const jwtToken = await SecureStore.getItemAsync('userToken')
-        const decoded = jwt_decode(jwtToken)
-        const { sub, exp } = decoded
-        console.log(sub)
-        return sub
+        // console.log('userName...')
+        try {
+          const jwtToken = await SecureStore.getItemAsync('userToken')
+          const decoded = jwt_decode(jwtToken)
+          const { sub, exp } = decoded
+          // console.log(sub)
+          return sub
+        } catch (e) {
+          // console.log('no userName')
+          return null
+        }
       },
+      userId: async () => {
+        try {
+          const jwtToken = await SecureStore.getItemAsync('userToken')
+          const decoded = jwt_decode(jwtToken)
+          const {uid} = decoded
+          // console.log(uid)    
+          return uid
+        } catch (e) {
+          // console.log('no userId')
+          return null
+        } 
+      }
     }),
     []
   );

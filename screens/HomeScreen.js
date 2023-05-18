@@ -4,20 +4,41 @@ import * as React from 'react'
 import { AuthContext } from '../Contexts'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { AppLayout } from '../components/AppLayout'
-import { useSubscription, gql } from '@apollo/client'
+import { useQuery, useMutation, gql } from '@apollo/client'
+import { ErrorMessage } from '../components/ErrorMessage'
 
 export function HomeScreen (props) {
-  const {signOut, signIn} = React.useContext(AuthContext);
-  const {loading, data, error} = useSubscription(USER_SUBSCRIPTION)
-  const {userName} = React.useContext(AuthContext)
+  const {signOut, signIn, userName, userId} = React.useContext(AuthContext);
+  const {loading, data, error} = useQuery(USER_QUERY)
   const [name, setName] = React.useState("")
-  React.useEffect(()=> { 
+  const [id, setId] = React.useState("")
+  const [ insertUser, {loading: insertingUser, data: insertUserData, error: insertUserError} ] = useMutation(INSERT_USER_MUTATION, {
+    variables: {
+      name
+    }
+  })
+  React.useEffect(()=> {
+    // console.log('name effect') 
     const fetchName = async () => {
       setName(await userName())
     }
     fetchName()
-  },[])
-  if (error) return (<AppLayout><ErrorMessage error={error}/></AppLayout>)
+  },[data])
+  React.useEffect(()=>{
+    // console.log('id effect')
+    const fetchId = async () => {
+      setId(await userId())
+    }
+    fetchId()
+  },[data])
+  React.useEffect(() => {
+    if (data?.users?.length == 0 && name) {
+      console.log('Creating new user in database')
+      console.log(name)
+      insertUser()
+    }
+  },[name, data])
+  
   return (
     <AppLayout>
       <View style={[, {flex: 8, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center'}]}>
@@ -50,9 +71,17 @@ export function HomeScreen (props) {
     </AppLayout>
   );
 }
-const USER_SUBSCRIPTION = gql`
-  subscription MySubscription {
+const USER_QUERY = gql`
+  query UserQuery {
     users {
+      id
+    }
+  }
+`
+
+const INSERT_USER_MUTATION = gql`
+  mutation insertNewUser($name: String) {
+    insert_users_one(object: {name: $name}) {
       id
     }
   }

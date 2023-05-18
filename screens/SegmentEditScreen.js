@@ -96,7 +96,7 @@ export const SegmentEditScreen = (props) => {
 }
 
 const UPDATE_SEGMENT_MUTATION = gql`
-  mutation updateSegment($bBlind: numeric = 0, $ante: numeric = 0, $duration: numeric = 0, $sBlind: numeric = 0, $id: uuid!) {
+  mutation UpdateSegment($bBlind: numeric = 0, $ante: numeric = 0, $duration: numeric = 0, $sBlind: numeric = 0, $id: uuid!) {
     update_segments_by_pk(pk_columns: {id: $id}, _set: {sBlind: $sBlind, bBlind: $bBlind, ante: $ante, duration: $duration}) {
       id
       sBlind
@@ -116,7 +116,7 @@ const DELETE_SEGMENT_MUTATION = gql`
 `
 
 const GET_SEGMENT_QUERY = gql`
-  query getSegment($id: uuid!) {
+  query Segment($id: uuid!) {
     segments_by_pk(id: $id) {
       id
       sBlind

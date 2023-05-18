@@ -91,7 +91,7 @@ const TOURNAMENT_QUERY = gql`
   }
 `
 const DELETE_TOURNAMENT_MUTATION = gql`
-  mutation MyMutation($id: uuid!) {
+  mutation DeleteTournament($id: uuid!) {
     delete_tournaments_by_pk(id: $id) {
       id
     }
