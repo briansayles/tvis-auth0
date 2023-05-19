@@ -20,8 +20,8 @@ export default {
 	],
 	ChipColorOptions: [
 		{longName: "White", shortName: "#fff"},
-		{longName: "Red", shortName: "#f00"},
-		{longName: "Green", shortName: "#0f0"},
+		{longName: "Red", shortName: "#d00"},
+		{longName: "Green", shortName: "#0d0"},
 		{longName: "Blue", shortName: "#00f"},
 		{longName: "Black", shortName: "#000"},
 		{longName: "Orange", shortName: "#f90"},

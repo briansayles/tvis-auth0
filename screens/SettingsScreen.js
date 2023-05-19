@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { SafeAreaView, View, Platform, Alert, FlatList } from 'react-native';
-import { Text, Button, } from 'react-native-elements'
+import { Text, Button, } from '@rneui/themed'
 import { gql} from '@apollo/client'
 import { responsiveFontSize, styles } from '../styles'
 import { AuthContext } from '../Contexts';

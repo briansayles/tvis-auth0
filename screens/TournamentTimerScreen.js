@@ -1,7 +1,7 @@
 import { gql, useMutation, useSubscription} from '@apollo/client'
 import React, { useState, useEffect, useReducer, useRef } from 'react'
 import { Animated, ActivityIndicator, View, StyleSheet, } from 'react-native'
-import { Button, Icon, Text } from 'react-native-elements'
+import { Button, Icon, Text } from '@rneui/themed'
 import * as Speech from 'expo-speech';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
@@ -210,12 +210,12 @@ export const TournamentTimerScreen = (props) => {
     EORTimeout = setTimeout(()=> {
       if (!playingSound) {
         if (newCSI == lastSI) {
-          playSoundEffect("The tournament has reached the end of the final round.  The timer has been stopped.", 1.5, true)
+          playSoundEffect("The tournament has reached the end of the final round.  The timer has been stopped.", 1.5, true, 0.5)
           toggleTimerButtonPressed()
         } else {
-          speech = "The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
+          speech = "Dinky donck! Dinky to the donkey! The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
           dispatch({type: 'END_OF_ROUND', payload: data.tournaments_by_pk})
-          playSoundEffect(speech, 1.5, true)
+          playSoundEffect(speech, 1, true, 1)
         }
       }
     }, new Date(currentSegmentFinishTime).valueOf() - new Date().valueOf())
@@ -229,7 +229,7 @@ export const TournamentTimerScreen = (props) => {
     if (!currentSegmentNoticeTime || !isActive) return
     lastMinuteTimeOut = setTimeout(()=> {
       dispatch({type: 'ONE_MINUTE_REMAINING'})
-      if (!playingSound) playSoundEffect("Last minute of this round.", 3, true)
+      if (!playingSound) playSoundEffect("Last minute of this round.", 1.5, true, 0.5)
     }, new Date(currentSegmentNoticeTime).valueOf() - new Date().valueOf())
     return () => {
       clearTimeout(lastMinuteTimeOut)
@@ -248,13 +248,13 @@ export const TournamentTimerScreen = (props) => {
     }
   }, [isActive])
 
-  const playSoundEffect = async (customSpeech="", beepRate, playBeeps) => {
+  const playSoundEffect = async (customSpeech="", beepRate, playBeeps, volume) => {
     try {
       const { sound: soundObject, status }  = await Audio.Sound.createAsync(
         require('../assets/sounds/3beeps.aiff'),
         {
           positionMillis: 0,
-          volume: 0.7,
+          volume,
           rate: beepRate,
           shouldPlay: playBeeps,
           shouldCorrectPitch: false,
@@ -264,19 +264,19 @@ export const TournamentTimerScreen = (props) => {
             Speech.speak(
               customSpeech,
               {
-                rate: 1.00,
-                pitch: 1,
+                rate: 0.9,
+                pitch: 1.30,
                 onDone: async () => {
                   setPlayingSound(false)
-                  const { sound: soundObject, status }  = await Audio.Sound.createAsync(
-                    require('../assets/sounds/500msSilence.mp3'),
-                    {
-                      rate: 4,
-                      positionMillis: 0,
-                      volume: 1,
-                      shouldPlay: true,
-                    },
-                  )                 
+                  // const { sound: soundObject, status }  = await Audio.Sound.createAsync(
+                    // require('../assets/sounds/500msSilence.mp3'),
+                    // {
+                    //   rate: 4,
+                    //   positionMillis: 0,
+                    //   volume: 1,
+                    //   shouldPlay: true,
+                    // },
+                  // )                 
                 }
               }
             )

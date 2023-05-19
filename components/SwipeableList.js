@@ -1,6 +1,6 @@
 import { responsiveFontSize, responsiveWidth, responsiveHeight, styles, colors } from '../styles'
 import { TouchableHighlight, View, TouchableOpacity, Icon, ActivityIndicator, Pressable, StyleSheet, SectionList} from 'react-native'
-import { Text, Button, } from 'react-native-elements'
+import { Text, Button, } from '@rneui/themed'
 import { SwipeRow} from 'react-native-swipe-list-view'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'

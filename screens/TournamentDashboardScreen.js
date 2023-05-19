@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useSubscription, gql } from '@apollo/client'
 import React, {useState, useEffect} from 'react'
 import { ActivityIndicator, Alert, View, ScrollView, RefreshControl, Pressable, SafeAreaView, SectionList, TouchableOpacity} from 'react-native'
-import { Text, Card, Button, Icon, } from 'react-native-elements';
+import { Text, Card, Button, Icon, Slider, } from '@rneui/themed';
 import { styles, responsiveFontSize, responsiveWidth, responsiveHeight} from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Ionicons } from '@expo/vector-icons'
 import { SwipeableCollapsibleSectionList } from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
-import { FormView, Picker, SubmitButton, MyInput, } from '../components/FormComponents'
+import { FormView, Picker, SubmitButton, MyInput, DeleteButton, GoToTimerButton} from '../components/FormComponents'
 import { SwipeRow } from 'react-native-swipe-list-view'
 
 
@@ -17,24 +17,25 @@ export function TournamentDashboardScreen (props) {
   const [refreshingState, setRefreshingState] = useState(false)
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
+  const [sliderValue, setSliderValue] = useState(0)
 
   const {data, loading, error, client, refetch} = useSubscription(TOURNAMENT_SUBSCRIPTION, {variables: {id: props.route.params.id}})
 
   const navigateToTimerButtonPressed = ({id, title, Timers} ) => {
     props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
   }
-  const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION)
-  const deleteItem = ({id, title}) => {
-    Alert.alert('Confirm Delete', 'Delete: \n' + title + ' ?', 
-    [
-      {text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, 
-      {text: 'OK', onPress: async ()=> {
-        await deleteTournament({variables: {id}})
-        props.navigation.navigate("Tournaments")
-      }, style: 'default'
-      }
-    ])
-  }
+  const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION, {variables: {id: props.route.params.id}})
+  // const deleteItem = ({id, title}) => {
+  //   Alert.alert('Confirm Delete', 'Delete: \n' + title + ' ?', 
+  //   [
+  //     {text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, 
+  //     {text: 'OK', onPress: async ()=> {
+  //       await deleteTournament({variables: {id}})
+  //       props.navigation.navigate("Tournaments")
+  //     }, style: 'default'
+  //     }
+  //   ])
+  // }
   const editButtonColor = dictionaryLookup("editButtonColor")
   const [ deleteSegment, {loading: deletingSegment, data: deleteSegmentData, error: deleteSegmentError} ] = useMutation(DELETE_SEGMENT_MUTATION, {})
   const deleteSegmentItem = ({id, sBlind, bBlind, ante}) => {
@@ -53,13 +54,13 @@ export function TournamentDashboardScreen (props) {
       editSegmentItem(insert_segments_one)
     },
   })
-  const createSegmentItem = () => {createSegment({variables: {tournamentId: data.tournaments_by_pk.id}})}
+  const createSegmentItem = () => {createSegment({variables: {tournamentId: data.tournaments_by_pk.id, duration: data.tournaments_by_pk.Segments[0].duration || 15}})}
   const [ createChip, {loading: creatingChip, data: createChipData, error: createChipError} ] = useMutation(CREATE_CHIP_MUTATION, {
     onCompleted: ({insert_chips_one}) => {
       editChipItem(insert_chips_one)
     },
   })
-  const createChipItem = () => {createChip({variables: {tournamentId: data.tournaments_by_pk.id}})}
+  const createChipItem = () => {createChip({variables: {tournamentId: data.tournaments_by_pk.id, color: null}})}
   const [ createCost, {loading: creatingCost, data: createCostData, error: createCostError} ] = useMutation(CREATE_COST_MUTATION, {
     onCompleted: ({insert_costs_one}) => {
       editCostItem(insert_costs_one)
@@ -69,25 +70,65 @@ export function TournamentDashboardScreen (props) {
   
   const editSegmentItem = (item) => { props.navigation.navigate('Segment Editor', {id: item.id})}
   const editChipItem = (item) => { props.navigation.navigate('Chip Editor', {id: item.id})}
-  const editCostItem = (item) => { props.navigation.navigate('Cost Editor', {id: item.id})}
+  const editCostItem = (item) => { props.navigation.navigate('Entry Fee Editor', {id: item.id})}
   const editTournamentInfoItem = (item) => {props.navigation.navigate('Tournament Info Editor', {id: props.route.params.id})}
   
   const [updateSegmentsDurations] = useMutation(UPDATE_DURATIONS_MUTATATION)
   const editAllSegmentDurations = (duration) => {
-    updateSegmentsDurations(
-      {
-        variables: {
-          tournamentId: props.route.params.id,
-          duration: duration,
+    Alert.alert(
+      'Confirm Change', 
+      'Are you sure you want to change all blind levels to ' + duration + ' minutes?',
+      [
+        {text: 'Cancel', onPress: ()=>{}, style: 'cancel'},
+        {
+          text: 'OK', 
+          onPress: async ()=> {
+            await updateSegmentsDurations(
+              {
+                variables: {
+                  tournamentId: props.route.params.id,
+                  duration: duration,
+                }
+              }
+            )
+            Alert.alert('Done', 'All blind levels have been changed to ' + duration + ' minutes.', [{text: 'Roger that. Thanks!', onPress: ()=>{}, style: 'default'}])
+          }, 
+          style: 'default'
         }
-      }
+      ]
     )
+  }
+  const [updateSegmentsAntes] = useMutation(UPDATE_ANTES_MUTATION)
+  const removeAllAntes = () => {
+    Alert.alert(
+      'Confirm Change', 
+      'Are you sure you want to remove ALL antes?',
+      [
+        {text: 'Cancel', onPress: ()=>{}, style: 'cancel'},
+        {
+          text: 'OK', 
+          onPress: async ()=> {
+            await updateSegmentsAntes(
+              {
+                variables: {
+                  tournamentId: props.route.params.id,
+                }
+              }
+            )
+            Alert.alert('Done', 'All antes have been removed.', [{text: 'Roger that. Thanks!', onPress: ()=>{}, style: 'default'}])
+          }, 
+          style: 'default'
+        }
+      ]
+    )
+
   }
 
   useEffect(()=>{
     if (data) {
       setInitialValues(data.tournaments_by_pk)
       setFormValues(data.tournaments_by_pk)
+      setSliderValue(data.tournaments_by_pk?.Segments[0]?.duration || 0)
     }
   },[data])
   
@@ -124,38 +165,27 @@ export function TournamentDashboardScreen (props) {
     const costs = sortEntryFees(Tournament.Costs)
     const smallestChipReq = smallestChipArray(chips, segments)
     const sectionListData = [
-      {
-        key: 0,
-        sectionIndex: 0,
-        title: Tournament.Timers[0].active ? "TIMER (Running) " : "TIMER (Stopped)",
-        titleStyles: [styles.green],
-        data: [Tournament],
-        initiallyCollapsed: false,
-        includeCountInTitle: false,
-        rightButtons: [],
-        renderFrontRow: (item, index, collapsed) => {
-          return(
-            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {navigateToTimerButtonPressed(item)}}>
-              <Text style={[ styles.bold, styles.green, {flex: 6 ,textAlign: 'left', }]}>GO TO TIMER</Text>
-              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
-            </Pressable>
-          )
-        } 
-      },
       // {
-      //   key: 1,
-      //   sectionIndex: 1,
-      //   title: "",
-      //   titleStyles: [],
-      //   data: [],
-      //   initiallyCollapsed: true,
+      //   key: 0,
+      //   sectionIndex: 0,
+      //   title: Tournament.Timers[0].active ? "TIMER (Running) " : "TIMER (Stopped)",
+      //   titleStyles: [styles.green],
+      //   data: [Tournament],
+      //   initiallyCollapsed: false,
       //   includeCountInTitle: false,
       //   rightButtons: [],
-      //   renderFrontRow: () => {return null}
+      //   renderFrontRow: (item, index, collapsed) => {
+      //     return(
+      //       <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {navigateToTimerButtonPressed(item)}}>
+      //         <Text style={[ styles.bold, styles.green, {flex: 6 ,textAlign: 'left', }]}>GO TO TIMER</Text>
+      //         {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
+      //       </Pressable>
+      //     )
+      //   } 
       // },
       { 
-        key: 2,
-        sectionIndex: 2,
+        key: 0,
+        sectionIndex: 0,
         title: "Tournament Info",
         titleStyles: [],
         data: [Tournament],
@@ -175,8 +205,8 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
-        key: 3,
-        sectionIndex: 3,
+        key: 1,
+        sectionIndex: 1,
         title: "Entry Fees",
         titleStyles: [],
         data: costs,
@@ -202,8 +232,8 @@ export function TournamentDashboardScreen (props) {
         }
       },
       { 
-        key: 4,
-        sectionIndex: 4,
+        key: 2,
+        sectionIndex: 2,
         title: "Blinds Levels",
         titleStyles: [],
         data:   segments,
@@ -230,12 +260,12 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
-        key: 5,
-        sectionIndex: 5,
+        key: 3,
+        sectionIndex: 3,
         title: "Chip Colors & Denominations",
         titleStyles: [],
         data: chips,
-        initiallyCollapsed: true,
+        initiallyCollapsed: false,
         includeCountInTitle: true,
         createFunction: createChipItem,
         onPressFunction: editChipItem,
@@ -257,44 +287,59 @@ export function TournamentDashboardScreen (props) {
         }
       },
       {
-        key: 6,
-        sectionIndex: 6,
-        title: "Quick Modifications",
+        key: 4,
+        sectionIndex: 4,
+        title: "Quick Adjustments",
         titleStyles: [],
-        data: [ 5, 7.5, 10, 15, 20, 30, 45, 60],
-        initiallyCollapsed: true,
+        data: [ 1, 2 ],
+        initiallyCollapsed: false,
         includeCountInTitle: false,
         createFunction: null,
         rightButtons: [],
         renderFrontRow: (item, index, collapsed) => {
-          return ( 
-            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editAllSegmentDurations(item)}}>
-              <Text>Set all blinds to {item.toString()} minutes</Text>
-            </Pressable>
+          return (
+            <>
+            { item == 1 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
+              <Slider
+                style={{flex: 16, marginHorizontal: responsiveFontSize(3)}}
+                value={sliderValue}
+                onValueChange={setSliderValue}
+                maximumValue={60}
+                minimumValue={0}
+                step={sliderValue >= 10 ? 1 : 0.5}
+                allowTouchTrack
+                trackStyle={{ height: 5, backgroundColor: 'transparent' }}
+                thumbStyle={{ height: 20, width: 20, backgroundColor: 'transparent' }}
+              />
+              <Text style={{flex: 4, fontSize: responsiveFontSize(1.5), marginHorizontal: responsiveFontSize(1.5)}}>{sliderValue} Min</Text>
+              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> editAllSegmentDurations(sliderValue)}>Set all durations</Button>
+            </View>}
+            { item == 2 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
+              <View style={{flex: 16}}/>
+              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> removeAllAntes()}>Remove antes</Button>
+            </View>}
+            </>
           )
         }
       },
-      {
-        key: 7,
-        sectionIndex: 7,
-        title: "",
-        titleStyles: [styles.red],
-        data: [],
-        initiallyCollapsed: true,
-        includeCountInTitle: false,
-        rightButtons: [],
-        renderFrontRow: (item, index, collapsed) => {
-          return(
-            <View></View>
-          )
-        } 
-      },
+
     ]
     return (
       <AppLayout>
         <SwipeableCollapsibleSectionList
           sections={sectionListData}
         />
+        <View style={[ , {width: responsiveWidth(90), flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height: responsiveFontSize(7), marginVertical: responsiveFontSize(0.5)}]}>
+          <DeleteButton
+            mutation={deleteTournament}
+            navigation={()=> props.navigation.popToTop()}
+            confirmationString={'Are you sure you want to delete this tournament? This can\'t be undone!!'}
+            confirmationTitleString='Confirm Deletion'
+          />
+          <GoToTimerButton
+            navigation={()=> props.navigation.navigate('Timer', {id: Tournament.id, timerId: Tournament.Timers[0].id })}
+          />
+        </View>
       </AppLayout>
     )
   }
@@ -390,14 +435,14 @@ const CREATE_SEGMENT_MUTATION = gql`
 `
 
 const CREATE_CHIP_MUTATION = gql`
-  mutation CreateChip($tournamentId: uuid!, $color: String = "#fff", $denom: numeric = 1, $qtyAvailable: Int = 0, ) {
+  mutation CreateChip($tournamentId: uuid!, $color: String=null, $denom: numeric = 0, $qtyAvailable: Int = 0, ) {
     insert_chips_one(object: {tournamentId: $tournamentId, denom: $denom, qtyAvailable: $qtyAvailable, color: $color}) {
       id
     }
   }
 `
 const CREATE_COST_MUTATION = gql`
-  mutation CreateCost($tournamentId: uuid!, $price: numeric = 20, $chipStack: Int = 1000, $costType: cost_types_enum = Buyin, ) {
+  mutation CreateCost($tournamentId: uuid!, $price: numeric = 0, $chipStack: Int = 0, $costType: cost_types_enum=Buyin, ) {
     insert_costs_one(object: {tournamentId: $tournamentId, price: $price, chipStack: $chipStack, costType: $costType, }) {
       id
     }
@@ -410,6 +455,16 @@ const UPDATE_DURATIONS_MUTATATION = gql`
       affected_rows
       returning {
         duration
+        id
+      }
+    }
+  }
+`
+const UPDATE_ANTES_MUTATION = gql`
+  mutation UpdateSegmentsAntes($tournamentId: uuid = null) {
+    update_segments_many(updates: {where: {tournamentId: {_eq: $tournamentId}}, _set: {ante: 0}}) {
+      affected_rows
+      returning {
         id
       }
     }

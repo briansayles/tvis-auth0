@@ -1,5 +1,5 @@
 import { View, ActivityIndicator } from 'react-native'
-import { Text, Button, Image, } from 'react-native-elements'
+import { Text, Button, Image, } from '@rneui/themed'
 import * as React from 'react'
 import { AuthContext } from '../Contexts'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
@@ -52,9 +52,10 @@ export function HomeScreen (props) {
       <Text>Logged in as: {name}</Text>
         <Button
           top={responsiveHeight(40)}
-          title={"Log Out"}
           onPress={() => signOut()}
-        />
+        >
+          Log Out
+        </Button>
       </View>
       }
       {(!data) && 
@@ -62,10 +63,11 @@ export function HomeScreen (props) {
         <Text>  </Text>
         <Button
           top={responsiveHeight(40)}
-          title="Log In or Sign Up (FREE)"
           onPress={() => {signIn()}
           }
-        />
+        >
+          Log In or Sign Up (FREE)
+        </Button>
       </View>
       }
     </AppLayout>

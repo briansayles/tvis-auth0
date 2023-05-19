@@ -1,6 +1,6 @@
 import { styles } from '../styles'
 import { SafeAreaView } from 'react-native'
-import { Text, } from 'react-native-elements'
+import { Text, } from '@rneui/themed'
 import * as React from 'react'
 
 export const ErrorMessage = (props) => {

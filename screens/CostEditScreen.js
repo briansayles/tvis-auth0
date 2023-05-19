@@ -71,16 +71,16 @@ export const CostEditScreen = (props) => {
             }
           </Picker>
         </View>
-        <View style={{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           <DeleteButton
             mutation={deleteCost}
             navigation={()=> props.navigation.goBack()}
-            confirmationString={'Are you sure you want to delete this ' + data.costs_by_pk.costType.toString() + '?'}
+            confirmationString={'Are you sure you want to delete this entry fee?'}
             confirmationTitleString='Confirm Deletion'
           />
           <SubmitButton 
             mutation={updateCost}
-            disabled={!isDirty()}
+            // disabled={!isDirty()}
             navigation={()=> props.navigation.goBack()}
           />
         </View>

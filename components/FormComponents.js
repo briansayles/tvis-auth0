@@ -2,7 +2,7 @@ import React, { Component, useState } from 'react'
 import ReactNative, {
   Platform, View, TouchableOpacity, TouchableHighlight, StyleSheet, ActionSheetIOS, ActivityIndicator, Alert
 } from 'react-native'
-import { Button, Icon, Input, Text, } from 'react-native-elements'
+import { Button, Icon, Input, Text, } from '@rneui/themed'
 import { KeyboardAwareScrollView, } from 'react-native-keyboard-aware-scroll-view'
 import {Ionicons, } from '@expo/vector-icons'
 import {Picker as RNPPicker} from '@react-native-picker/picker'
@@ -136,17 +136,17 @@ export const DeleteButton = (props) => {
       iconRight
       buttonStyle={{ 
         borderRadius: responsiveFontSize(1), 
-        marginTop: responsiveFontSize(3), 
+        marginTop: responsiveFontSize(1.5), 
         paddingLeft: responsiveFontSize(1), 
         paddingRight: responsiveFontSize(1), 
         // marginLeft: 0, 
         // marginRight: 0, 
         // marginBottom: 0, 
-        backgroundColor: '#f00', 
+        backgroundColor: '#d00', 
         alignSelf: 'flex-end'
       }}
       title='Delete  '
-      titleStyle={{fontSize: 18, color: '#fff'}}
+      titleStyle={{fontSize: 14, color: '#fff'}}
       onPress={() => handlePress()}
       {...props}
     />
@@ -172,7 +172,7 @@ export const SubmitButton = (props) => {
       iconRight
       buttonStyle={{ 
         borderRadius: responsiveFontSize(1), 
-        marginTop: responsiveFontSize(3), 
+        marginTop: responsiveFontSize(1.5), 
         paddingLeft: responsiveFontSize(1), 
         paddingRight: responsiveFontSize(1), 
         // marginLeft: 0, 
@@ -183,7 +183,44 @@ export const SubmitButton = (props) => {
       }}
       disabledStyle={{backgroundColor: "#0504"}}
       title='Submit  '
-      titleStyle={{fontSize: 18, color: '#fff'}}
+      titleStyle={{fontSize: 14, color: '#fff'}}
+      onPress={() => handlePress()}
+      {...props}
+    />
+  )
+}
+
+export const GoToTimerButton = (props) => {
+  // [busy, setBusy] = useState(false)
+  const handlePress = () => {
+  	// setBusy(true)
+  	// props.mutation().then(() => {
+  		// setBusy(false)
+      if (props.navigation) {props.navigation()}  
+  	// })
+  }  
+  return (
+    <Button 
+      icon={<Icon
+        name='ios-checkmark-circle-outline'
+        color='#fff'
+        type='ionicon'
+      />}
+      iconRight
+      buttonStyle={{ 
+        borderRadius: responsiveFontSize(1), 
+        marginTop: responsiveFontSize(1.5), 
+        paddingLeft: responsiveFontSize(1), 
+        paddingRight: responsiveFontSize(1), 
+        // marginLeft: 0, 
+        // marginRight: 0, 
+        // marginBottom: 0, 
+        backgroundColor: '#050', 
+        alignSelf: 'flex-end'
+      }}
+      // disabledStyle={{backgroundColor: "#0504"}}
+      title='Go to Timer  '
+      titleStyle={{fontSize: 14, color: '#fff'}}
       onPress={() => handlePress()}
       {...props}
     />

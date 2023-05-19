@@ -62,16 +62,16 @@ export const TournamentInfoEditScreen = (props) => {
             keyboardType="default"
           />
         </View>
-        <View style={{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-          <DeleteButton
+        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
+          {/* <DeleteButton
             mutation={deleteTournament}
             navigation={()=> props.navigation.popToTop()}
             confirmationString={'Are you sure you want to delete this tournament? This can\'t be undone!!'}
             confirmationTitleString='Confirm Deletion'
-          />
+          /> */}
           <SubmitButton 
             mutation={updateTournament}
-            disabled={!isDirty()}
+            // disabled={!isDirty()}
             navigation={()=> props.navigation.goBack()}
           />
         </View>

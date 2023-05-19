@@ -71,16 +71,16 @@ export const ChipEditScreen = (props) => {
             }
           </Picker>
         </View>
-        <View style={{flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           <DeleteButton
             mutation={deleteChip}
             navigation={()=> props.navigation.goBack()}
-            confirmationString={'Are you sure you want to delete this T-' + data.chips_by_pk.denom.toString() + ' chip?'}
+            confirmationString={'Are you sure you want to delete this chip?'}
             confirmationTitleString='Confirm Deletion'
           />
           <SubmitButton 
             mutation={updateChip}
-            disabled={!isDirty()}
+            // disabled={!isDirty()}
             navigation={()=> props.navigation.goBack()}
           />
         </View>

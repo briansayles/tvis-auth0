@@ -41,7 +41,7 @@ export default function App({ navigation }) {
   React.useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      interruptionModeIOS: 2,
+      interruptionModeIOS: 0,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
       interruptionModeAndroid: 2,
@@ -64,7 +64,7 @@ export default function App({ navigation }) {
         // console.log(userToken)
         // After restoring token, we may need to validate it in production apps
         const decoded = jwt_decode(userToken);
-        console.log(JSON.stringify(decoded))
+        // console.log(JSON.stringify(decoded))
         const { exp } = decoded;
         const expiry = new Date(exp*1000)
         if (expiry < Date.now()) {
@@ -72,6 +72,7 @@ export default function App({ navigation }) {
           dispatch({type: 'SIGN_OUT'})
         } else {
           // console.log('bootstrapping. restoring token.')
+          console.log(userToken)
           dispatch({ type: 'RESTORE_TOKEN', token: userToken })
         }
       } catch (e) {
@@ -85,7 +86,7 @@ export default function App({ navigation }) {
     () => ({
       redirect: redirectUri.toString(),
       signIn: async data => {
-        console.log('signIn...')
+        // console.log('signIn...')
         const request = await AuthSession.loadAsync(
           {
             responseType: ResponseType.Token,
@@ -108,7 +109,7 @@ export default function App({ navigation }) {
         if (result.type === 'success') {
           const jwtToken = JSON.stringify(result.params.access_token)
           const decoded = jwt_decode(jwtToken)
-          console.log(decoded)
+          // console.log(decoded)
           const { sub, exp, id } = decoded
           const expiry = new Date(exp*1000)
           if (expiry < Date.now()) {
@@ -120,6 +121,7 @@ export default function App({ navigation }) {
           }
           await SecureStore.setItemAsync('userToken', jwtToken)
           await SecureStore.setItemAsync('expiry', expiry.toString())
+          console.log(jwtToken)
           dispatch({ type: 'SIGN_IN', token: jwtToken });
         }
       },
@@ -210,7 +212,7 @@ function TournamentsStack() {
       <Stack.Screen name="Timer" component={TournamentTimerScreen}/>
       <Stack.Screen name="Segment Editor" component={SegmentEditScreen}/>
       <Stack.Screen name="Chip Editor" component={ChipEditScreen}/>
-      <Stack.Screen name="Cost Editor" component={CostEditScreen}/>
+      <Stack.Screen name="Entry Fee Editor" component={CostEditScreen}/>
     </Stack.Navigator>
   );
 }

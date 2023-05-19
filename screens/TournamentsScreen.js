@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable, SectionList, TouchableOpacity} from 'react-native';
-import { Text, Button, } from 'react-native-elements'
+import { Text, Button, } from '@rneui/themed'
 import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
 import { styles, responsiveFontSize, } from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
@@ -15,7 +15,17 @@ export function TournamentsScreen(props) {
   const {loading, data, error} = useSubscription(CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION)
   const [ collapsedState, setCollapsedState] = useState(false)
   const [ createTournament, {loading: creating, data: createdData, error: createError} ] = useMutation(CREATE_TOURNAMENT_MUTATION, {})
-  const createItem = () => { createTournament() }
+  const createItem = async () => { 
+    const id = await (await createTournament()).data.insert_tournaments_one.id
+    console.log(id)
+    Alert.alert(
+      'New Tournament Created',
+      'We created a new tournament with some default settings for you. Edit it by tapping on the various components or using the features in the Quick Adjustments section',
+      [
+        {text: 'OK, thanks!', onPress: ()=>{props.navigation.navigate('Tournament Dashboard', {id: id})}, style: 'default'}
+      ]
+    )
+  }
   const [ deleteTournament, {loading: deleting, data: deleteData, error: deleteError} ] = useMutation(DELETE_TOURNAMENT_MUTATION, {})
   const deleteItem = ({id, title}) => {
     Alert.alert('Confirm Delete', 'Delete: \n' + title + '\n\n' + id + ' ?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteTournament({variables: {id}})}, style: 'default'}])
@@ -137,19 +147,17 @@ const CREATE_TOURNAMENT_MUTATION = gql`
         {sBlind: 500, bBlind: 1000, ante: 100, duration: 10},
       ]}, 
       Chips: {data: [
-        {color: "#f00", denom: 5}, 
-        {color: "#0f0", denom: 25}, 
+        {color: "#d00", denom: 5}, 
+        {color: "#0d0", denom: 25}, 
         {color: "#000", denom: 100}, 
         {color: "#00f", denom: 500}
       ]},
+      Costs: {data: [
+        {price: 20, chipStack: 1000, costType: Buyin}
+      ]}
     })
     { 
       id
-      title
-      Timers(limit: 1) {
-        active
-        updated_at
-      }
     }
   }
 `
