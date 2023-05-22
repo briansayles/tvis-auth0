@@ -426,8 +426,8 @@ export const TournamentTimerScreen = (props) => {
                 {sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
                   if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
                     return (
-                      <Animated.View key={i} style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
-                        <Icon style={[, {flex: 2}]} name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(5)}/>
+                      <Animated.View key={i} style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
+                        <Icon style={[, {}]} name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(5)}/>
                         <Text style={[styles.chipText, {flex: 3, textAlign: 'right'}]} >{numberToSuffixedString(u.denom)}  </Text>
                       </Animated.View>
                     )

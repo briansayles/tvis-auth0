@@ -180,6 +180,7 @@ export function TournamentDashboardScreen (props) {
     const chips = sortChips(Tournament.Chips)
     const costs = sortEntryFees(Tournament.Costs)
     const smallestChipReq = smallestChipArray(chips, segments)
+    const totalScheduledDuration = Tournament.Segments_aggregate.aggregate.sum.duration
     const sectionListData = [
       // {
       //   key: 0,
@@ -252,7 +253,7 @@ export function TournamentDashboardScreen (props) {
         sectionIndex: 2,
         title: "Blinds Levels",
         titleStyles: [],
-        data:   segments,
+        data:   [...segments, {id: 'totals'}],
         initiallyCollapsed: false,
         includeCountInTitle: true,
         createFunction: createSegmentItem,
@@ -266,13 +267,18 @@ export function TournamentDashboardScreen (props) {
         ], 
         renderFrontRow: (item, index, collapsed) => {
           return(
-            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editSegmentItem(item)}}>
+            <>
+            {item.duration && <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editSegmentItem(item)}}>
               <Text style={[ styles.bold, {flex: 0.5, textAlign: 'left'}]}>{index + 1}{collapsed ? 'C': ''}:</Text>
               <Text style={[ styles.bold, {flex: 4, }]}>{item.sBlind.toLocaleString()} / {item.bBlind.toLocaleString()} {item.ante > 0 ? ' + ' + item.ante.toLocaleString() + ' ante': ''}</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.duration.toLocaleString()} Minutes</Text>
               {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
-            </Pressable>
-          )
+            </Pressable>}
+            {item.id == 'totals' && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {borderTopColor: 'black', borderTopWidth: 1} ]} >
+              <Text style={[ styles.bold, {flex: 4.5, textAlign: 'left'}]}>Total scheduled duration:</Text>
+              <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{totalScheduledDuration} Minutes</Text>
+            </View>}
+            </>)
         }
       },
       {
@@ -336,7 +342,7 @@ export function TournamentDashboardScreen (props) {
             </View>}
             { item == 3 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
               <View style={{flex: 16}}/>
-              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle)}>Copy to New</Button>
+              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle)}>Copy to New Tournament</Button>
             </View>}
             </>
           )

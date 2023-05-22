@@ -125,8 +125,8 @@ const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
 const CREATE_TOURNAMENT_MUTATION = gql`
   mutation createTournament {
     insert_tournaments_one(object: {
-      title: "Default tournament title", 
-      subtitle: "With default segments", 
+      title: "$20, T-1000 NLHE Tournament", 
+      subtitle: "10 Minute Blinds", 
       Timers: {data: [
         {active: false}
       ]}, 
