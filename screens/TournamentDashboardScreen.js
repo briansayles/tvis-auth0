@@ -25,17 +25,33 @@ export function TournamentDashboardScreen (props) {
     props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
   }
   const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION, {variables: {id: props.route.params.id}})
-  // const deleteItem = ({id, title}) => {
-  //   Alert.alert('Confirm Delete', 'Delete: \n' + title + ' ?', 
-  //   [
-  //     {text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, 
-  //     {text: 'OK', onPress: async ()=> {
-  //       await deleteTournament({variables: {id}})
-  //       props.navigation.navigate("Tournaments")
-  //     }, style: 'default'
-  //     }
-  //   ])
-  // }
+  const [copyTournament, {loading: copyingTournament, data: copiedTournamentData, error: copyTournamentError}] = useMutation(COPY_TOURNAMENT_MUTATION, {})
+  const copyTournamentFunction = async (segments, chips, costs, title, subtitle) => {
+    let newSegmentsArray=[], newChipsArray=[], newCostsArray=[]
+    segments.map((segment, index) => {
+      let {sBlind, bBlind, ante, duration} = segment
+      newSegmentsArray.push({sBlind, bBlind, ante, duration})
+    })
+    chips.map((chip, index) => {
+      let {color, denom, qtyAvailable} = chip
+      newChipsArray.push({color, denom, qtyAvailable})
+    })
+    costs.map((cost, index) => {
+      let {chipStack, costType, price} = cost
+      newCostsArray.push({chipStack, costType, price})
+    })
+    const newTourney = await copyTournament({variables: {
+      Title: title,
+      Subtitle: subtitle,
+      Segments: {'data': newSegmentsArray},
+      Chips: {'data': newChipsArray},
+      Costs: {'data': newCostsArray}
+    }})
+    Alert.alert('Tournament Copied', 'We copied this tournament to a new one for you. Click OK to go to the new tournament to edit or run it.', [{text: 'OK', onPress: ()=>{
+      props.navigation.navigate('Tournament Dashboard', {id: newTourney.data.insert_tournaments_one.id})
+    }, style: 'default'}])
+  }
+
   const editButtonColor = dictionaryLookup("editButtonColor")
   const [ deleteSegment, {loading: deletingSegment, data: deleteSegmentData, error: deleteSegmentError} ] = useMutation(DELETE_SEGMENT_MUTATION, {})
   const deleteSegmentItem = ({id, sBlind, bBlind, ante}) => {
@@ -291,7 +307,7 @@ export function TournamentDashboardScreen (props) {
         sectionIndex: 4,
         title: "Quick Adjustments",
         titleStyles: [],
-        data: [ 1, 2 ],
+        data: [ 1, 2, 3 ],
         initiallyCollapsed: false,
         includeCountInTitle: false,
         createFunction: null,
@@ -317,6 +333,10 @@ export function TournamentDashboardScreen (props) {
             { item == 2 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
               <View style={{flex: 16}}/>
               <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> removeAllAntes()}>Remove antes</Button>
+            </View>}
+            { item == 3 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
+              <View style={{flex: 16}}/>
+              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle)}>Copy to New</Button>
             </View>}
             </>
           )
@@ -395,6 +415,25 @@ const TOURNAMENT_SUBSCRIPTION = gql`
     }
   }
 `
+
+const COPY_TOURNAMENT_MUTATION = gql`
+  mutation CreateCopyOfTournament($Segments: segments_arr_rel_insert_input, $Chips: chips_arr_rel_insert_input, $Costs: costs_arr_rel_insert_input, $Title: String, $Subtitle: String) {
+    insert_tournaments_one(object: {
+      title: $Title, 
+      subtitle: $Subtitle, 
+      Timers: {data: [
+        {active: false}
+      ]}, 
+      Segments: $Segments, 
+      Chips: $Chips,
+      Costs: $Costs,
+    })
+    { 
+      id
+    }
+  }
+`
+
 const DELETE_TOURNAMENT_MUTATION = gql`
   mutation DeleteTournament($id: uuid!) {
     delete_tournaments_by_pk(id: $id) {
