@@ -179,7 +179,9 @@ export function TournamentDashboardScreen (props) {
     const segments = sortSegments(Tournament.Segments)
     const chips = sortChips(Tournament.Chips)
     const costs = sortEntryFees(Tournament.Costs)
+    const timer = Tournament.Timers[0]
     const smallestChipReq = smallestChipArray(chips, segments)
+    // console.log(smallestChipReq)
     const totalScheduledDuration = Tournament.Segments_aggregate.aggregate.sum.duration
     const sectionListData = [
       // {
@@ -302,7 +304,7 @@ export function TournamentDashboardScreen (props) {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editChipItem(item)}}>
               <Text style={[ styles.bold, {flex: 2, color: item.color}]}>{item.denom}</Text>
-              {/* <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>{item.qtyAvailable ? item.qtyAvailable.toLocaleString() : '0'} Available</Text> */}
+              <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>Required through Level {smallestChipReq[index].segment + 1}</Text>
               {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
@@ -311,9 +313,42 @@ export function TournamentDashboardScreen (props) {
       {
         key: 4,
         sectionIndex: 4,
+        title: "Timer Customization",
+        titleStyles: [],
+        data: [timer],
+        initiallyCollapsed: false,
+        includeCountInTitle: false,
+        createFunction: null,
+        onPressFunction: ()=>{},
+        rightButtons: [
+          // {
+          //   onPress: deleteChipItem,
+          //   iconName: 'trash',
+          //   backgroundColor: 'red',
+          // },
+        ], 
+        renderFrontRow: (item, index, collapsed) => {
+          return(
+            <Pressable style={[collapsed ? styles.collapsed : null, {flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'left', textAlign: 'left'} ]} onPress={() => {}}>
+              <Text style={[ styles.bold, {textAlign: 'left'}]}>Play alarm/speech at start of each round?: {item.playEndOfRoundSound.toString()}</Text>
+              <Text style={[ item.playEndOfRoundSound ? styles.bold : {color: 'grey'}, {}]}>Speech:</Text>
+              <Text style={[ item.playEndOfRoundSound ? styles.bold : {color: 'grey'}, {}]}>{(item.endOfRoundSpeech || "").toString()}. The blinds are now...</Text>
+              <Text>  </Text>
+              <Text style={[ styles.bold, {textAlign: 'left'}]}>Play alarm/speech at one minute remaining?: {item.playOneMinuteRemainingSound.toString()}</Text>
+              <Text style={[ item.playOneMinuteRemainingSound ? styles.bold : {color: 'grey'}, {}]}>Speech:</Text>
+              <Text style={[ item.playOneMinuteRemainingSound ? styles.bold : {color: 'grey'}, {}]}>{(item.oneMinuteRemainingSpeech ||"").toString()}</Text>
+              <Text>  </Text>
+            </Pressable>
+          )
+        }
+      },
+
+      {
+        key: 5,
+        sectionIndex: 5,
         title: "Quick Adjustments",
         titleStyles: [],
-        data: [ 1, 2, 3 ],
+        data: [ 1, ],
         initiallyCollapsed: false,
         includeCountInTitle: false,
         createFunction: null,
@@ -321,29 +356,25 @@ export function TournamentDashboardScreen (props) {
         renderFrontRow: (item, index, collapsed) => {
           return (
             <>
-            { item == 1 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
-              <Slider
-                style={{flex: 16, marginHorizontal: responsiveFontSize(3)}}
-                value={sliderValue}
-                onValueChange={setSliderValue}
-                maximumValue={60}
-                minimumValue={0}
-                step={sliderValue >= 10 ? 1 : 0.5}
-                allowTouchTrack
-                trackStyle={{ height: 5, backgroundColor: 'transparent' }}
-                thumbStyle={{ height: 20, width: 20, backgroundColor: 'transparent' }}
-              />
-              <Text style={{flex: 4, fontSize: responsiveFontSize(1.5), marginHorizontal: responsiveFontSize(1.5)}}>{sliderValue} Min</Text>
-              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> editAllSegmentDurations(sliderValue)}>Set all durations</Button>
-            </View>}
-            { item == 2 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
-              <View style={{flex: 16}}/>
-              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> removeAllAntes()}>Remove antes</Button>
-            </View>}
-            { item == 3 && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
-              <View style={{flex: 16}}/>
-              <Button style={[ , {flex: 10, marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle)}>Copy to New Tournament</Button>
-            </View>}
+            <View style={[ collapsed ? styles.collapsed : null, {flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}]}>
+              <View style={[styles.rowFront, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
+                <Slider
+                  style={{flex: 20, marginHorizontal: responsiveFontSize(1)}}
+                  value={sliderValue}
+                  onValueChange={setSliderValue}
+                  maximumValue={60}
+                  minimumValue={0}
+                  step={sliderValue < 10 ? 0.5 : (sliderValue >=20 ? 5 : 1)}
+                  allowTouchTrack
+                  trackStyle={{ height: 5, color: 'yellow', backgroundColor: 'black' }}
+                  thumbStyle={{ height: 20, width: 20, color: 'pink', backgroundColor: 'grey' }}
+                />
+                <Text style={{flex: 4, fontSize: responsiveFontSize(1.5), marginHorizontal: responsiveFontSize(1.5)}}>{sliderValue} Min</Text>
+              </View>
+              <Button style={[ , {marginVertical: responsiveFontSize(0.5), alignSelf: 'flex-end'}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> editAllSegmentDurations(sliderValue)}>Set all durations</Button>
+              <Button style={[ , {marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> removeAllAntes()}>Remove antes</Button>
+              <Button style={[ , {marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle)}>Copy to New Tournament</Button>
+            </View>
             </>
           )
         }
@@ -396,7 +427,12 @@ const TOURNAMENT_SUBSCRIPTION = gql`
       }
       Timers(limit: 1) {
         active
-        updated_at
+        clock_updated_at
+        playOneMinuteRemainingSound
+        oneMinuteRemainingSpeech
+        playEndOfRoundSound
+        endOfRoundSpeech
+        backgroundColor
         id
       }
       Segments_aggregate {

@@ -47,7 +47,7 @@ const stateCalculator = (payload) => {
   var noticeStatus = false
   for (let i = 0, len = sortedSegmentsArray.length; i < len; i++) {
     if (Timers[0].active) {
-      finishTime = new Date(sortedSegmentsArray[i].duration * 60000 + cumulativeDuration - Timers[0].elapsed + new Date(Timers[0].updated_at).valueOf())
+      finishTime = new Date(sortedSegmentsArray[i].duration * 60000 + cumulativeDuration - Timers[0].elapsed + new Date(Timers[0].clock_updated_at).valueOf())
     } else {
       finishTime = new Date(sortedSegmentsArray[i].duration * 60000 + cumulativeDuration - Timers[0].elapsed + nowValue)
     }
@@ -82,7 +82,7 @@ const stateCalculator = (payload) => {
       : 0,
     currentDurationText: (calculatedSegmentIndex <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex].duration.toString() + 
-      (sortedSegmentsArray[calculatedSegmentIndex].duration > 1 ? " Minutes" : "Minute"))
+      (sortedSegmentsArray[calculatedSegmentIndex].duration > 1 ? " Minutes" : " Minute"))
       : "--- Minutes",
     nextBlindsText: (calculatedSegmentIndex != null && calculatedSegmentIndex + 1 <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex +1 ].sBlind.toString() + 
@@ -91,7 +91,7 @@ const stateCalculator = (payload) => {
       :"None",
     nextDurationText: (calculatedSegmentIndex != null && calculatedSegmentIndex + 1 <= sortedSegmentsArray.length - 1) ? (
       sortedSegmentsArray[calculatedSegmentIndex + 1].duration.toString() + 
-      (sortedSegmentsArray[calculatedSegmentIndex + 1].duration > 1 ? " Minutes" : "Minute"))
+      (sortedSegmentsArray[calculatedSegmentIndex + 1].duration > 1 ? " Minutes" : " Minute"))
       :"",
     currentSegmentFinishTime: (calculatedSegmentIndex <= sortedSegmentsArray.length - 1) ? sortedSegmentsArray[calculatedSegmentIndex].finishTime : null,
     currentSegmentNoticeTime: (calculatedSegmentIndex <= sortedSegmentsArray.length - 1) ? sortedSegmentsArray[calculatedSegmentIndex].finishTime - AppOptions.warningTime : null,
@@ -210,31 +210,31 @@ export const TournamentTimerScreen = (props) => {
     EORTimeout = setTimeout(()=> {
       if (!playingSound) {
         if (newCSI == lastSI) {
-          playSoundEffect("The tournament has reached the end of the final round.  The timer has been stopped.", 1.5, true, 0.5)
+          if (timer.playEndOfRoundSound) playSoundEffect("The tournament has reached the end of the final round.  The timer has been stopped.", 1.5, true, 0.5)
           toggleTimerButtonPressed()
         } else {
-          speech = "Dinky donck! Dinky to the donkey! The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
+          speech = (timer.endOfRoundSpeech || "") + ". The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
           dispatch({type: 'END_OF_ROUND', payload: data.tournaments_by_pk})
-          playSoundEffect(speech, 1, true, 1)
+          if (timer.playEndOfRoundSound) playSoundEffect(speech, 1, true, 1)
         }
       }
     }, new Date(currentSegmentFinishTime).valueOf() - new Date().valueOf())
     return () => {
       clearTimeout(EORTimeout)
     }
-  }, [currentSegmentFinishTime, isActive])
+  }, [currentSegmentFinishTime, isActive, timer])
 
   useEffect(()=> {
     let lastMinuteTimeOut
     if (!currentSegmentNoticeTime || !isActive) return
     lastMinuteTimeOut = setTimeout(()=> {
       dispatch({type: 'ONE_MINUTE_REMAINING'})
-      if (!playingSound) playSoundEffect("Last minute of this round.", 1.5, true, 0.5)
+      if (!playingSound && timer.playOneMinuteRemainingSound) playSoundEffect((timer.oneMinuteRemainingSpeech || ""), 1.5, true, 0.5)
     }, new Date(currentSegmentNoticeTime).valueOf() - new Date().valueOf())
     return () => {
       clearTimeout(lastMinuteTimeOut)
     }
-  }, [currentSegmentNoticeTime, isActive])
+  }, [currentSegmentNoticeTime, isActive, timer])
 
   useEffect(() => {
     let ticker
@@ -325,14 +325,14 @@ export const TournamentTimerScreen = (props) => {
       variables: {
         id: timer.id,
         active: !(timer.active),
-        elapsed: timer.elapsed + (timer.active ? new Date().valueOf() - new Date(timer.updated_at).valueOf() : 0),
+        elapsed: timer.elapsed + (timer.active ? new Date().valueOf() - new Date(timer.clock_updated_at).valueOf() : 0),
       },
       optimisticResponse: {
         update_timers_by_pk: {
           id: timer.id,
-          elapsed: timer.elapsed + (timer.active ? new Date().valueOf() - new Date(timer.updated_at).valueOf() : 0),
+          elapsed: timer.elapsed + (timer.active ? new Date().valueOf() - new Date(timer.clock_updated_at).valueOf() : 0),
           active: !(timer.active),
-          updated_at: new Date(),
+          clock_updated_at: new Date(),
         }
       }
     })
@@ -350,7 +350,7 @@ export const TournamentTimerScreen = (props) => {
             id: timer.id,
             elapsed: sortedSegmentsArray[newCSI].cumulativeDuration +1,
             active: timer.active,
-            updated_at: new Date(),
+            clock_updated_at: new Date(),
           }
         },
       })
@@ -381,7 +381,7 @@ export const TournamentTimerScreen = (props) => {
           id: timer.id,
           elapsed,
           active: timer.active,
-          updated_at: new Date(),
+          clock_updated_at: new Date(),
         }
       },
     })
@@ -397,7 +397,7 @@ export const TournamentTimerScreen = (props) => {
           id: timer.id,
           elapsed: 0,
           active: false,
-          updated_at: new Date(),
+          clock_updated_at: new Date(),
         }
       },
     })
@@ -579,7 +579,7 @@ export const TOURNAMENT_SUBSCRIPTION = gql`
     Timers (limit: 1) {
       id
       active
-      updated_at
+      clock_updated_at
       created_at
       elapsed
       oneMinuteRemainingSpeech
@@ -602,9 +602,9 @@ export const TOURNAMENT_SUBSCRIPTION = gql`
 
 export const UPDATE_TIMER_MUTATION = gql`
   mutation updateTimer($id: uuid!, $active: Boolean!, $elapsed: Int!) {
-    update_timers_by_pk(pk_columns: {id: $id}, _set: {active: $active, updated_at: "=now()", elapsed: $elapsed, lastAccessed: "=now()"}) {
+    update_timers_by_pk(pk_columns: {id: $id}, _set: {active: $active, clock_updated_at: "=now()", elapsed: $elapsed, lastAccessed: "=now()"}) {
       id
-      updated_at
+      clock_updated_at
       active
       elapsed
     }
@@ -612,9 +612,9 @@ export const UPDATE_TIMER_MUTATION = gql`
 `
 export const JUMP_SEGMENT_MUTATION = gql`
   mutation advanceTimer($id: uuid!, $elapsed: Int!) {
-    update_timers_by_pk(pk_columns: {id: $id}, _set: {updated_at: "=now()", elapsed: $elapsed, lastAccessed: "=now()"}) {
+    update_timers_by_pk(pk_columns: {id: $id}, _set: {clock_updated_at: "=now()", elapsed: $elapsed, lastAccessed: "=now()"}) {
       id
-      updated_at
+      clock_updated_at
       active
       elapsed
     }
@@ -622,9 +622,9 @@ export const JUMP_SEGMENT_MUTATION = gql`
 `
 export const RESET_TIMER_MUTATION = gql`
   mutation resetTimer($id: uuid!) {
-    update_timers_by_pk(pk_columns: {id: $id}, _set: {active: false, elapsed: "0", lastAccessed: "=now()", updated_at: "=now()", }) {
+    update_timers_by_pk(pk_columns: {id: $id}, _set: {active: false, elapsed: "0", lastAccessed: "=now()", clock_updated_at: "=now()", }) {
       id
-      updated_at
+      clock_updated_at
       active
       elapsed
     }

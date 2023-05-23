@@ -59,6 +59,12 @@ export function TournamentsScreen(props) {
     }
   }, [data])
 
+  React.useEffect(()=>{
+    if (data?.tournaments?.length > 0) {
+      console.log(data.tournaments[0].Timers)
+    } 
+  }, [data])
+
   if (loading) return (<AppLayout><ActivityIndicator/></AppLayout>)
   if (error) return (<AppLayout><ErrorMessage error={error}/></AppLayout>)
   if (createError) return (<AppLayout><ErrorMessage error={createError}/></AppLayout>)
@@ -90,8 +96,8 @@ export function TournamentsScreen(props) {
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editItem(item)}}>
-              <Text style={[item.Timers[0]?.is_active? styles.active : null, {}]}>{item.title}</Text>
-              <Text style={[item.Timers[0]?.is_active? styles.active : null, {}]}>{item.subtitle}</Text>
+              <Text style={[item.Timers[0]?.active? styles.active : null, {}]}>{item.title}</Text>
+              <Text style={[item.Timers[0]?.active? styles.active : null, {}]}>{item.subtitle}</Text>
               {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
@@ -110,13 +116,22 @@ export function TournamentsScreen(props) {
 
 const CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION = gql`
   subscription currentUserTournamentListSubscription {
-    tournaments(order_by: {updated_at: desc_nulls_last}) {
+    tournaments(order_by: {Timers_aggregate: {max: {clock_updated_at: desc_nulls_last}}}) {
       id
       title
       subtitle
-      Timers (limit: 1) {
+      updated_at
+      Timers(limit: 1) {
         id
         active
+        updated_at
+      }
+      Timers_aggregate {
+        aggregate {
+          max {
+            clock_updated_at
+          }
+        }
       }
     }
   }
@@ -128,7 +143,7 @@ const CREATE_TOURNAMENT_MUTATION = gql`
       title: "$20, T-1000 NLHE Tournament", 
       subtitle: "10 Minute Blinds", 
       Timers: {data: [
-        {active: false}
+        {active: false, clock_updated_at: "=now()", playEndOfRoundSound: true, playOneMinuteRemainingSound: true, endOfRoundSpeech: "Attention all tournament players. The blinds are up.", oneMinuteRemainingSpeech: "There is one minute left in this round."}
       ]}, 
       Segments: {data: [
         {sBlind: 5, bBlind: 10, ante: 0, duration: 10}, 

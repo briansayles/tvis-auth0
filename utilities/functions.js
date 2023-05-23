@@ -93,69 +93,6 @@ export function numberToSuffixedString(number) {
 	return number.toLocaleString()
 }
 
-export function tick(endOfRoundFunction, noticeSeconds, noticeFunction) {
-
-	if (this.props.getTournamentQuery.loading || this.props.getTournamentQuery.error || this.props.getServerTimeMutation.loading || this.props.getServerTimeMutation.error) {return}
-	const msPerMinute = 60 * 1000
-	const noticeMilliseconds = noticeSeconds * 1000
-	const tourney = this.props.getTournamentQuery.Tournament
-	const segments = sortSegments(tourney.segments)
-	const timer = tourney.timer
-	const time = new Date()
-	const totalElapsedMS = Math.max(0,timer.active ? timer.elapsed + time.valueOf() - this.state.offsetFromServerTime - new Date(timer.updatedAt).valueOf() : timer.elapsed)
-	var cumulativeMS = 0
-	var currentSegmentIndex = null
-	for (var i = 0, len = segments.length; i < len; i++) {
-	  if (totalElapsedMS >= cumulativeMS && totalElapsedMS < (cumulativeMS + segments[i].duration * msPerMinute)) {
-	    currentSegmentIndex = i
-	    break
-	  }
-	  cumulativeMS += segments[i].duration * msPerMinute
-	}
-
-	if(currentSegmentIndex==null) {
-	  this.setState ({
-	    time: time,
-	    ms: 0,
-	    display: {timer: "", currentBlinds: "", currentAnte: ""},
-	    segment: segments[segments.length-1],
-	    nextSegment: null,
-	    csi: segments.length-1,
-	    currentDuration: segments[segments.length-1].duration,
-	    totalDuration: cumulativeMS,
-	    percentage: 0,
-	    noticeStatus: false,
-	    timerActive: false,
-	  })
-	  return
-	}
-	const duration = cumulativeMS + segments[currentSegmentIndex].duration * msPerMinute
-	const ms = duration - totalElapsedMS
-	if (currentSegmentIndex > this.state.csi && currentSegmentIndex > 0 && this.state.csi != null && this.state.timerActive) {
-		endOfRoundFunction()
-	} else if (ms < noticeMilliseconds && this.state.ms >= noticeMilliseconds && this.state.timerActive && ms > noticeMilliseconds - 1000) {
-		noticeFunction()
-	}
-
-	this.setState ({
-	  time: time,
-	  ms: ms,
-	  display: {
-	  	timer: timer.active ? msToTime(ms + 999) : msToTime(ms),
-	  	currentBlinds: numberToSuffixedString(segments[currentSegmentIndex].sBlind) + '/' + numberToSuffixedString(segments[currentSegmentIndex].bBlind),
-	  	currentAnte: segments[currentSegmentIndex].ante != null && "Ante: " + numberToSuffixedString(segments[currentSegmentIndex].ante)
-	  },
-	  segment: segments[currentSegmentIndex],
-	  nextSegment: currentSegmentIndex < segments.length -1 ? segments[currentSegmentIndex + 1] : null,
-	  csi: currentSegmentIndex,
-	  currentDuration: segments[currentSegmentIndex].duration, 
-	  totalDuration: duration,
-	  percentage: ms/(segments[currentSegmentIndex].duration * msPerMinute),
-	  noticeStatus: ms < noticeMilliseconds,
-	  timerActive: timer.active,
-	})
-}
-
 export function sortSegments (segments) {
 	return segments.slice(0).sort((a,b) => {
 		return (parseInt(a.sBlind || 0) + parseInt(a.bBlind || 0) + parseInt(a.ante || 0) - parseInt(b.sBlind || 0) - parseInt(b.bBlind || 0) - parseInt(b.ante || 0))
@@ -171,11 +108,11 @@ export function sortChips (chips) {
 export function sortEntryFees (fees) {
 	const sortOrder = {
 		Buyin: 1,
-		House: 2,
-		Charity: 3,
-		Rebuy: 4,
-		Addon: 5,
-		Bounty: 6
+		Addon: 2,
+		House: 3,
+		Charity: 4,
+		Bounty: 5,
+		Rebuy: 6,
 	}
 	return fees.slice(0).sort((a,b) => {
 		if (a.costType !== b.costType) {
