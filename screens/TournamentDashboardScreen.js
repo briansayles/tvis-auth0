@@ -303,8 +303,8 @@ export function TournamentDashboardScreen (props) {
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editChipItem(item)}}>
-              <Text style={[ styles.bold, {flex: 2, color: item.color}]}>{item.denom}</Text>
-              <Text style={[ , {flex: 4 ,textAlign: 'right', }]}>Required through Level {smallestChipReq[index].segment + 1}</Text>
+              <Text style={[ styles.bold, {flex: 2, color: item.color, textAlign: 'right'}]}>{item.denom}</Text>
+              <Text style={[ , {flex: 12 ,textAlign: 'right', }]}>Required through Level {smallestChipReq[index].segment + 1}</Text>
               {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
