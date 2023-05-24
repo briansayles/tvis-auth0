@@ -20,6 +20,14 @@ export const colors = {
 }
 
 export const styles = StyleSheet.create({
+  inputTitleEnabled: {
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  inputTitleDisabled: {
+    fontWeight: 'normal',
+    color: 'grey',
+  },
   appleButton: {
     height: responsiveHeight(5),
     width: responsiveWidth(40),

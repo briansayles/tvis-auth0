@@ -213,7 +213,7 @@ export const TournamentTimerScreen = (props) => {
           if (timer.playEndOfRoundSound) playSoundEffect("The tournament has reached the end of the final round.  The timer has been stopped.", 1.5, true, 0.5)
           toggleTimerButtonPressed()
         } else {
-          speech = (timer.endOfRoundSpeech || "") + ". The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
+          speech = (timer.endOfRoundSpeech ? timer.endOfRoundSpeech + ". ":"") + "The blinds are now " + nextBlindsText.replace("k", " thousand ").replace("/", " and ").replace("false","").replace("+ ", "with an ante of ")
           dispatch({type: 'END_OF_ROUND', payload: data.tournaments_by_pk})
           if (timer.playEndOfRoundSound) playSoundEffect(speech, 1, true, 1)
         }

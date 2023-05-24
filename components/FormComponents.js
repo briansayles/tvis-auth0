@@ -7,6 +7,7 @@ import { KeyboardAwareScrollView, } from 'react-native-keyboard-aware-scroll-vie
 import {Ionicons, } from '@expo/vector-icons'
 import {Picker as RNPPicker} from '@react-native-picker/picker'
 import { responsiveFontSize } from '../utilities/functions'
+import { styles } from '../styles'
 
 export const theme= {
   Button: {
@@ -103,6 +104,7 @@ export const MyInput = (props) => {
     <Input
       value={props.value.toString()}
       label={props.title}
+      labelStyle={[props.disabled ? styles.inputTitleDisabled : styles.inputTitleEnabled]}
       inputContainerStyle={{marginBottom: responsiveFontSize(4), }}
       {...props}
     />

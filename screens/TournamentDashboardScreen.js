@@ -88,7 +88,8 @@ export function TournamentDashboardScreen (props) {
   const editChipItem = (item) => { props.navigation.navigate('Chip Editor', {id: item.id})}
   const editCostItem = (item) => { props.navigation.navigate('Entry Fee Editor', {id: item.id})}
   const editTournamentInfoItem = (item) => {props.navigation.navigate('Tournament Info Editor', {id: props.route.params.id})}
-  
+  const editTimerItem = (item) => { props.navigation.navigate('Timer Editor', {id: item.id})}
+
   const [updateSegmentsDurations] = useMutation(UPDATE_DURATIONS_MUTATATION)
   const editAllSegmentDurations = (duration) => {
     Alert.alert(
@@ -320,24 +321,11 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: false,
         createFunction: null,
         onPressFunction: ()=>{},
-        rightButtons: [
-          // {
-          //   onPress: deleteChipItem,
-          //   iconName: 'trash',
-          //   backgroundColor: 'red',
-          // },
-        ], 
+        rightButtons: [], 
         renderFrontRow: (item, index, collapsed) => {
           return(
-            <Pressable style={[collapsed ? styles.collapsed : null, {flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'left', textAlign: 'left'} ]} onPress={() => {}}>
-              <Text style={[ styles.bold, {textAlign: 'left'}]}>Play alarm/speech at start of each round?: {item.playEndOfRoundSound.toString()}</Text>
-              <Text style={[ item.playEndOfRoundSound ? styles.bold : {color: 'grey'}, {}]}>Speech:</Text>
-              <Text style={[ item.playEndOfRoundSound ? styles.bold : {color: 'grey'}, {}]}>{(item.endOfRoundSpeech || "").toString()}. The blinds are now...</Text>
-              <Text>  </Text>
-              <Text style={[ styles.bold, {textAlign: 'left'}]}>Play alarm/speech at one minute remaining?: {item.playOneMinuteRemainingSound.toString()}</Text>
-              <Text style={[ item.playOneMinuteRemainingSound ? styles.bold : {color: 'grey'}, {}]}>Speech:</Text>
-              <Text style={[ item.playOneMinuteRemainingSound ? styles.bold : {color: 'grey'}, {}]}>{(item.oneMinuteRemainingSpeech ||"").toString()}</Text>
-              <Text>  </Text>
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {height: responsiveFontSize(6.75), flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', textAlign: 'left'} ]} onPress={() => editTimerItem(item)}>
+              <Text style={[styles.bold, collapsed ? styles.collapsed : null, {}]}>Tap here to customize the timer sounds...</Text>
             </Pressable>
           )
         }
@@ -366,8 +354,8 @@ export function TournamentDashboardScreen (props) {
                   minimumValue={0}
                   step={sliderValue < 10 ? 0.5 : (sliderValue >=20 ? 5 : 1)}
                   allowTouchTrack
-                  trackStyle={{ height: 5, color: 'yellow', backgroundColor: 'black' }}
-                  thumbStyle={{ height: 20, width: 20, color: 'pink', backgroundColor: 'grey' }}
+                  trackStyle={{ height: 5, }}
+                  thumbStyle={{ height: 20, width: 20, backgroundColor: 'grey' }}
                 />
                 <Text style={{flex: 4, fontSize: responsiveFontSize(1.5), marginHorizontal: responsiveFontSize(1.5)}}>{sliderValue} Min</Text>
               </View>

@@ -19,6 +19,7 @@ import { TournamentTimerScreen}  from './screens/TournamentTimerScreen'
 import { SegmentEditScreen } from './screens/SegmentEditScreen'
 import { ChipEditScreen } from './screens/ChipEditScreen' 
 import { CostEditScreen } from './screens/CostEditScreen'
+import { TimerEditScreen } from './screens/TimerEditScreen'
 import { AuthContext, authReducer, authData, redirectUri, } from './Contexts'
 import * as WebBrowser from 'expo-web-browser';
 import { ResponseType, } from 'expo-auth-session';
@@ -213,6 +214,7 @@ function TournamentsStack() {
       <Stack.Screen name="Segment Editor" component={SegmentEditScreen}/>
       <Stack.Screen name="Chip Editor" component={ChipEditScreen}/>
       <Stack.Screen name="Entry Fee Editor" component={CostEditScreen}/>
+      <Stack.Screen name="Timer Editor" component={TimerEditScreen}/>
     </Stack.Navigator>
   );
 }
