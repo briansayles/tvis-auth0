@@ -26,8 +26,8 @@ export function TournamentDashboardScreen (props) {
   }
   const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION, {variables: {id: props.route.params.id}})
   const [copyTournament, {loading: copyingTournament, data: copiedTournamentData, error: copyTournamentError}] = useMutation(COPY_TOURNAMENT_MUTATION, {})
-  const copyTournamentFunction = async (segments, chips, costs, title, subtitle) => {
-    let newSegmentsArray=[], newChipsArray=[], newCostsArray=[]
+  const copyTournamentFunction = async (segments, chips, costs, title, subtitle, timer) => {
+    let newSegmentsArray=[], newChipsArray=[], newCostsArray=[], newTimersArray=[]
     segments.map((segment, index) => {
       let {sBlind, bBlind, ante, duration} = segment
       newSegmentsArray.push({sBlind, bBlind, ante, duration})
@@ -40,12 +40,18 @@ export function TournamentDashboardScreen (props) {
       let {chipStack, costType, price} = cost
       newCostsArray.push({chipStack, costType, price})
     })
+    console.log(newCostsArray)
+    // console.log(timer)
+    let {playEndOfRoundSound, playOneMinuteRemainingSound, endOfRoundSpeech, oneMinuteRemainingSpeech} = timer
+    newTimersArray.push({playEndOfRoundSound, playOneMinuteRemainingSound, endOfRoundSpeech, oneMinuteRemainingSpeech, active: false })
+    console.log(newTimersArray)
     const newTourney = await copyTournament({variables: {
       Title: title,
       Subtitle: subtitle,
       Segments: {'data': newSegmentsArray},
       Chips: {'data': newChipsArray},
-      Costs: {'data': newCostsArray}
+      Costs: {'data': newCostsArray},
+      Timers: {'data': newTimersArray}
     }})
     Alert.alert('Tournament Copied', 'We copied this tournament to a new one for you. Click OK to go to the new tournament to edit or run it.', [{text: 'OK', onPress: ()=>{
       props.navigation.navigate('Tournament Dashboard', {id: newTourney.data.insert_tournaments_one.id})
@@ -361,7 +367,7 @@ export function TournamentDashboardScreen (props) {
               </View>
               <Button style={[ , {marginVertical: responsiveFontSize(0.5), alignSelf: 'flex-end'}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> editAllSegmentDurations(sliderValue)}>Set all durations</Button>
               <Button style={[ , {marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> removeAllAntes()}>Remove antes</Button>
-              <Button style={[ , {marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle)}>Copy to New Tournament</Button>
+              <Button style={[ , {marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> copyTournamentFunction(segments, chips, costs, Tournament.title, Tournament.subtitle, timer)}>Copy to New Tournament</Button>
             </View>
             </>
           )
@@ -447,16 +453,14 @@ const TOURNAMENT_SUBSCRIPTION = gql`
 `
 
 const COPY_TOURNAMENT_MUTATION = gql`
-  mutation CreateCopyOfTournament($Segments: segments_arr_rel_insert_input, $Chips: chips_arr_rel_insert_input, $Costs: costs_arr_rel_insert_input, $Title: String, $Subtitle: String) {
+  mutation CreateCopyOfTournament($Segments: segments_arr_rel_insert_input, $Chips: chips_arr_rel_insert_input, $Costs: costs_arr_rel_insert_input, $Title: String, $Subtitle: String, $Timers: timers_arr_rel_insert_input) {
     insert_tournaments_one(object: {
       title: $Title, 
       subtitle: $Subtitle, 
-      Timers: {data: [
-        {active: false}
-      ]}, 
       Segments: $Segments, 
       Chips: $Chips,
       Costs: $Costs,
+      Timers: $Timers,
     })
     { 
       id

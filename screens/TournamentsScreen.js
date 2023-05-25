@@ -59,11 +59,11 @@ export function TournamentsScreen(props) {
     }
   }, [data])
 
-  React.useEffect(()=>{
-    if (data?.tournaments?.length > 0) {
-      console.log(data.tournaments[0].Timers)
-    } 
-  }, [data])
+  // React.useEffect(()=>{
+  //   if (data?.tournaments?.length > 0) {
+  //     console.log(data.tournaments[0].Timers)
+  //   } 
+  // }, [data])
 
   if (loading) return (<AppLayout><ActivityIndicator/></AppLayout>)
   if (error) return (<AppLayout><ErrorMessage error={error}/></AppLayout>)
