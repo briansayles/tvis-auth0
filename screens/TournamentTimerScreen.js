@@ -226,7 +226,7 @@ export const TournamentTimerScreen = (props) => {
 
   useEffect(()=> {
     let lastMinuteTimeOut
-    if (!currentSegmentNoticeTime || !isActive) return
+    if (!currentSegmentNoticeTime || !isActive || currentSegmentNoticeTime.valueOf() <= new Date().valueOf()) return
     lastMinuteTimeOut = setTimeout(()=> {
       dispatch({type: 'ONE_MINUTE_REMAINING'})
       if (!playingSound && timer.playOneMinuteRemainingSound) playSoundEffect((timer.oneMinuteRemainingSpeech || ""), 1.5, true, 0.5)
