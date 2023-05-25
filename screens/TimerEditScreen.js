@@ -46,7 +46,7 @@ export const TimerEditScreen = (props) => {
             containerStyle={{backgroundColor: 'transparent'}}
           />
           <MyInput
-            title="Subtitle"
+            title="One minute remaining speech (optional)"
             value={(formValues?.oneMinuteRemainingSpeech ? formValues.oneMinuteRemainingSpeech : "")}
             placeholder="Enter one minute remaining speech here..."
             onChangeText={(text) => handleInputChange('oneMinuteRemainingSpeech', text)}
@@ -61,15 +61,15 @@ export const TimerEditScreen = (props) => {
             containerStyle={{backgroundColor: 'transparent'}}
           />
           <MyInput
-            title="End of round speech (custom)"
+            title="End of round speech (optional)"
             value={(formValues?.endOfRoundSpeech ? formValues.endOfRoundSpeech : "")}
-            placeholder="Enter end of round speech here..."
+            placeholder="Enter end of round speech here. It will be followed automatically by 'The blinds are now ___ and ___ ...'"
             onChangeText={(text) => handleInputChange('endOfRoundSpeech', text)}
             keyboardType="default"
             multiline={true}
             disabled={!formValues?.playEndOfRoundSound}
           />
-          <MyInput
+          {/* <MyInput
             title="End of round speech (automatic) that will be appended to above speech"
             value="The blinds are now ___ and ___ [with an ante of ___]"
             // placeholder="Enter end of round speech here..."
@@ -78,7 +78,7 @@ export const TimerEditScreen = (props) => {
             multiline={true}
             disabled={!formValues?.playEndOfRoundSound}
             editable={false}
-          />
+          /> */}        
         </View>
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
           {/* <DeleteButton
