@@ -21,8 +21,9 @@ import { ChipEditScreen } from './screens/ChipEditScreen'
 import { CostEditScreen } from './screens/CostEditScreen'
 import { TimerEditScreen } from './screens/TimerEditScreen'
 import { AuthContext, authReducer, authData, redirectUri, } from './Contexts'
-import * as WebBrowser from 'expo-web-browser';
-import { ResponseType, } from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser'
+// import * as AuthSession from 'expo-auth-session'
+// import { ResponseType, } from 'expo-auth-session';
 import { AuthConfig } from './config'
 
 const Stack = createStackNavigator()
@@ -62,17 +63,13 @@ export default function App({ navigation }) {
       let userToken;
       try {
         userToken = await SecureStore.getItemAsync('userToken')
-        // console.log(userToken)
         // After restoring token, we may need to validate it in production apps
         const decoded = jwt_decode(userToken);
-        // console.log(JSON.stringify(decoded))
         const { exp } = decoded;
         const expiry = new Date(exp*1000)
         if (expiry < Date.now()) {
-          // console.log('bootstraping. expired.')
           dispatch({type: 'SIGN_OUT'})
         } else {
-          // console.log('bootstrapping. restoring token.')
           console.log(userToken)
           dispatch({ type: 'RESTORE_TOKEN', token: userToken })
         }
@@ -87,19 +84,22 @@ export default function App({ navigation }) {
     () => ({
       redirect: redirectUri.toString(),
       signIn: async data => {
-        // console.log('signIn...')
+        const discoveryDocument = await AuthSession.fetchDiscoveryAsync(AuthConfig.discoveryURI)
         const request = await AuthSession.loadAsync(
           {
-            responseType: ResponseType.Token,
+            responseType: AuthSession.ResponseType.Code,
             extraParams: {
               nonce: randomString(12),
             },
             clientId: AuthConfig.clientId,
+            clientSecret: AuthConfig.clientSecret,
+            usePKCE: false,
             scopes: ["openid", "profile"],
             redirectUri,
-          }, AuthConfig.authorizeURI
-          )
+          }, discoveryDocument
+        )
         const result = await request.promptAsync({})
+        console.log(result)
         if (result.error) {
           Alert.alert(
             'Authentication error',
@@ -108,9 +108,19 @@ export default function App({ navigation }) {
           dispatch({type: 'SIGN_OUT'})
         }
         if (result.type === 'success') {
-          const jwtToken = JSON.stringify(result.params.access_token)
+          console.log('success')
+          console.log(result.params.code)
+          exchangeResult = await AuthSession.exchangeCodeAsync(
+            {
+              code: result.params.code,
+              clientId: AuthConfig.clientId,
+              clientSecret: AuthConfig.clientSecret,
+              redirectUri,
+            }, discoveryDocument
+          )
+          console.log(exchangeResult.accessToken)
+          const jwtToken = JSON.stringify(exchangeResult.accessToken)
           const decoded = jwt_decode(jwtToken)
-          // console.log(decoded)
           const { sub, exp, id } = decoded
           const expiry = new Date(exp*1000)
           if (expiry < Date.now()) {
@@ -127,21 +137,17 @@ export default function App({ navigation }) {
         }
       },
       signOut: async () => {
-        // console.log('signOut...')
         await SecureStore.deleteItemAsync('userToken')
         await SecureStore.deleteItemAsync('expiry')
         dispatch({ type: 'SIGN_OUT' })
       },
       userName: async () => {
-        // console.log('userName...')
         try {
           const jwtToken = await SecureStore.getItemAsync('userToken')
           const decoded = jwt_decode(jwtToken)
           const { sub, exp } = decoded
-          // console.log(sub)
           return sub
         } catch (e) {
-          // console.log('no userName')
           return null
         }
       },
@@ -150,10 +156,8 @@ export default function App({ navigation }) {
           const jwtToken = await SecureStore.getItemAsync('userToken')
           const decoded = jwt_decode(jwtToken)
           const {uid} = decoded
-          // console.log(uid)    
           return uid
         } catch (e) {
-          // console.log('no userId')
           return null
         } 
       }
