@@ -22,9 +22,9 @@ import { CostEditScreen } from './screens/CostEditScreen'
 import { TimerEditScreen } from './screens/TimerEditScreen'
 import { AuthContext, authReducer, authData, redirectUri, } from './Contexts'
 import * as WebBrowser from 'expo-web-browser'
-// import * as AuthSession from 'expo-auth-session'
-// import { ResponseType, } from 'expo-auth-session';
+import * as Crypto from 'expo-crypto'
 import { AuthConfig } from './config'
+import { generateChallange } from './utilities/functions'
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -87,6 +87,7 @@ export default function App({ navigation }) {
       redirect: redirectUri.toString(),
       signIn: async data => {
         const discoveryDocument = await AuthSession.fetchDiscoveryAsync(AuthConfig.discoveryURI)
+        const {codeVerifier, codeChallenge, state} = await generateChallange()
         const request = await AuthSession.loadAsync(
           {
             responseType: AuthSession.ResponseType.Code,
@@ -96,6 +97,8 @@ export default function App({ navigation }) {
             clientId: AuthConfig.clientId,
             clientSecret: AuthConfig.clientSecret,
             usePKCE: false,
+            // codeChallenge: codeChallenge,
+            // codeChallengeMethod: AuthSession.CodeChallengeMethod.S256,
             scopes: ["openid", "profile", "offline_access"],
             redirectUri,
           }, discoveryDocument
@@ -110,13 +113,18 @@ export default function App({ navigation }) {
           dispatch({type: 'SIGN_OUT'})
         }
         if (result.type === 'success') {
-          // console.log('success')
+          console.log('success. going for the exchange...')
           // console.log(result.params.code)
+          // console.log(codeVerifier)
+          // console.log(codeChallenge)
           exchangeResult = await AuthSession.exchangeCodeAsync(
             {
               code: result.params.code,
               clientId: AuthConfig.clientId,
               clientSecret: AuthConfig.clientSecret,
+              extraParams: { 
+                // code_verifier: codeVerifier,
+              },
               redirectUri,
             }, discoveryDocument
           )
@@ -176,7 +184,7 @@ export default function App({ navigation }) {
     let discoveryDocument
     let refreshResult
     if (state.refreshToken && state.tokenExpiry > new Date()) {
-      // console.log('will refresh in ' + (state.tokenExpiry.valueOf() - new Date().valueOf() -60000) + ' ms')
+      // console.log('will refresh in ' + (state.tokenExpiry.valueOf() - new Date().valueOf() -5000) + ' ms')
       refreshTokenTimeout = setTimeout(async ()=>{
         // console.log('refreshTokenTimeout')
         discoveryDocument = await AuthSession.fetchDiscoveryAsync(AuthConfig.discoveryURI)
@@ -204,8 +212,7 @@ export default function App({ navigation }) {
         } else {
           dispatch({type: 'SIGN_OUT'})
         }
-
-      }, state.tokenExpiry.valueOf() - new Date().valueOf() -60000)
+      }, state.tokenExpiry.valueOf() - new Date().valueOf() - 5000)
     }
     return (() => {
       // console.log('clearing old timeout')
