@@ -12,7 +12,10 @@ export const authReducer = (prevState, action) => {
       // console.log('RESTORE_TOKEN')
       return {
         ...prevState,
-        userToken: action.token,
+        userToken: action.accessToken,
+        refreshToken: action.refreshToken,
+        tokenExpiry: action.tokenExpiry,
+        idToken: action.idToken,
         isLoading: false,
       };
     case 'SIGN_IN':
@@ -20,7 +23,10 @@ export const authReducer = (prevState, action) => {
       return {
         ...prevState,
         isSignout: false,
-        userToken: action.token,
+        userToken: action.accessToken,
+        refreshToken: action.refreshToken,
+        idToken: action.idToken,
+        tokenExpiry: action.tokenExpiry,
       };
     case 'SIGN_OUT':
       // console.log('SIGN_OUT')
@@ -28,7 +34,18 @@ export const authReducer = (prevState, action) => {
         ...prevState,
         isSignout: true,
         userToken: null,
+        refreshToken: null,
+        tokenExpiry: null,
       };
+    case 'REFRESH_TOKEN':
+      // console.log('REFRESH_TOKEN')
+      return {
+        ...prevState,
+        isSignout: false,
+        userToken: action.accessToken,
+        refreshToken: action.refreshToken,
+        tokenExpiry: action.tokenExpiry,
+      }
     default:
       return {
         ...prevState
@@ -39,7 +56,10 @@ export const authReducer = (prevState, action) => {
 export const authData = {
   isLoading: true,
   isSignout: false,
-  userToken: null,  
+  userToken: null,
+  refreshToken: null,
+  tokenExpiry: null,
+  idToken: null,
 }
 
 export const redirectUri = Linking.createURL()
