@@ -1,23 +1,13 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
 import { ActivityIndicator, View } from 'react-native'
-
-import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
-import { dictionaryLookup, } from '../utilities/functions'
+import { FormView, SubmitButton, MyInput, } from '../components/FormComponents'
 import { ErrorMessage } from '../components/ErrorMessage'
-import { Ionicons } from '@expo/vector-icons'
-import { responsiveFontSize } from '../utilities/functions'
-
 
 export const TournamentInfoEditScreen = (props) => {
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error, client, refetch} = useQuery(TOURNAMENT_QUERY, {variables: {id: props.route.params.id}})
-  const [ deleteTournament, {loading: deleting, data: deleteData, error: deleteError} ] = useMutation(DELETE_TOURNAMENT_MUTATION, {
-    variables: {
-      id: props.route.params.id
-    }
-  })
   const [updateTournament] = useMutation(UPDATE_TOURNAMENT_MUTATION, {
     variables: {
       ...formValues,
@@ -63,15 +53,8 @@ export const TournamentInfoEditScreen = (props) => {
           />
         </View>
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-          {/* <DeleteButton
-            mutation={deleteTournament}
-            navigation={()=> props.navigation.popToTop()}
-            confirmationString={'Are you sure you want to delete this tournament? This can\'t be undone!!'}
-            confirmationTitleString='Confirm Deletion'
-          /> */}
           <SubmitButton 
             mutation={updateTournament}
-            // disabled={!isDirty()}
             navigation={()=> props.navigation.goBack()}
           />
         </View>

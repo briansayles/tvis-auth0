@@ -58,25 +58,21 @@ export default function App({ navigation }) {
   )
 
   React.useEffect(() => {
-    // Fetch the token from storage then navigate to our appropriate place
     bootstrapAsync = async () => {
       let userToken, refreshToken, idToken;
       try {
         userToken = await SecureStore.getItemAsync('userToken')
-        // After restoring token, we may need to validate it in production apps
         const decoded = jwt_decode(userToken);
         const { exp } = decoded;
         const expiry = new Date(exp*1000)
         if (expiry < Date.now()) {
           dispatch({type: 'SIGN_OUT'})
         } else {
-          // console.log(userToken)
           refreshToken = await SecureStore.getItemAsync('refreshToken')
           idToken = await SecureStore.getItemAsync('idToken')
           dispatch({ type: 'RESTORE_TOKEN', accessToken: userToken, idToken: idToken, refreshToken: refreshToken, tokenExpiry: expiry })
         }
       } catch (e) {
-        // Restoring token failed
       }
     };
     bootstrapAsync();
@@ -105,7 +101,6 @@ export default function App({ navigation }) {
           }, discoveryDocument
         )
         const result = await request.promptAsync({})
-        // console.log(result)
         if (result.error) {
           Alert.alert(
             'Authentication error',
@@ -114,10 +109,6 @@ export default function App({ navigation }) {
           dispatch({type: 'SIGN_OUT'})
         }
         if (result.type === 'success') {
-          // console.log('success. going for the exchange...')
-          // console.log(result.params.code)
-          // console.log(codeVerifier)
-          // console.log(codeChallenge)
           exchangeResult = await AuthSession.exchangeCodeAsync(
             {
               code: result.params.code,
@@ -129,12 +120,10 @@ export default function App({ navigation }) {
               redirectUri,
             }, discoveryDocument
           )
-          // console.log(exchangeResult)
           const jwtToken = JSON.stringify(exchangeResult.accessToken)
           const decoded = jwt_decode(jwtToken)
           const { sub, exp, id } = decoded
           const expiry = new Date(exp*1000)
-          // console.log(expiry)
           if (expiry < Date.now()) {
             Alert.alert(
               'Token expired',
@@ -146,7 +135,6 @@ export default function App({ navigation }) {
           await SecureStore.setItemAsync('expiry', expiry.toString())
           await SecureStore.setItemAsync('refreshToken', exchangeResult.refreshToken)
           await SecureStore.setItemAsync('idToken', exchangeResult.idToken)
-          // console.log(jwtToken)
           dispatch({ type: 'SIGN_IN', accessToken: jwtToken, refreshToken: exchangeResult.refreshToken, idToken: exchangeResult.idToken, tokenExpiry: expiry });
         }
       },
@@ -180,14 +168,11 @@ export default function App({ navigation }) {
   );
 
   React.useEffect(()=>{
-    // console.log(JSON.stringify(state))
     let refreshTokenTimeout
     let discoveryDocument
     let refreshResult
     if (state.refreshToken && state.tokenExpiry > new Date()) {
-      // console.log('will refresh in ' + (state.tokenExpiry.valueOf() - new Date().valueOf() -5000) + ' ms')
       refreshTokenTimeout = setTimeout(async ()=>{
-        // console.log('refreshTokenTimeout')
         discoveryDocument = await AuthSession.fetchDiscoveryAsync(AuthConfig.discoveryURI)
         refreshResult = await AuthSession.refreshAsync({
           responseType: AuthSession.ResponseType.Code,
@@ -198,9 +183,7 @@ export default function App({ navigation }) {
           refreshToken: state.refreshToken
         },
           discoveryDocument)
-        // console.log(refreshResult)
         if (refreshResult.accessToken) {
-          // console.log('refreshResult.accessToken = ' & JSON.stringify(refreshResult.accessToken))
           const jwtToken = JSON.stringify(refreshResult.accessToken)
           const decoded = jwt_decode(jwtToken)
           const { sub, exp, id } = decoded
@@ -209,14 +192,12 @@ export default function App({ navigation }) {
           await SecureStore.setItemAsync('expiry', expiry.toString())
           await SecureStore.setItemAsync('refreshToken', refreshResult.refreshToken)
           dispatch({type: 'REFRESH_TOKEN', accessToken: jwtToken, tokenExpiry: expiry, refreshToken: refreshResult.refreshToken})
-          // console.log(JSON.stringify(state))          
         } else {
           dispatch({type: 'SIGN_OUT'})
         }
       }, state.tokenExpiry.valueOf() - new Date().valueOf() - 5000)
     }
     return (() => {
-      // console.log('clearing old timeout')
       clearTimeout(refreshTokenTimeout)
     })
   }, [state])

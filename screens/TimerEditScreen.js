@@ -2,9 +2,11 @@ import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
 import { ActivityIndicator, View, } from 'react-native'
 import { Text, Button, CheckBox} from '@rneui/themed'
-import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
-import { dictionaryLookup, } from '../utilities/functions'
+import { FormView, SubmitButton, MyInput, } from '../components/FormComponents'
 import { ErrorMessage } from '../components/ErrorMessage'
+import { responsiveFontSize } from '../utilities/functions'
+import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 
 export const TimerEditScreen = (props) => {
   const [initialValues, setInitialValues] = useState(null)
@@ -22,7 +24,54 @@ export const TimerEditScreen = (props) => {
       setFormValues(data.timers_by_pk)
     }
   },[data])
-  
+
+  const [ playingSound, setPlayingSound] = useState(false)
+  const playSoundEffect = async (customSpeech="", beepRate, playBeeps, volume) => {
+    try {
+      const { sound: soundObject, status }  = await Audio.Sound.createAsync(
+        require('../assets/sounds/3beeps.aiff'),
+        {
+          positionMillis: 0,
+          volume,
+          rate: beepRate,
+          shouldPlay: playBeeps,
+          shouldCorrectPitch: false,
+        },
+        (playbackStatus) => {
+          if (playbackStatus.didJustFinish) {
+            Speech.speak(
+              customSpeech,
+              {
+                rate: 0.9,
+                pitch: 1.30,
+                onDone: async () => {
+                  setPlayingSound(false)              
+                }
+              }
+            )
+          }
+        }
+      )
+    } catch (error) {
+      setPlayingSound(false)
+    }
+  }
+
+  const soundCheckOneMinuteWarning = () => {
+    if (!playingSound) {
+      setPlayingSound(true)
+      playSoundEffect((formValues.oneMinuteRemainingSpeech || ""), 1.5, true, 0.5)
+    }
+  }
+
+  const soundCheckEndOfRound = () => {
+    if (!playingSound) {
+      setPlayingSound(true)
+      const speech = (formValues.endOfRoundSpeech ? formValues.endOfRoundSpeech + ". ":"") + "The blinds are now five hundred and one thousand with an ante of one hundred."
+      playSoundEffect(speech, 1, true, 1)
+    }
+  }
+
   const handleInputChange = (fieldName, value) => {
     setFormValues({...formValues, [fieldName]:value})
   }
@@ -69,24 +118,12 @@ export const TimerEditScreen = (props) => {
             multiline={true}
             disabled={!formValues?.playEndOfRoundSound}
           />
-          {/* <MyInput
-            title="End of round speech (automatic) that will be appended to above speech"
-            value="The blinds are now ___ and ___ [with an ante of ___]"
-            // placeholder="Enter end of round speech here..."
-            // onChangeText={(text) => handleInputChange('endOfRoundSpeech', text)}
-            // keyboardType="default"
-            multiline={true}
-            disabled={!formValues?.playEndOfRoundSound}
-            editable={false}
-          /> */}        
+          <View style={[, {flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>
+            <Button disabled={!formValues.playOneMinuteRemainingSound || playingSound} style={[ , {marginVertical: responsiveFontSize(0.5), }]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> soundCheckOneMinuteWarning()}>Test 1 Minute Warning</Button>
+            <Button disabled={!formValues.playEndOfRoundSound || playingSound} style={[ , {marginVertical: responsiveFontSize(0.5), }]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> soundCheckEndOfRound()}>Test End of Round</Button>
+          </View>
         </View>
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-          {/* <DeleteButton
-            mutation={deleteCost}
-            navigation={()=> props.navigation.goBack()}
-            confirmationString={'Are you sure you want to delete this entry fee?'}
-            confirmationTitleString='Confirm Deletion'
-          /> */}
           <SubmitButton 
             mutation={updateTimer}
             // disabled={!isDirty()}
@@ -124,7 +161,6 @@ const UPDATE_TIMER_MUTATION = gql`
     }
   }
 `
-
 const GET_TIMER_QUERY = gql`
   query Timer($id: uuid!) {
     timers_by_pk(id: $id) {

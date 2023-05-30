@@ -1,23 +1,17 @@
-import React, {useState} from 'react'
-import { SafeAreaView, View, Platform, Alert, FlatList, ActivityIndicator, Pressable, SectionList, TouchableOpacity} from 'react-native';
-import { Text, Button, } from '@rneui/themed'
-import { gql, useQuery, useMutation, useSubscription} from '@apollo/client'
-import { styles, responsiveFontSize, } from '../styles'
+import React from 'react'
+import { Alert, ActivityIndicator, Pressable, } from 'react-native';
+import { Text,  } from '@rneui/themed'
+import { gql, useMutation, useSubscription} from '@apollo/client'
+import { styles, } from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
-import { Ionicons } from '@expo/vector-icons'
-import { SwipeableList, SwipeableCollapsibleSectionList} from '../components/SwipeableList'
+import { SwipeableCollapsibleSectionList} from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
-import { SwipeRow } from 'react-native-swipe-list-view'
 
-
-export function TournamentsScreen(props) {
-
+export const TournamentsScreen = (props) => {
   const {loading, data, error} = useSubscription(CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION)
-  const [ collapsedState, setCollapsedState] = useState(false)
   const [ createTournament, {loading: creating, data: createdData, error: createError} ] = useMutation(CREATE_TOURNAMENT_MUTATION, {})
   const createItem = async () => { 
     const id = await (await createTournament()).data.insert_tournaments_one.id
-    console.log(id)
     Alert.alert(
       'New Tournament Created',
       'We created a new tournament with some default settings for you. Edit it by tapping on the various components or using the features in the Quick Adjustments section',
@@ -34,10 +28,6 @@ export function TournamentsScreen(props) {
     props.navigation.navigate('Tournament Dashboard', {id: id})
   }
   
-  const navigateToTimerButtonPressed = ({id, title, Timers} ) => {
-    props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
-  }
-
   React.useEffect(()=> {
     if (data?.tournaments?.length == 0) {
       const createFirstTournament = async () => {
@@ -59,12 +49,6 @@ export function TournamentsScreen(props) {
     }
   }, [data])
 
-  // React.useEffect(()=>{
-  //   if (data?.tournaments?.length > 0) {
-  //     console.log(data.tournaments[0].Timers)
-  //   } 
-  // }, [data])
-
   if (loading) return (<AppLayout><ActivityIndicator/></AppLayout>)
   if (error) return (<AppLayout><ErrorMessage error={error}/></AppLayout>)
   if (createError) return (<AppLayout><ErrorMessage error={createError}/></AppLayout>)
@@ -81,18 +65,7 @@ export function TournamentsScreen(props) {
         createFunction: createItem,
         onPressFunction: editItem,
         deleteFunction: deleteItem,
-        rightButtons: [
-        //   {
-        //     onPress: deleteItem,
-        //     iconName: 'trash',
-        //     backgroundColor: 'red',
-        //   },
-        //   {
-        //     onPress: navigateToTimerButtonPressed,
-        //     iconName: 'ios-timer-outline',
-        //     backgroundColor: 'forestgreen',
-        //   },
-        ], 
+        rightButtons: [], 
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editItem(item)}}>
@@ -176,7 +149,6 @@ const CREATE_TOURNAMENT_MUTATION = gql`
     }
   }
 `
-
 const DELETE_TOURNAMENT_MUTATION = gql`
   mutation DeleteTournament($id: uuid!) {
     delete_tournaments_by_pk(id: $id) {

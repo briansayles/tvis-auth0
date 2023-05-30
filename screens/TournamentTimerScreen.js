@@ -7,8 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
 import { useKeepAwake} from 'expo-keep-awake';
 import useDimensions from '@rnhooks/dimensions'
-import CircularProgress, { CircularProgressBase } from 'react-native-circular-progress-indicator'
-
+import CircularProgress from 'react-native-circular-progress-indicator'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { AppOptions } from '../config'
 import { smallestChipArray, msToTime, numberToSuffixedString, sortChips, sortSegments, responsiveFontSize, responsiveWidth, responsiveHeight} from '../utilities/functions'
@@ -190,7 +189,6 @@ export const TournamentTimerScreen = (props) => {
   const [ toggleTournamentTimer ] = useMutation(UPDATE_TIMER_MUTATION, {})
   const [ jumpTournamentSegment ] = useMutation(JUMP_SEGMENT_MUTATION, {})
   const [ resetTournamentTimer ] = useMutation(RESET_TIMER_MUTATION, {})
-  // const [ getServerTime] = useMutation(GET_SERVER_TIME_MUTATION, {})
   const { fontScale, width, height, scale } = useDimensions('screen')
   const { data, loading, error, } = useSubscription(TOURNAMENT_SUBSCRIPTION, { variables: { id: props.route.params.id}, onData: ({data: {data}}) => {}})
   const [state, dispatch] = useReducer(reducer, initialState)
@@ -267,16 +265,7 @@ export const TournamentTimerScreen = (props) => {
                 rate: 0.9,
                 pitch: 1.30,
                 onDone: async () => {
-                  setPlayingSound(false)
-                  // const { sound: soundObject, status }  = await Audio.Sound.createAsync(
-                    // require('../assets/sounds/500msSilence.mp3'),
-                    // {
-                    //   rate: 4,
-                    //   positionMillis: 0,
-                    //   volume: 1,
-                    //   shouldPlay: true,
-                    // },
-                  // )                 
+                  setPlayingSound(false)               
                 }
               }
             )
@@ -292,7 +281,6 @@ export const TournamentTimerScreen = (props) => {
 
   useEffect(() => {
     const animate = () => {
-      // chipFadeAnimation = new Animated.Value(1)
       Animated.loop(
         Animated.sequence([    
           Animated.timing(
@@ -317,7 +305,6 @@ export const TournamentTimerScreen = (props) => {
       ).start()
     }
     animate()
-    // return(loop.reset())
   },[data])
   
   toggleTimerButtonPressed = async ()=> {
@@ -599,7 +586,6 @@ export const TOURNAMENT_SUBSCRIPTION = gql`
   }
 }
 `
-
 export const UPDATE_TIMER_MUTATION = gql`
   mutation updateTimer($id: uuid!, $active: Boolean!, $elapsed: Int!) {
     update_timers_by_pk(pk_columns: {id: $id}, _set: {active: $active, clock_updated_at: "=now()", elapsed: $elapsed, lastAccessed: "=now()"}) {
@@ -630,10 +616,3 @@ export const RESET_TIMER_MUTATION = gql`
     }
   }
 `
-// export const GET_SERVER_TIME_MUTATION = gql`
-//   mutation MyMutation ($id: uuid!) {
-//     update_timers_by_pk(pk_columns: {id: $id}, _set: {lastAccessed: "=now()"}) {
-//       lastAccessed
-//     }
-//   }
-// `

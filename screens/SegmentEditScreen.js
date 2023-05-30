@@ -1,9 +1,7 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
 import { ActivityIndicator, View} from 'react-native'
-
-import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
-import { dictionaryLookup, } from '../utilities/functions'
+import { FormView, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { ErrorMessage } from '../components/ErrorMessage'
 
 export const SegmentEditScreen = (props) => {
@@ -106,7 +104,6 @@ const UPDATE_SEGMENT_MUTATION = gql`
     }
   }
 `
-
 const DELETE_SEGMENT_MUTATION = gql`
   mutation DeleteSegment($id: uuid!) {
     delete_segments_by_pk(id: $id) {
@@ -114,7 +111,6 @@ const DELETE_SEGMENT_MUTATION = gql`
     }
   }
 `
-
 const GET_SEGMENT_QUERY = gql`
   query Segment($id: uuid!) {
     segments_by_pk(id: $id) {

@@ -1,5 +1,3 @@
-const tintColor = '#009900';
-
 export default {
 	REVMOB_ID: '5a5ca4b4a30c3b1c882dfe7b',
 	GameOptions: [
@@ -30,35 +28,15 @@ export default {
 		{longName: "Yellow", shortName: "#ff0"},
 		{longName: "Light Blue", shortName: "#cff"}
 	],
-	DurationOptions: [
-		{longName: "~1 min.", shortName: "1.1"},
-		{longName: "2 min.", shortName: "2"},
-		{longName: "3 min.", shortName: "3"},
-		{longName: "4 min.", shortName: "4"},
-		{longName: "5 min.", shortName: "5"},
-		{longName: "6 min.", shortName: "6"},
-		{longName: "7 min.", shortName: "7"},
-		{longName: "8 min.", shortName: "8"},
-		{longName: "9 min.", shortName: "9"},
-		{longName: "10 min.", shortName: "10"},
-		{longName: "12 min.", shortName: "12"},
-		{longName: "15 min.", shortName: "15"},
-		{longName: "20 min.", shortName: "20"},
-		{longName: "25 min.", shortName: "25"},
-		{longName: "30 min.", shortName: "30"},
-		{longName: "40 min.", shortName: "40"},
-		{longName: "45 min.", shortName: "45"},
-		{longName: "60 min.", shortName: "60"}
-	],
-	tintColor,
+	tintColor: '#009900',
 	tabIconDefault: '#888',
-	tabIconSelected: tintColor,
+	tabIconSelected: '009900',
 	tabBar: '#fefefe',
 	errorBackground: 'red',
 	errorText: '#fff',
 	warningBackground: '#EAEB5E',
 	warningText: '#666804',
-	noticeBackground: tintColor,
+	noticeBackground: '009900',
 	noticeText: '#fff',
 	editButtonColor: '#0498',
 }

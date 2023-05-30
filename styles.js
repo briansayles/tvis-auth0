@@ -207,4 +207,44 @@ export const styles = StyleSheet.create({
     bottom: 0, 
     height: 50
   },
+  blindsText: {
+    color: 'rgba(225,225,225,1)',
+    fontSize: Math.min(responsiveHeight(12), responsiveWidth(12)),
+  },
+  durationText: {
+    color: 'rgba(225, 225, 225, 1)',
+    fontSize: Math.min(responsiveHeight(6), responsiveWidth(6)) 
+  },
+  anteText: {
+    color: 'rgba(225,225,225,1)',
+    fontSize: Math.min(responsiveHeight(8), responsiveWidth(8)),
+  },
+  blindsNoticeText: {
+    fontWeight: '300',
+  },
+  nextBlindsText: {
+    color: 'rgba(180,180,180,1)',
+    fontSize: Math.min(responsiveHeight(5), responsiveWidth(5)),
+    textAlign: 'center',
+  },
+  nextBlindsNoticeText: {
+    color: 'red',
+  },
+  timerText: {
+    color: 'rgba(225,225,225,1)',
+    fontFamily: 'Menlo',
+    fontSize: Math.min(responsiveHeight(10), responsiveWidth(10)),
+  },
+  timerNoticeText: {
+    color: 'red',
+  },
+  titleText: {
+    fontSize: Math.min(responsiveHeight(4.5), responsiveWidth(4.5)),
+    color: '#222',
+    fontWeight: 'bold'
+  },
+  chipText: {
+    fontSize: responsiveFontSize(2.5),
+    color: 'rgba(225,225,225,1)',
+  }
 });

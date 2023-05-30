@@ -1,7 +1,6 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
 import { ActivityIndicator, View, Alert } from 'react-native'
-
 import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
@@ -51,13 +50,6 @@ export const ChipEditScreen = (props) => {
             onChangeText={(text) => handleInputChange('denom', (!text ? 0 : text))}
             keyboardType="numeric"
           />
-          {/* <MyInput
-            title="Quantity Availalbe"
-            value={(formValues.qtyAvailable || 0).toString()}
-            placeholder="Enter number of these chips on hand..."
-            onChangeText={(text) => handleInputChange('qtyAvailable', parseInt(text) || 0)}
-            keyboardType="numeric"
-          /> */}
           <Picker
             prompt="Choose a color"
             title="Chip color"
@@ -107,7 +99,6 @@ const DELETE_CHIP_MUTATION = gql`
     }
   }
 `
-
 const GET_CHIP_QUERY = gql`
   query Chip($id: uuid!) {
     chips_by_pk(id: $id) {

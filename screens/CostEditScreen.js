@@ -1,7 +1,6 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
 import { ActivityIndicator, View} from 'react-native'
-
 import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
@@ -100,7 +99,6 @@ const UPDATE_COST_MUTATION = gql`
     }
   }
 `
-
 const DELETE_COST_MUTATION = gql`
   mutation DeleteCost($id: uuid!) {
     delete_costs_by_pk(id: $id) {
@@ -108,7 +106,6 @@ const DELETE_COST_MUTATION = gql`
     }
   }
 `
-
 const GET_COST_QUERY = gql`
   query Cost($id: uuid!) {
     costs_by_pk(id: $id) {

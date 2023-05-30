@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { SafeAreaView, View, Platform, Alert, FlatList } from 'react-native';
 import { Text, Button, } from '@rneui/themed'
-import { gql} from '@apollo/client'
 import { responsiveFontSize, styles } from '../styles'
 import { AuthContext } from '../Contexts';
 import { AppLayout } from '../components/AppLayout'
 
 export function SettingsScreen(props) {
-  const {redirect, userName} = React.useContext(AuthContext)
+  const {userName} = React.useContext(AuthContext)
   const [name, setName] = React.useState("")
   React.useEffect(()=> { 
     const fetchName = async () => {

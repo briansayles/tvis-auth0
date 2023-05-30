@@ -1,29 +1,17 @@
-import { useQuery, useMutation, useSubscription, gql } from '@apollo/client'
+import { useMutation, useSubscription, gql } from '@apollo/client'
 import React, {useState, useEffect} from 'react'
 import { ActivityIndicator, Alert, View, ScrollView, RefreshControl, Pressable, SafeAreaView, SectionList, TouchableOpacity} from 'react-native'
-import { Text, Card, Button, Icon, Slider, } from '@rneui/themed';
+import { Text, Button, Slider, } from '@rneui/themed';
 import { styles, responsiveFontSize, responsiveWidth, responsiveHeight} from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
-import { Ionicons } from '@expo/vector-icons'
 import { SwipeableCollapsibleSectionList } from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
-import { FormView, Picker, SubmitButton, MyInput, DeleteButton, GoToTimerButton} from '../components/FormComponents'
-import { SwipeRow } from 'react-native-swipe-list-view'
-
-
-import { smallestChipArray, sortSegments, sortChips, sortEntryFees, numberToSuffixedString, dictionaryLookup } from '../utilities/functions'
+import { DeleteButton, GoToTimerButton} from '../components/FormComponents'
+import { smallestChipArray, sortSegments, sortChips, sortEntryFees, dictionaryLookup } from '../utilities/functions'
 
 export function TournamentDashboardScreen (props) {
-  const [refreshingState, setRefreshingState] = useState(false)
-  const [initialValues, setInitialValues] = useState(null)
-  const [formValues, setFormValues] = useState(null)
   const [sliderValue, setSliderValue] = useState(0)
-
   const {data, loading, error, client, refetch} = useSubscription(TOURNAMENT_SUBSCRIPTION, {variables: {id: props.route.params.id}})
-
-  const navigateToTimerButtonPressed = ({id, title, Timers} ) => {
-    props.navigation.navigate('Timer', {id: id, timerId: Timers[0].id })
-  }
   const [deleteTournament, {loading: deletingTournament, data: deleteTournamentData, error: deleteTournamentError}] = useMutation(DELETE_TOURNAMENT_MUTATION, {variables: {id: props.route.params.id}})
   const [copyTournament, {loading: copyingTournament, data: copiedTournamentData, error: copyTournamentError}] = useMutation(COPY_TOURNAMENT_MUTATION, {})
   const copyTournamentFunction = async (segments, chips, costs, title, subtitle, timer) => {
@@ -40,11 +28,8 @@ export function TournamentDashboardScreen (props) {
       let {chipStack, costType, price} = cost
       newCostsArray.push({chipStack, costType, price})
     })
-    console.log(newCostsArray)
-    // console.log(timer)
     let {playEndOfRoundSound, playOneMinuteRemainingSound, endOfRoundSpeech, oneMinuteRemainingSpeech} = timer
     newTimersArray.push({playEndOfRoundSound, playOneMinuteRemainingSound, endOfRoundSpeech, oneMinuteRemainingSpeech, active: false })
-    console.log(newTimersArray)
     const newTourney = await copyTournament({variables: {
       Title: title,
       Subtitle: subtitle,
@@ -58,19 +43,6 @@ export function TournamentDashboardScreen (props) {
     }, style: 'default'}])
   }
 
-  const editButtonColor = dictionaryLookup("editButtonColor")
-  const [ deleteSegment, {loading: deletingSegment, data: deleteSegmentData, error: deleteSegmentError} ] = useMutation(DELETE_SEGMENT_MUTATION, {})
-  const deleteSegmentItem = ({id, sBlind, bBlind, ante}) => {
-    Alert.alert('Confirm Delete', 'Delete: \n' + sBlind + '/' + bBlind + '/' + ante + ' level?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteSegment({variables: {id}})}, style: 'default'}])
-  }
-  const [ deleteChip, {loading: deletingChip, data: deleteChipData, error: deleteChipError} ] = useMutation(DELETE_CHIP_MUTATION, {})
-  const deleteChipItem = ({id, denom}) => {
-    Alert.alert('Confirm Delete', 'Delete: \n' + denom + ' chips?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteChip({variables: {id}})}, style: 'default'}])
-  }
-  const [ deleteCost, {loading: deletingCost, data: deleteCostData, error: deleteCostError} ] = useMutation(DELETE_COST_MUTATION, {})
-  const deleteCostItem = ({id, costType, price}) => {
-    Alert.alert('Confirm Delete', 'Delete: \n' + price.toLocaleString(undefined, {style: 'currency', currency: 'usd'}) + ' ' + dictionaryLookup(costType, "EntryFeeOptions", "long") + '?', [{text: 'Cancel', onPress: ()=>{}, style: 'cancel'}, {text: 'OK', onPress: ()=>{deleteCost({variables: {id}})}, style: 'default'}])
-  }
   const [ createSegment, {loading: creatingSegment, data: createSegmentData, error: createSegmentError} ] = useMutation(CREATE_SEGMENT_MUTATION, {
     onCompleted: ({insert_segments_one}) => {
       editSegmentItem(insert_segments_one)
@@ -149,38 +121,15 @@ export function TournamentDashboardScreen (props) {
 
   useEffect(()=>{
     if (data) {
-      setInitialValues(data.tournaments_by_pk)
-      setFormValues(data.tournaments_by_pk)
       setSliderValue(data.tournaments_by_pk?.Segments[0]?.duration || 0)
     }
   },[data])
   
-  const [updateTournament] = useMutation(UPDATE_TOURNAMENT_MUTATION, {
-    variables: {
-      ...formValues,
-    },
-  })
-
-  const handleInputChange = (fieldName, value) => {
-    setFormValues({...formValues, [fieldName]:value})
-  }
-
-  const isDirty = () => {
-    let result = false
-    try {
-      Object.keys(formValues).forEach((key, index) => { if (formValues[key] !== initialValues[key]) result = true })
-    } catch {}
-    return result
-  }
-  const deleting = deletingSegment || deletingChip || deletingCost || deletingTournament
-  const creating = creatingSegment || creatingChip || creatingCost
   const createError = createSegmentError || createChipError || createCostError
-  const deleteError = deleteSegmentError || deleteChipError || deleteCostError
 
   if (loading || deletingTournament || deleteTournamentData) return (<ActivityIndicator/>)
   if (error) return (<ErrorMessage error={error}/>)
   if (createError) return (<ErrorMessage error={createError}/>)
-  if (deleteError) return (<ErrorMessage error={deleteError}/>)
   if (data) {
     const Tournament = data.tournaments_by_pk
     const segments = sortSegments(Tournament.Segments)
@@ -188,15 +137,11 @@ export function TournamentDashboardScreen (props) {
     const costs = sortEntryFees(Tournament.Costs)
     const timer = Tournament.Timers[0]
     const smallestChipReq = smallestChipArray(chips, segments)
-    // console.log(smallestChipReq)
-    // const augmentedSegments = JSON.parse(JSON.stringify(segments))
     let augmentedSegments = segments.map((segment, index) => {
       return {...segment, segmentIndex: index}
     })
     let splicedCount = 0
     smallestChipReq.map((chip, index) => {
-      console.log('chip.segemnt = ' + chip.segment)
-      console.log('segments.length = ' + segments.length)
       if(chip.segment <= segments.length - 2) {
         augmentedSegments.splice(chip.segment + 1 + splicedCount, 0, {
           denom: chip.denom,
@@ -206,27 +151,8 @@ export function TournamentDashboardScreen (props) {
         splicedCount += 1
       }
     })
-    console.log(augmentedSegments)
     const totalScheduledDuration = Tournament.Segments_aggregate.aggregate.sum.duration || 0
     const sectionListData = [
-      // {
-      //   key: 0,
-      //   sectionIndex: 0,
-      //   title: Tournament.Timers[0].active ? "TIMER (Running) " : "TIMER (Stopped)",
-      //   titleStyles: [styles.green],
-      //   data: [Tournament],
-      //   initiallyCollapsed: false,
-      //   includeCountInTitle: false,
-      //   rightButtons: [],
-      //   renderFrontRow: (item, index, collapsed) => {
-      //     return(
-      //       <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {navigateToTimerButtonPressed(item)}}>
-      //         <Text style={[ styles.bold, styles.green, {flex: 6 ,textAlign: 'left', }]}>GO TO TIMER</Text>
-      //         {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
-      //       </Pressable>
-      //     )
-      //   } 
-      // },
       { 
         key: 0,
         sectionIndex: 0,
@@ -243,7 +169,6 @@ export function TournamentDashboardScreen (props) {
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editTournamentInfoItem(item)}}>
               <Text style={[styles.bold, {}]}>{item.title}</Text>
               <Text style={[, {}]}>{item.subtitle}</Text>
-              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>
           )
         }
@@ -258,19 +183,12 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: true,
         createFunction: createCostItem,
         onPressFunction: editCostItem,
-        rightButtons: [
-          // {
-          //   onPress: deleteCostItem,
-          //   iconName: 'trash',
-          //   backgroundColor: 'red',
-          // },
-        ], 
+        rightButtons: [],
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editCostItem(item)}}>
               <Text style={[ , {flex: 4, }]}>{(item.price || 0).toLocaleString(undefined, {style: 'currency', currency: 'usd'})} {dictionaryLookup(item.costType, "EntryFeeOptions", "long")}</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{(item.chipStack || 0).toLocaleString()} chips</Text>
-              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
              </Pressable>
           )
         }
@@ -285,13 +203,7 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: false,
         createFunction: createSegmentItem,
         onPressFunction: editSegmentItem,
-        rightButtons: [
-          // {
-          //   onPress: deleteSegmentItem,
-          //   iconName: 'trash',
-          //   backgroundColor: 'red',
-          // },
-        ], 
+        rightButtons: [],
         renderFrontRow: (item, index, collapsed) => {
           return(
             <>
@@ -321,19 +233,12 @@ export function TournamentDashboardScreen (props) {
         includeCountInTitle: true,
         createFunction: createChipItem,
         onPressFunction: editChipItem,
-        rightButtons: [
-          // {
-          //   onPress: deleteChipItem,
-          //   iconName: 'trash',
-          //   backgroundColor: 'red',
-          // },
-        ], 
+        rightButtons: [],
         renderFrontRow: (item, index, collapsed) => {
           return(
             <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editChipItem(item)}}>
               <Text style={[ styles.bold, {flex: 2, color: item.color, textAlign: 'right'}]}>{item.denom}</Text>
-              <Text style={[ , {flex: 12 ,textAlign: 'right', }]}>Required through Level {smallestChipReq[index].segment + 1}</Text>
-              {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
+              <Text style={[ , {flex: 12 ,textAlign: 'right', }]}>{smallestChipReq[index].segment <= (segments.length-2) ? 'Color-up after level ' + (smallestChipReq[index].segment + 1) : ""}</Text>
             </Pressable>
           )
         }
@@ -426,7 +331,6 @@ const UPDATE_TOURNAMENT_MUTATION = gql`
     }
   }
 `
-
 const TOURNAMENT_SUBSCRIPTION = gql`
   subscription TournamentSubscription($id: uuid!) {
     tournaments_by_pk(id: $id) {
@@ -472,7 +376,6 @@ const TOURNAMENT_SUBSCRIPTION = gql`
     }
   }
 `
-
 const COPY_TOURNAMENT_MUTATION = gql`
   mutation CreateCopyOfTournament($Segments: segments_arr_rel_insert_input, $Chips: chips_arr_rel_insert_input, $Costs: costs_arr_rel_insert_input, $Title: String, $Subtitle: String, $Timers: timers_arr_rel_insert_input) {
     insert_tournaments_one(object: {
@@ -488,7 +391,6 @@ const COPY_TOURNAMENT_MUTATION = gql`
     }
   }
 `
-
 const DELETE_TOURNAMENT_MUTATION = gql`
   mutation DeleteTournament($id: uuid!) {
     delete_tournaments_by_pk(id: $id) {
@@ -496,8 +398,6 @@ const DELETE_TOURNAMENT_MUTATION = gql`
     }
   }
 `
-
-
 const DELETE_SEGMENT_MUTATION = gql`
   mutation DeleteSegment($id: uuid!) {
     delete_segments_by_pk(id: $id) {
@@ -519,7 +419,6 @@ const DELETE_COST_MUTATION = gql`
     }
   }
 `
-
 const CREATE_SEGMENT_MUTATION = gql`
   mutation CreateSegment($tournamentId: uuid!, $sBlind: numeric = 0, $duration: numeric = 10, $bBlind: numeric = 0, $ante: numeric = 0, ) {
     insert_segments_one(object: {tournamentId: $tournamentId, ante: $ante, bBlind: $bBlind, duration: $duration, sBlind: $sBlind}) {
@@ -527,7 +426,6 @@ const CREATE_SEGMENT_MUTATION = gql`
     }
   }
 `
-
 const CREATE_CHIP_MUTATION = gql`
   mutation CreateChip($tournamentId: uuid!, $color: String=null, $denom: numeric = 0, $qtyAvailable: Int = 0, ) {
     insert_chips_one(object: {tournamentId: $tournamentId, denom: $denom, qtyAvailable: $qtyAvailable, color: $color}) {
@@ -542,7 +440,6 @@ const CREATE_COST_MUTATION = gql`
     }
   }
 `
-
 const UPDATE_DURATIONS_MUTATATION = gql`
   mutation UpdateSegmentsDuration($duration: numeric, $tournamentId: uuid = null) {
     update_segments_many(updates: {where: {tournamentId: {_eq: $tournamentId}}, _set: {duration: $duration}}) {

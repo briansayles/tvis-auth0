@@ -5,7 +5,6 @@ import { AuthContext } from '../Contexts'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { AppLayout } from '../components/AppLayout'
 import { useQuery, useMutation, gql } from '@apollo/client'
-import { ErrorMessage } from '../components/ErrorMessage'
 
 export function HomeScreen (props) {
   const {signOut, signIn, userName, userId} = React.useContext(AuthContext);
@@ -80,7 +79,6 @@ const USER_QUERY = gql`
     }
   }
 `
-
 const INSERT_USER_MUTATION = gql`
   mutation insertNewUser($name: String) {
     insert_users_one(object: {name: $name}) {
