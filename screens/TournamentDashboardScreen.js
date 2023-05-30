@@ -76,7 +76,7 @@ export function TournamentDashboardScreen (props) {
       editSegmentItem(insert_segments_one)
     },
   })
-  const createSegmentItem = () => {createSegment({variables: {tournamentId: data.tournaments_by_pk.id, duration: data.tournaments_by_pk.Segments[0].duration || 15}})}
+  const createSegmentItem = () => {createSegment({variables: {tournamentId: data.tournaments_by_pk.id, duration: data.tournaments_by_pk.Segments[0]?.duration || 15}})}
   const [ createChip, {loading: creatingChip, data: createChipData, error: createChipError} ] = useMutation(CREATE_CHIP_MUTATION, {
     onCompleted: ({insert_chips_one}) => {
       editChipItem(insert_chips_one)
@@ -189,7 +189,25 @@ export function TournamentDashboardScreen (props) {
     const timer = Tournament.Timers[0]
     const smallestChipReq = smallestChipArray(chips, segments)
     // console.log(smallestChipReq)
-    const totalScheduledDuration = Tournament.Segments_aggregate.aggregate.sum.duration
+    // const augmentedSegments = JSON.parse(JSON.stringify(segments))
+    let augmentedSegments = segments.map((segment, index) => {
+      return {...segment, segmentIndex: index}
+    })
+    let splicedCount = 0
+    smallestChipReq.map((chip, index) => {
+      console.log('chip.segemnt = ' + chip.segment)
+      console.log('segments.length = ' + segments.length)
+      if(chip.segment <= segments.length - 2) {
+        augmentedSegments.splice(chip.segment + 1 + splicedCount, 0, {
+          denom: chip.denom,
+          color: chip.color,
+          type: 'colorup'
+        })
+        splicedCount += 1
+      }
+    })
+    console.log(augmentedSegments)
+    const totalScheduledDuration = Tournament.Segments_aggregate.aggregate.sum.duration || 0
     const sectionListData = [
       // {
       //   key: 0,
@@ -260,11 +278,11 @@ export function TournamentDashboardScreen (props) {
       { 
         key: 2,
         sectionIndex: 2,
-        title: "Blinds Levels",
+        title: "Blinds Levels (" + segments.length + ')',
         titleStyles: [],
-        data:   [...segments, {id: 'totals'}],
+        data:   [...augmentedSegments, {id: 'totals'}],
         initiallyCollapsed: false,
-        includeCountInTitle: true,
+        includeCountInTitle: false,
         createFunction: createSegmentItem,
         onPressFunction: editSegmentItem,
         rightButtons: [
@@ -278,11 +296,14 @@ export function TournamentDashboardScreen (props) {
           return(
             <>
             {item.duration && <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {} ]} onPress={() => {editSegmentItem(item)}}>
-              <Text style={[ styles.bold, {flex: 0.5, textAlign: 'left'}]}>{index + 1}{collapsed ? 'C': ''}:</Text>
+              <Text style={[ styles.bold, {flex: 0.5, textAlign: 'left'}]}>{item.segmentIndex + 1}:</Text>
               <Text style={[ styles.bold, {flex: 4, }]}>{item.sBlind.toLocaleString()} / {item.bBlind.toLocaleString()} {item.ante > 0 ? ' + ' + item.ante.toLocaleString() + ' ante': ''}</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{item.duration.toLocaleString()} Minutes</Text>
               {/* <Ionicons iconStyle={{flex: 2}} name='ios-arrow-forward' size={responsiveFontSize(2)} color="black"/> */}
             </Pressable>}
+            {item.type=='colorup' && <View style={[styles.rowFront, styles.rowFrontColorup, collapsed ? styles.collapsed : null, {} ]} >
+              <Text style={[ styles.bold, {flex: 1, textAlign: 'center', color: item.color}]}>Color-Up {item.denom}'s</Text>
+            </View>}
             {item.id == 'totals' && <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {borderTopColor: 'black', borderTopWidth: 1} ]} >
               <Text style={[ styles.bold, {flex: 4.5, textAlign: 'left'}]}>Total scheduled duration:</Text>
               <Text style={[ , {flex: 2 ,textAlign: 'right', }]}>{totalScheduledDuration} Minutes</Text>
@@ -330,7 +351,7 @@ export function TournamentDashboardScreen (props) {
         rightButtons: [], 
         renderFrontRow: (item, index, collapsed) => {
           return(
-            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {height: responsiveFontSize(6.75), flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', textAlign: 'left'} ]} onPress={() => editTimerItem(item)}>
+            <Pressable style={[styles.rowFront, collapsed ? styles.collapsed : null, {height: collapsed ? 0 : responsiveFontSize(6.75), flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', textAlign: 'left'} ]} onPress={() => editTimerItem(item)}>
               <Text style={[styles.bold, collapsed ? styles.collapsed : null, {}]}>Tap here to customize the timer sounds...</Text>
             </Pressable>
           )
@@ -351,9 +372,9 @@ export function TournamentDashboardScreen (props) {
           return (
             <>
             <View style={[ collapsed ? styles.collapsed : null, {flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}]}>
-              <View style={[styles.rowFront, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
-                <Slider
-                  style={{flex: 20, marginHorizontal: responsiveFontSize(1)}}
+              <View style={[styles.rowFront, collapsed ? styles.collapsed : null, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}]}>
+                {!collapsed && <Slider
+                  style={[ , {flex: 20, marginHorizontal: responsiveFontSize(1)}]}
                   value={sliderValue}
                   onValueChange={setSliderValue}
                   maximumValue={60}
@@ -362,8 +383,8 @@ export function TournamentDashboardScreen (props) {
                   allowTouchTrack
                   trackStyle={{ height: 5, }}
                   thumbStyle={{ height: 20, width: 20, backgroundColor: 'grey' }}
-                />
-                <Text style={{flex: 4, fontSize: responsiveFontSize(1.5), marginHorizontal: responsiveFontSize(1.5)}}>{sliderValue} Min</Text>
+                />}
+                <Text style={[collapsed ? styles.collapsed : null, {flex: 4, fontSize: responsiveFontSize(1.5), marginHorizontal: responsiveFontSize(1.5)}]}>{sliderValue} Min</Text>
               </View>
               <Button style={[ , {marginVertical: responsiveFontSize(0.5), alignSelf: 'flex-end'}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> editAllSegmentDurations(sliderValue)}>Set all durations</Button>
               <Button style={[ , {marginVertical: responsiveFontSize(0.5)}]} titleStyle={[ , {fontSize: responsiveFontSize(1.5)}]} onPress={()=> removeAllAntes()}>Remove antes</Button>

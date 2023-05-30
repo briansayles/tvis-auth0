@@ -113,6 +113,9 @@ export const styles = StyleSheet.create({
     width: responsiveWidth(90),
     // backgroundColor: 'pink'
   },
+  rowFrontColorup: {
+    height: responsiveFontSize(1.75),
+  },
   rowBack:{
     alignItems: 'center',
     flexDirection: 'row',
