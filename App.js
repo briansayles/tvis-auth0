@@ -97,7 +97,8 @@ export default function App({ navigation }) {
             clientId: AuthConfig.clientId,
             clientSecret: AuthConfig.clientSecret,
             usePKCE: false,
-            // codeChallenge: codeChallenge,
+            // usePKCE: true,
+            // codeChallenge: 'KcLxQyxql2lXSQWrRP2bj71S16vRn2bUDkus473JgIY',
             // codeChallengeMethod: AuthSession.CodeChallengeMethod.S256,
             scopes: ["openid", "profile", "offline_access"],
             redirectUri,
@@ -113,7 +114,7 @@ export default function App({ navigation }) {
           dispatch({type: 'SIGN_OUT'})
         }
         if (result.type === 'success') {
-          console.log('success. going for the exchange...')
+          // console.log('success. going for the exchange...')
           // console.log(result.params.code)
           // console.log(codeVerifier)
           // console.log(codeChallenge)
@@ -123,7 +124,7 @@ export default function App({ navigation }) {
               clientId: AuthConfig.clientId,
               clientSecret: AuthConfig.clientSecret,
               extraParams: { 
-                // code_verifier: codeVerifier,
+                // code_verifier: '6OelKi3CqRtxBoJ7p6p03mcmv-oGY4g2z7Ekwz109kg',
               },
               redirectUri,
             }, discoveryDocument
