@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Alert,} from 'react-native'
+import { Alert, LogBox} from 'react-native'
 import { Audio } from 'expo-av'
 import * as SecureStore from 'expo-secure-store'
 import { NavigationContainer } from '@react-navigation/native'
@@ -30,6 +30,11 @@ const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
 WebBrowser.maybeCompleteAuthSession()
 
+// Ignore log notification by message
+// LogBox.ignoreLogs(['Internal React error ...']);
+
+//Ignore all log notifications
+LogBox.ignoreAllLogs();
 export default function App({ navigation }) {
   var randomString = function(length) {
     var text = "";

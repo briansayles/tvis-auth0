@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { Alert, ActivityIndicator, Pressable, } from 'react-native';
 import { Text,  } from '@rneui/themed'
 import { gql, useMutation, useSubscription} from '@apollo/client'
@@ -7,14 +7,9 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { SwipeableCollapsibleSectionList} from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { useFocusEffect } from '@react-navigation/core';
 
 export const TournamentsScreen = (props) => {
-  React.useEffect(()=> {
-    async function lockPortraitOrientation() {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    }
-    lockPortraitOrientation()
-  }, [props.navigation])
   const {loading, data, error} = useSubscription(CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION)
   const [ createTournament, {loading: creating, data: createdData, error: createError} ] = useMutation(CREATE_TOURNAMENT_MUTATION, {})
   const createItem = async () => { 
@@ -35,7 +30,7 @@ export const TournamentsScreen = (props) => {
     props.navigation.navigate('Tournament Dashboard', {id: id})
   }
   
-  React.useEffect(()=> {
+  useEffect(()=> {
     if (data?.tournaments?.length == 0) {
       const createFirstTournament = async () => {
         Alert.alert(

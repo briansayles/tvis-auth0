@@ -1,18 +1,16 @@
 import { useMutation, useQuery, gql,  } from '@apollo/client'
 import React, { useState, useEffect} from 'react'
-import { ActivityIndicator, View, Alert } from 'react-native'
+import { ActivityIndicator, View, Alert, Text } from 'react-native'
 import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { useFocusEffect } from '@react-navigation/core'
+import useDimensions from '@rnhooks/dimensions'
 
 export const ChipEditScreen = (props) => {
-  useEffect(()=> {
-    async function lockPortraitOrientation() {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    }
-    lockPortraitOrientation()
-  }, [props.navigation])
+  const { fontScale, width, height, scale } = useDimensions('screen')
+  const orientation = height > width ? 'portrait' : 'landscape'
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_CHIP_QUERY, {variables: {id: props.route.params.id}})
@@ -70,7 +68,7 @@ export const ChipEditScreen = (props) => {
             }
           </Picker>
         </View>
-        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <View style={{flex: orientation == 'portrait' ? 1 : 3, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           <DeleteButton
             mutation={deleteChip}
             navigation={()=> props.navigation.goBack()}

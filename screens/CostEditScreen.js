@@ -5,14 +5,9 @@ import { FormView, Picker, SubmitButton, MyInput, DeleteButton, } from '../compo
 import { dictionaryLookup, } from '../utilities/functions'
 import { ErrorMessage } from '../components/ErrorMessage'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { useFocusEffect } from '@react-navigation/core'
 
 export const CostEditScreen = (props) => {
-  useEffect(()=> {
-    async function lockPortraitOrientation() {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    }
-    lockPortraitOrientation()
-  }, [props.navigation])
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_COST_QUERY, {variables: {id: props.route.params.id}})

@@ -4,14 +4,9 @@ import { ActivityIndicator, View } from 'react-native'
 import { FormView, SubmitButton, MyInput, } from '../components/FormComponents'
 import { ErrorMessage } from '../components/ErrorMessage'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { useFocusEffect } from '@react-navigation/core'
 
 export const TournamentInfoEditScreen = (props) => {
-  useEffect(()=> {
-    async function lockPortraitOrientation() {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    }
-    lockPortraitOrientation()
-  }, [props.navigation])
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error, client, refetch} = useQuery(TOURNAMENT_QUERY, {variables: {id: props.route.params.id}})

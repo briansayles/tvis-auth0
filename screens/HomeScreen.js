@@ -1,11 +1,12 @@
 import { View, ActivityIndicator } from 'react-native'
 import { Text, Button, Image, } from '@rneui/themed'
-import * as React from 'react'
+import React, {useEffect} from 'react'
 import { AuthContext } from '../Contexts'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { AppLayout } from '../components/AppLayout'
 import { useQuery, useMutation, gql } from '@apollo/client'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { useFocusEffect } from '@react-navigation/core'
 
 export const HomeScreen = (props) => {
   const {signOut, signIn, userName, userId} = React.useContext(AuthContext);
@@ -17,27 +18,19 @@ export const HomeScreen = (props) => {
       name
     }
   })
-  React.useEffect(()=> {
-    async function lockPortraitOrientation() {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-    }
-    lockPortraitOrientation()
-  }, [props.navigation])
-  React.useEffect(()=> {
+  useEffect(()=> {
     // console.log('name effect') 
     const fetchName = async () => {
       setName(await userName())
     }
-    fetchName()
-  },[data])
-  React.useEffect(()=>{
-    // console.log('id effect')
     const fetchId = async () => {
       setId(await userId())
     }
+    fetchName()
     fetchId()
   },[data])
-  React.useEffect(() => {
+  
+  useEffect(() => {
     if (data?.users?.length == 0 && name) {
       console.log('Creating new user in database')
       console.log(name)

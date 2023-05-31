@@ -14,6 +14,7 @@ import { smallestChipArray, msToTime, numberToSuffixedString, sortChips, sortSeg
 import { AppLayout } from '../components/AppLayout'
 import { styles, } from '../styles'
 import * as ScreenOrientation from 'expo-screen-orientation'
+import { useFocusEffect } from '@react-navigation/native'
 
 const initialState = {
   newCSI: 0,
@@ -193,18 +194,11 @@ export const TournamentTimerScreen = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { newCSI, remainingTimeMS, lastSI, currentBlindsText, nextBlindsText, currentDurationMS, currentDurationText, nextDurationText, isActive, smallestChipReq, title,
           currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, sortedSegmentsArray, sortedChipsArray, timer, subtitle} = state
-  
-  useEffect(()=> {
-    async function unlockOrientation() {
-      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.DEFAULT);
-    }
-    unlockOrientation()
-  }, [props.navigation])
         
-  useEffect(()=>{
-    if (!data) {return}
-    let {tournaments_by_pk} = data
-    dispatch({type: 'SETUP', payload: tournaments_by_pk})
+  useEffect(() => {
+    if (!data) { return; }
+    let { tournaments_by_pk } = data;
+    dispatch({ type: 'SETUP', payload: tournaments_by_pk });
   }, [data])
 
   useEffect(()=> {
