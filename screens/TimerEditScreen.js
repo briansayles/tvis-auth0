@@ -7,8 +7,15 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { responsiveFontSize } from '../utilities/functions'
 import { Audio } from 'expo-av';
 import * as Speech from 'expo-speech';
+import * as ScreenOrientation from 'expo-screen-orientation'
 
 export const TimerEditScreen = (props) => {
+  useEffect(()=> {
+    async function lockPortraitOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    }
+    lockPortraitOrientation()
+  }, [props.navigation])
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_TIMER_QUERY, {variables: {id: props.route.params.id}})

@@ -20,6 +20,20 @@ export const colors = {
 }
 
 export const styles = StyleSheet.create({
+  test: {
+    // borderColor: 'blue',
+    // borderStyle: 'dotted',
+    // borderWidth: 1,
+  },
+  column1: {
+    // backgroundColor: 'orange'
+  },
+  column2: {
+    // backgroundColor: 'transparent'
+  },
+  column3: {
+    // backgroundColor: 'pink'
+  },
   inputTitleEnabled: {
     fontWeight: 'bold',
     color: 'black',
@@ -27,10 +41,6 @@ export const styles = StyleSheet.create({
   inputTitleDisabled: {
     fontWeight: 'normal',
     color: 'grey',
-  },
-  appleButton: {
-    height: responsiveHeight(5),
-    width: responsiveWidth(40),
   },
   container: {
     flex: 1,
@@ -207,13 +217,36 @@ export const styles = StyleSheet.create({
     bottom: 0, 
     height: 50
   },
+  blindsTitleText: {
+    color: 'rgba(225,225,225,1)',
+    fontSize: Math.min(responsiveHeight(6), responsiveWidth(6)),
+  },
   blindsText: {
     color: 'rgba(225,225,225,1)',
-    fontSize: Math.min(responsiveHeight(12), responsiveWidth(12)),
+    fontSize: Math.min(responsiveHeight(11.5), responsiveWidth(11.5)),
+    fontWeight: 'bold',
+  },
+  blindsTitleTextLandscape: {
+    color: 'rgba(225,225,225,1)',
+    fontSize: Math.min(responsiveHeight(8), responsiveWidth(8)),
+    flex: 2.5,
+  },
+  blindsTextLandscape: {
+    color: 'rgba(225,225,225,1)',
+    fontSize: Math.min(responsiveHeight(10), responsiveWidth(10)),
+    fontWeight: 'bold',
+    flexWrap: 'wrap',
+    // flexGrow: 6,
+    flex: 3,
+  },
+  durationTextLandscape: {
+    color: 'rgba(225, 225, 225, 1)',
+    fontSize: Math.min(responsiveHeight(8), responsiveWidth(8)) ,
+    flex: 2,
   },
   durationText: {
     color: 'rgba(225, 225, 225, 1)',
-    fontSize: Math.min(responsiveHeight(6), responsiveWidth(6)) 
+    fontSize: Math.min(responsiveHeight(10), responsiveWidth(10)) 
   },
   anteText: {
     color: 'rgba(225,225,225,1)',
@@ -223,9 +256,17 @@ export const styles = StyleSheet.create({
     fontWeight: '300',
   },
   nextBlindsText: {
-    color: 'rgba(180,180,180,1)',
-    fontSize: Math.min(responsiveHeight(5), responsiveWidth(5)),
+    color: 'black',
+    fontSize: Math.min(responsiveHeight(7), responsiveWidth(7)),
+    fontWeight: '500',
     textAlign: 'center',
+  },
+  nextBlindsTextLandscape: {
+    color: 'black',
+    fontSize: Math.min(responsiveHeight(7), responsiveWidth(7)),
+    fontWeight: '500',
+    textAlign: 'center',
+    flexWrap: 'wrap',
   },
   nextBlindsNoticeText: {
     color: 'red',

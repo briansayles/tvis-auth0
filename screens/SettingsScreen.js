@@ -4,8 +4,15 @@ import { Text, Button, } from '@rneui/themed'
 import { responsiveFontSize, styles } from '../styles'
 import { AuthContext } from '../Contexts';
 import { AppLayout } from '../components/AppLayout'
+import * as ScreenOrientation from 'expo-screen-orientation'
 
-export function SettingsScreen(props) {
+export const SettingsScreen = (props) => {
+  React.useEffect(()=> {
+    async function lockPortraitOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    }
+    lockPortraitOrientation()
+  }, [props.navigation])
   const {userName} = React.useContext(AuthContext)
   const [name, setName] = React.useState("")
   React.useEffect(()=> { 

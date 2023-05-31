@@ -6,8 +6,15 @@ import { styles, } from '../styles'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { SwipeableCollapsibleSectionList} from '../components/SwipeableList'
 import { AppLayout } from '../components/AppLayout'
+import * as ScreenOrientation from 'expo-screen-orientation'
 
 export const TournamentsScreen = (props) => {
+  React.useEffect(()=> {
+    async function lockPortraitOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    }
+    lockPortraitOrientation()
+  }, [props.navigation])
   const {loading, data, error} = useSubscription(CURRENT_USER_TOURNAMENTS_LIST_SUBSCRIPTION)
   const [ createTournament, {loading: creating, data: createdData, error: createError} ] = useMutation(CREATE_TOURNAMENT_MUTATION, {})
   const createItem = async () => { 

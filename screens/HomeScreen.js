@@ -5,8 +5,9 @@ import { AuthContext } from '../Contexts'
 import { styles, responsiveHeight, responsiveWidth } from '../styles'
 import { AppLayout } from '../components/AppLayout'
 import { useQuery, useMutation, gql } from '@apollo/client'
+import * as ScreenOrientation from 'expo-screen-orientation'
 
-export function HomeScreen (props) {
+export const HomeScreen = (props) => {
   const {signOut, signIn, userName, userId} = React.useContext(AuthContext);
   const {loading, data, error} = useQuery(USER_QUERY)
   const [name, setName] = React.useState("")
@@ -16,6 +17,12 @@ export function HomeScreen (props) {
       name
     }
   })
+  React.useEffect(()=> {
+    async function lockPortraitOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    }
+    lockPortraitOrientation()
+  }, [props.navigation])
   React.useEffect(()=> {
     // console.log('name effect') 
     const fetchName = async () => {

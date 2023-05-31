@@ -3,8 +3,15 @@ import React, { useState, useEffect} from 'react'
 import { ActivityIndicator, View} from 'react-native'
 import { FormView, SubmitButton, MyInput, DeleteButton, } from '../components/FormComponents'
 import { ErrorMessage } from '../components/ErrorMessage'
+import * as ScreenOrientation from 'expo-screen-orientation'
 
 export const SegmentEditScreen = (props) => {
+  useEffect(()=> {
+    async function lockPortraitOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    }
+    lockPortraitOrientation()
+  }, [props.navigation])
   const [initialValues, setInitialValues] = useState(null)
   const [formValues, setFormValues] = useState(null)
   const {data, loading, error} = useQuery(GET_SEGMENT_QUERY, {variables: {id: props.route.params.id}})

@@ -1,6 +1,6 @@
 import { gql, useMutation, useSubscription} from '@apollo/client'
 import React, { useState, useEffect, useReducer, useRef } from 'react'
-import { Animated, ActivityIndicator, View, StyleSheet, } from 'react-native'
+import { Animated, ActivityIndicator, View, Pressable, SafeAreaView } from 'react-native'
 import { Button, Icon, Text } from '@rneui/themed'
 import * as Speech from 'expo-speech';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,6 +12,8 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { AppOptions } from '../config'
 import { smallestChipArray, msToTime, numberToSuffixedString, sortChips, sortSegments, responsiveFontSize, responsiveWidth, responsiveHeight} from '../utilities/functions'
 import { AppLayout } from '../components/AppLayout'
+import { styles, } from '../styles'
+import * as ScreenOrientation from 'expo-screen-orientation'
 
 const initialState = {
   newCSI: 0,
@@ -104,7 +106,6 @@ const remainingTimeCalculator = (isActive, currentSegmentFinishTime, currentSegm
 }
 
 const reducer =(state, action) => {
-  let newState
   switch (action.type) {
     case 'SETUP': {
       const { isActive, title, smallestChipReq, timer, subtitle, sortedSegmentsArray, sortedChipsArray, newCSI, lastSI, currentBlindsText, currentDurationMS, currentDurationText, nextBlindsText, nextDurationText, currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, currentSegmentCumulativeDuration, } = stateCalculator(action.payload)
@@ -155,7 +156,6 @@ const reducer =(state, action) => {
         currentSegmentNoticeTime,
         noticeStatus,
         currentTime: new Date(),
-        // countdownText: msToTime(remainingTimeMS),
         sortedSegmentsArray,
         sortedChipsArray,
         }
@@ -173,7 +173,6 @@ const reducer =(state, action) => {
         ...state,
         currentTime: new Date(),
         remainingTimeMS,
-        // countdownText: msToTime(remainingTimeMS)
       }
     }
     default: {
@@ -194,7 +193,14 @@ export const TournamentTimerScreen = (props) => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { newCSI, remainingTimeMS, lastSI, currentBlindsText, nextBlindsText, currentDurationMS, currentDurationText, nextDurationText, isActive, smallestChipReq, title,
           currentSegmentFinishTime, currentSegmentNoticeTime, noticeStatus, sortedSegmentsArray, sortedChipsArray, timer, subtitle} = state
-
+  
+  useEffect(()=> {
+    async function unlockOrientation() {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.DEFAULT);
+    }
+    unlockOrientation()
+  }, [props.navigation])
+        
   useEffect(()=>{
     if (!data) {return}
     let {tournaments_by_pk} = data
@@ -395,52 +401,39 @@ export const TournamentTimerScreen = (props) => {
   if (loading) return (<ActivityIndicator/>)
   if (error) return (<ErrorMessage error={error}/>)
   if (data) {  
-    const userIsOwner = true //dataUser && (dataUser.id == Tournament.user.id)
     const orientation = height > width ? 'portrait' : 'landscape'
     return (
-      <AppLayout>
-        <View style={[{flex: 1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch'}]}>
-          <LinearGradient
+      <>
+        {orientation == 'landscape' &&
+          <SafeAreaView style={[styles.test, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'stretch', flex: 1}]}>
+            <LinearGradient
               colors={[ '#257a2f', '#194a2f', '#226a2f' ]}
-              style={{ flex: 11, width: Math.min(height*14/9, width)*0.95, alignItems: 'stretch', margin: responsiveFontSize(1), padding: responsiveFontSize(1), borderRadius: responsiveFontSize(3) }}
+              style={[styles.test, {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'stretch', flex: 1, borderRadius: Math.min(responsiveHeight(5), responsiveWidth(5))}]}
             >
-            <View style={{flex: orientation=='portrait' ? 1.25 : 0.8, flexDirection: orientation=='portrait' ? 'column' : 'row', justifyContent: 'center', alignItems: 'center', }}>
-              <Text style={[styles.titleText, { textAlign:  orientation=='portrait' ? 'center' : 'left'}]}>{title}</Text>
-              <Text style={[styles.titleText, { textAlign:  orientation=='portrait' ? 'center' : 'left'}]}> {subtitle} </Text>
+            <View style={[styles.test, styles.column1, {flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', flex: 4}]}>
+              {sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
+                if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
+                  return (
+                    <Animated.View key={i} style={[styles.test, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', flex: 1/sortedChipsArray.length, opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }]}>
+                      <Text style={[styles.test, styles.chipText, {flex: 5, textAlign: 'right'}]} >{numberToSuffixedString(u.denom)}  </Text>
+                      <Icon containerStyle={[ styles.test, {flex: 5, }]} name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(23/sortedChipsArray.length)}/>
+                    </Animated.View>
+                  )
+                }
+              })}
             </View>
-            <View style={{flex: 8, flexDirection:'row', }}>
-              {orientation == 'landscape' && <View style={{flex: 1, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'flex-start', paddingLeft: 5}}>
-                {sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
-                  if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
-                    return (
-                      <Animated.View key={i} style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
-                        <Icon style={[, {}]} name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(5)}/>
-                        <Text style={[styles.chipText, {flex: 3, textAlign: 'right'}]} >{numberToSuffixedString(u.denom)}  </Text>
-                      </Animated.View>
-                    )
-                  }
-                })}
-              </View>}
-              <View style={{flex: 4, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center',}}>
-                <View style={{flex: orientation == 'portrait' ? 3 : 4, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', }}>
-                  <Text
-                    style={[styles.blindsText, noticeStatus && styles.blindsNoticeText]}
-                  >
-                    {currentBlindsText}
-                  </Text>
-                  <Text
-                    style={[styles.durationText, noticeStatus && styles.blindsNoticeText]}
-                  >
-                    {currentDurationText}
-                  </Text>
-                </View>
-                <View style={{flex: orientation == 'portrait' ? 8 : 10, flexDirection: 'column',  justifyContent: 'space-evenly', alignItems: 'center', }}>
+            <View style={[styles.test, styles.column2, {flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'stretch', flex: 7}]}>
+              <View style={[ , {flex: 0.5}]}></View>
+              <Text style={[styles.test, styles.titleText, { textAlign:  'center', flex: 1,}]}>{title}</Text>            
+              <Text style={[styles.test, styles.titleText, { textAlign:  'center', flex: 1,}]}>{subtitle}</Text>            
+              <View style={[ styles.test, {flexDirection: 'row', justifyContent: 'center', alignItems: 'center', flex: 12}]}>
+                <Pressable onPress={()=> toggleTimerButtonPressed()} onLongPress={()=> resetTimerButtonPressed()}>
                   <CircularProgress
                     value={remainingTimeMS}
-                    radius={orientation == 'portrait' ? 90 : 75}
+                    radius={Math.min(responsiveHeight(26), responsiveWidth(26))}
                     duration={500}
                     progressValueColor={noticeStatus ? 'red' : '#ecf0f1'}
-                    activeStrokeColor={noticeStatus ? 'red' : 'limegreen'}
+                    activeStrokeColor={noticeStatus ? 'red' : (isActive ? 'limegreen' : 'orange')}
                     initialValue={currentDurationMS}
                     maxValue={currentDurationMS}
                     progressFormatter={(remainingTimeMS) => {
@@ -448,95 +441,130 @@ export const TournamentTimerScreen = (props) => {
                       return msToTime(remainingTimeMS)
                     }}
                   />
-                </View>
-                <View style={{flex: orientation == 'portrait' ? 4 : 1.25, flexDirection: orientation == 'portrait' ? 'column' : 'row',  justifyContent: 'space-evenly', alignItems: 'center', }}>
-                  <Text
-                    style={[styles.nextBlindsText, noticeStatus && styles.nextBlindsNoticeText]}
-                  >
-                    {'Next Blinds: ' + nextBlindsText}
-                  </Text>
-                  <Text
-                    style={[styles.nextBlindsText, noticeStatus && styles.nextBlindsNoticeText]}
-                  >
-                    {orientation == 'landscape' && ' - '}{nextDurationText}
-                  </Text>
-                </View>
-                {orientation == 'portrait' && <View style={{flex: 2, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                  {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='restore' size={responsiveFontSize(3)}/>} onPress={() => resetTimerButtonPressed()}></Button>}
-                  {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='fast-rewind' size={responsiveFontSize(3)}/>} onPress={()=> rwdButtonPressed()}></Button>}
-                  {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={ isActive ? <Icon name='pause' size={responsiveFontSize(3)}/> : <Icon name='play-arrow' size={responsiveFontSize(3)}/>} onPress={()=> toggleTimerButtonPressed()}></Button>}
-                  {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='fast-forward' size={responsiveFontSize(3)}/>} onPress={()=> fwdButtonPressed()}></Button>}
-                </View>}
+                  </Pressable>
               </View>
-              {orientation == 'landscape' && <View style={{flex: 1, flexDirection: 'column', justifyContent: 'space-between', paddingRight: 5}}>
-                {<Button containerStyle={{flex: 2}} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={<Icon name='restore' size={responsiveFontSize(3)}/>} onPress={()=> resetTimerButtonPressed()}></Button>}
-                {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='fast-rewind' size={responsiveFontSize(3)}/>} onPress={()=> rwdButtonPressed()}></Button>}
-                {<Button containerStyle={{flex: 2}} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={ isActive ? <Icon name='pause' size={responsiveFontSize(3)}/> : <Icon name='play-arrow' size={responsiveFontSize(3)}/>} onPress={()=> toggleTimerButtonPressed()}></Button>}
-                {<Button containerStyle={{flex: 2}} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={<Icon name='fast-forward' size={responsiveFontSize(3)}/>} onPress={()=> fwdButtonPressed()}></Button>}
+              <View style={[styles.test, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', alignSelf: 'stretch' , flex: 2.5, }]}>
+                {<Button containerStyle={[styles.test, {flex: 1}]} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={<Icon name='restore' size={responsiveFontSize(3)}/>} onPress={()=> resetTimerButtonPressed()}></Button>}
+                {<Button containerStyle={[styles.test, {flex: 1}]} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={<Icon name='fast-rewind' size={responsiveFontSize(3)}/>} onPress={()=> rwdButtonPressed()}></Button>}
+                {<Button containerStyle={[styles.test, {flex: 1}]} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={ isActive ? <Icon name='pause' size={responsiveFontSize(3)}/> : <Icon name='play-arrow' size={responsiveFontSize(3)}/>} onPress={()=> toggleTimerButtonPressed()}></Button>}
+                {<Button containerStyle={[styles.test, {flex: 1}]} title="" buttonStyle={{backgroundColor: 'transparent'}} icon={<Icon name='fast-forward' size={responsiveFontSize(3)}/>} onPress={()=> fwdButtonPressed()}></Button>}
               </View>
-              }
             </View>
-            {orientation == 'portrait' && <View style={{flex: 2, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', }}>
-              {sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
-                if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
-                  return (
-                    <Animated.View key={i} style={{flexDirection: 'column', justifyContent:'center', alignItems: 'center', opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
-                      <Icon name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(6)}/>
-                      <Text style={[styles.chipText]} >{numberToSuffixedString(u.denom)}</Text>
-                    </Animated.View>
-                  )
-                }
-              })}
-            </View>}
-          </LinearGradient>
-        </View>
-      </AppLayout>
+            <View style={[styles.test, styles.column3, {flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', flex: 9}]}>
+              <View style={[styles.test, {flexDirection: 'column', justifyContent: 'space-around', alignItems: 'center', flex: 1}]}></View>
+              <View style={[styles.test, {flexDirection: 'column', justifyContent: 'space-around', alignItems: 'center', flex: 5}]}>
+                <Text style={[styles.test, styles.blindsTitleTextLandscape, noticeStatus && styles.blindsNoticeText, {}]}>
+                  Current Blinds:
+                </Text>
+                <Text style={[styles.test, styles.blindsTextLandscape, noticeStatus && styles.blindsNoticeText, {}]}>
+                  {currentBlindsText}
+                </Text>
+                <Text style={[styles.test, styles.durationTextLandscape, noticeStatus && styles.blindsNoticeText, {}]}>
+                  {currentDurationText}
+                </Text>
+              </View>
+              <View style={[styles.test, {flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', alignSelf: 'stretch' , flex: 2, }]}>
+              </View>
+              <View style={[styles.test, {flexDirection: 'column', justifyContent: 'space-around', alignItems: 'center', flex: 5}]}>
+                <Text style={[styles.test, styles.nextBlindsTextLandscape, noticeStatus && styles.nextBlindsNoticeText]}>
+                  Next Blinds:
+                </Text>
+                <Text style={[styles.test, styles.nextBlindsTextLandscape, noticeStatus && styles.nextBlindsNoticeText]}>
+                  {nextBlindsText}
+                </Text>
+                <Text style={[styles.test, styles.nextBlindsTextLandscape, noticeStatus && styles.nextBlindsNoticeText]}>
+                  {nextDurationText}
+                </Text>
+              </View>
+              <View style={[styles.test, {flexDirection: 'column', justifyContent: 'space-around', alignItems: 'center', flex: 1}]}></View>
+            </View>
+
+            </LinearGradient>
+
+          </SafeAreaView>
+        }
+        {orientation == 'portrait' && 
+          <AppLayout>
+            <View style={[{flex: 1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'stretch'}]}>
+              <LinearGradient
+                  colors={[ '#257a2f', '#194a2f', '#226a2f' ]}
+                  style={{ flex: 1, width: responsiveWidth(98), height: responsiveHeight(98), alignItems: 'stretch', borderRadius: responsiveFontSize(3) }}
+              >
+                <View style={{flex: 1.25, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', }}>
+                  <Text style={[styles.titleText, { textAlign: 'center'}]}>{title}</Text>
+                  <Text style={[styles.titleText, { textAlign: 'center'}]}> {subtitle} </Text>
+                </View>
+                {/* <View style={{flex: 8, flexDirection:'row', }}> */}
+                  <View style={{flex: 8, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center',}}>
+                    <View style={{flex: 4, flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', }}>
+                      <Text
+                        style={[styles.blindsText, noticeStatus && styles.blindsNoticeText]}
+                      >
+                        {currentBlindsText}
+                      </Text>
+                      <Text
+                        style={[styles.durationText, noticeStatus && styles.blindsNoticeText]}
+                      >
+                        {currentDurationText}
+                      </Text>
+                    </View>
+                    <View style={{flex: 10, flexDirection: 'column',  justifyContent: 'space-evenly', alignItems: 'center', }}>
+                      <Pressable onPress={()=> toggleTimerButtonPressed()} onLongPress={()=> resetTimerButtonPressed()}>
+                        <CircularProgress
+                          value={remainingTimeMS}
+                          radius={Math.min(responsiveHeight(26), responsiveWidth(26))}
+                          duration={500}
+                          progressValueColor={noticeStatus ? 'red' : '#ecf0f1'}
+                          activeStrokeColor={noticeStatus ? 'red' : (isActive ? 'limegreen' : 'orange')}
+                          initialValue={currentDurationMS}
+                          maxValue={currentDurationMS}
+                          progressFormatter={(remainingTimeMS) => {
+                            'worklet'
+                            return msToTime(remainingTimeMS)
+                          }}
+                        />
+                      </Pressable>
+                    </View>
+                    <View style={{flex: 4, flexDirection: orientation == 'portrait' ? 'column' : 'row',  justifyContent: 'space-evenly', alignItems: 'center', }}>
+                      <Text
+                        style={[styles.nextBlindsText, noticeStatus && styles.nextBlindsNoticeText]}
+                      >
+                        {'Next Blinds: ' + nextBlindsText}
+                      </Text>
+                      <Text
+                        style={[styles.nextBlindsText, noticeStatus && styles.nextBlindsNoticeText]}
+                      >
+                        {nextDurationText}
+                      </Text>
+                    </View>
+                    <View style={{flex: 2, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                      {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='restore' size={responsiveFontSize(3)}/>} onPress={() => resetTimerButtonPressed()}></Button>}
+                      {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='fast-rewind' size={responsiveFontSize(3)}/>} onPress={()=> rwdButtonPressed()}></Button>}
+                      {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={ isActive ? <Icon name='pause' size={responsiveFontSize(3)}/> : <Icon name='play-arrow' size={responsiveFontSize(3)}/>} onPress={()=> toggleTimerButtonPressed()}></Button>}
+                      {<Button containerStyle={{flex: 2}} title="" buttonStyle={{ backgroundColor: 'transparent'}} icon={<Icon name='fast-forward' size={responsiveFontSize(3)}/>} onPress={()=> fwdButtonPressed()}></Button>}
+                    </View>
+                  </View>
+                {/* </View> */}
+                <View style={{flex: 2, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', }}>
+                  {sortedChipsArray && sortedChipsArray.length > 0 && sortedChipsArray.map((u,i) => {
+                    if (newCSI <= smallestChipReq[i].segment || smallestChipReq[i].segment < 0) {
+                      return (
+                        <Animated.View key={i} style={{flexDirection: 'column', justifyContent:'center', alignItems: 'center', flex: 1/sortedChipsArray.length, opacity: (newCSI + 1 <= smallestChipReq[i].segment) ? 1 : (chipFadeAnimation || 1) }}>
+                          <Icon name='poker-chip' color={u.color} type='material-community' size={responsiveFontSize(33/sortedChipsArray.length)}/>
+                          <Text style={[styles.chipText]} >{numberToSuffixedString(u.denom)}</Text>
+                        </Animated.View>
+                      )
+                    }
+                  })}
+                </View>
+              </LinearGradient>
+            </View>
+          </AppLayout>            
+        }
+      </>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  blindsText: {
-    color: 'rgba(225,225,225,1)',
-    fontSize: Math.min(responsiveHeight(12), responsiveWidth(12)),
-  },
-  durationText: {
-    color: 'rgba(225, 225, 225, 1)',
-    fontSize: Math.min(responsiveHeight(6), responsiveWidth(6)) 
-  },
-  anteText: {
-    color: 'rgba(225,225,225,1)',
-    fontSize: Math.min(responsiveHeight(8), responsiveWidth(8)),
-  },
-  blindsNoticeText: {
-    fontWeight: '300',
-  },
-  nextBlindsText: {
-    color: 'rgba(180,180,180,1)',
-    fontSize: Math.min(responsiveHeight(5), responsiveWidth(5)),
-    textAlign: 'center',
-  },
-  nextBlindsNoticeText: {
-    color: 'red',
-  },
-  timerText: {
-    color: 'rgba(225,225,225,1)',
-    fontFamily: 'Menlo',
-    fontSize: Math.min(responsiveHeight(10), responsiveWidth(10)),
-  },
-  timerNoticeText: {
-    color: 'red',
-  },
-  titleText: {
-    fontSize: Math.min(responsiveHeight(4.5), responsiveWidth(4.5)),
-    color: '#222',
-    fontWeight: 'bold'
-  },
-  chipText: {
-    fontSize: responsiveFontSize(2.5),
-    color: 'rgba(225,225,225,1)',
-  }
-})
 
 export const TOURNAMENT_SUBSCRIPTION = gql`
   subscription TournamentSubscription($id: uuid!) {
